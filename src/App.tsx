@@ -6,17 +6,17 @@ import { ResultsPanel } from "./components/ResultsPanel";
 import { ComparisonPanel } from "./components/ComparisonPanel";
 import { Disclaimer } from "./components/ui/Disclaimer";
 import { VryfIDFooter } from "./components/VryfIDFooter";
+import { Wizard } from "./components/Wizard";
 import { useSimulatorState } from "./state/useSimulatorState";
 import { computeMixResult } from "./engine/mix";
 import { RULE_SET } from "./engine/rules";
 import { heroGradient } from "./styles/brand";
 
-type TabId = "profile" | "mix" | "assumptions" | "results" | "comparison";
+type TabId = "profile" | "mix" | "results" | "comparison";
 
 const TABS: Array<{ id: TabId; label: string }> = [
   { id: "profile", label: "Profile" },
   { id: "mix", label: "Track Mix" },
-  { id: "assumptions", label: "Assumptions" },
   { id: "results", label: "Results" },
   { id: "comparison", label: "Comparison" },
 ];
@@ -88,14 +88,39 @@ function Hero() {
 }
 
 function App() {
-  const { profile, setProfile, mix, setMix, assumptions, setAssumptions, resetAll } =
-    useSimulatorState();
-  const [tab, setTab] = useState<TabId>("profile");
+  const {
+    profile,
+    setProfile,
+    mix,
+    setMix,
+    assumptions,
+    setAssumptions,
+    onboarded,
+    setOnboarded,
+    resetAll,
+  } = useSimulatorState();
+  const [tab, setTab] = useState<TabId>("results");
 
   const result = useMemo(
     () => computeMixResult(mix, profile, assumptions, RULE_SET),
     [mix, profile, assumptions]
   );
+
+  if (!onboarded) {
+    return (
+      <Wizard
+        profile={profile}
+        setProfile={setProfile}
+        mix={mix}
+        setMix={setMix}
+        assumptions={assumptions}
+        onComplete={() => {
+          setOnboarded(true);
+          setTab("results");
+        }}
+      />
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-cream">
@@ -119,8 +144,14 @@ function App() {
             ))}
           </div>
           <button
-            onClick={resetAll}
+            onClick={() => setOnboarded(false)}
             className="ml-auto whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wide text-navy-mid/50 transition-colors hover:text-navy"
+          >
+            Redo guided setup
+          </button>
+          <button
+            onClick={resetAll}
+            className="whitespace-nowrap rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wide text-navy-mid/50 transition-colors hover:text-navy"
           >
             Reset
           </button>
@@ -140,15 +171,17 @@ function App() {
             <TrackMixBuilder mix={mix} onChange={setMix} />
           </section>
         )}
-        {tab === "assumptions" && (
-          <section key="assumptions" className="mb-reveal">
-            <h2 className="mb-6 font-serif text-2xl text-navy">Assumptions</h2>
-            <AssumptionsPanel assumptions={assumptions} onChange={setAssumptions} />
-          </section>
-        )}
         {tab === "results" && (
           <section key="results" className="mb-reveal">
             <h2 className="mb-6 font-serif text-2xl text-navy">Results</h2>
+            <details className="mb-6 rounded-2xl border border-warm-border bg-white p-4 open:pb-5">
+              <summary className="cursor-pointer text-sm font-semibold text-navy-mid/70">
+                Advanced assumptions (CPI &amp; stress test)
+              </summary>
+              <div className="mt-4">
+                <AssumptionsPanel assumptions={assumptions} onChange={setAssumptions} />
+              </div>
+            </details>
             <ResultsPanel result={result} />
           </section>
         )}

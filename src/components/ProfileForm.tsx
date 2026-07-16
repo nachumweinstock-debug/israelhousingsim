@@ -1,6 +1,7 @@
 import type { BorrowerProfile, BuyerCategory } from "../types";
 import { NumberField } from "./ui/NumberField";
 import { SelectField } from "./ui/SelectField";
+import { CurrencyField } from "./ui/CurrencyField";
 
 const BUYER_CATEGORIES: Array<{ value: BuyerCategory; label: string }> = [
   { value: "first_home", label: "First home" },
@@ -23,23 +24,23 @@ export function ProfileForm({
 
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-      <NumberField
+      <CurrencyField
         label="Property price"
         labelHe="מחיר הנכס"
         value={profile.propertyPrice}
         onChange={(v) => set("propertyPrice", v)}
-        unit="₪"
-        min={0}
-        step={10000}
+        min={200_000}
+        max={10_000_000}
+        step={10_000}
       />
-      <NumberField
+      <CurrencyField
         label="Own equity"
         labelHe="הון עצמי"
         value={profile.ownEquity}
         onChange={(v) => set("ownEquity", v)}
-        unit="₪"
         min={0}
-        step={10000}
+        max={profile.propertyPrice || 10_000_000}
+        step={10_000}
       />
       <SelectField
         label="Buyer category"
@@ -47,13 +48,13 @@ export function ProfileForm({
         onChange={(v) => set("buyerCategory", v as BuyerCategory)}
         options={BUYER_CATEGORIES}
       />
-      <NumberField
+      <CurrencyField
         label="Combined monthly net income"
         labelHe="הכנסה נטו חודשית"
         value={profile.monthlyNetIncome}
         onChange={(v) => set("monthlyNetIncome", v)}
-        unit="₪/mo"
         min={0}
+        max={100_000}
         step={500}
       />
       <NumberField
@@ -64,13 +65,13 @@ export function ProfileForm({
         min={18}
         max={90}
       />
-      <NumberField
+      <CurrencyField
         label="Existing monthly debt"
         labelHe="החזר חודשי קיים"
         value={profile.existingMonthlyDebt}
         onChange={(v) => set("existingMonthlyDebt", v)}
-        unit="₪/mo"
         min={0}
+        max={50_000}
         step={100}
       />
       <NumberField

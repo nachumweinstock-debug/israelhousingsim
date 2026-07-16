@@ -1,4 +1,5 @@
-import type { Basket } from "../types";
+import type { Basket, Mix } from "../types";
+import { getTrack } from "./tracks";
 
 /**
  * The three official comparison baskets every bank is required to quote.
@@ -33,3 +34,24 @@ export const BASKETS: Basket[] = [
     ],
   },
 ];
+
+export function getBasket(basketId: string): Basket {
+  const basket = BASKETS.find((b) => b.id === basketId);
+  if (!basket) throw new Error(`Unknown basket id: ${basketId}`);
+  return basket;
+}
+
+/** Converts a basket definition into a full Mix (default track rates), so it
+ * can run through the same computeMixResult path as any custom mix. */
+export function basketToMix(basketId: string): Mix {
+  const basket = getBasket(basketId);
+  return {
+    id: basket.id,
+    name: basket.name,
+    allocations: basket.allocations.map((a) => ({
+      trackId: a.trackId,
+      percent: a.percent,
+      annualRate: getTrack(a.trackId).defaultAnnualRate,
+    })),
+  };
+}

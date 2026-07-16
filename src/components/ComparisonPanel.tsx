@@ -1,22 +1,8 @@
-import type { Assumptions, BorrowerProfile, Mix, MixResult, RegulatoryRuleSet } from "../types";
-import { BASKETS } from "../engine/baskets";
+import type { Assumptions, BorrowerProfile, MixResult, RegulatoryRuleSet } from "../types";
+import { BASKETS, basketToMix } from "../engine/baskets";
 import { computeMixResult } from "../engine/mix";
-import { getTrack } from "../engine/tracks";
 import { formatCurrency, formatPercent } from "../engine/format";
 import { softCardBorder, softCardShadow } from "../styles/brand";
-
-function basketToMix(basketId: string): Mix {
-  const basket = BASKETS.find((b) => b.id === basketId)!;
-  return {
-    id: basket.id,
-    name: basket.name,
-    allocations: basket.allocations.map((a) => ({
-      trackId: a.trackId,
-      percent: a.percent,
-      annualRate: getTrack(a.trackId).defaultAnnualRate,
-    })),
-  };
-}
 
 export function ComparisonPanel({
   userMixResult,
