@@ -8,7 +8,7 @@ import { RULE_SET } from "../../engine/rules";
  */
 export function Disclaimer() {
   return (
-    <div className="border-t border-warm-border bg-warm-gray/60 px-4 py-2 text-center text-xs text-navy-mid/80">
+    <div className="border-t border-warm-border bg-warm-gray/60 px-4 py-3 text-center text-[11px] tracking-wide text-navy-mid/70">
       Educational simulation, not a bank quote — confirm figures with a licensed bank or advisor
       before committing. Regulatory figures as of {RULE_SET.effectiveDate}.
     </div>
