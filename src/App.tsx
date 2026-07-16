@@ -5,6 +5,7 @@ import { AssumptionsPanel } from "./components/AssumptionsPanel";
 import { ResultsPanel } from "./components/ResultsPanel";
 import { ComparisonPanel } from "./components/ComparisonPanel";
 import { Disclaimer } from "./components/ui/Disclaimer";
+import { VryfIDFooter } from "./components/VryfIDFooter";
 import { useSimulatorState } from "./state/useSimulatorState";
 import { computeMixResult } from "./engine/mix";
 import { RULE_SET } from "./engine/rules";
@@ -39,10 +40,14 @@ function Hero() {
       />
 
       <div className="relative mx-auto w-full max-w-5xl px-4 py-14 text-center sm:px-8 sm:py-20">
-        <div className="mb-6 inline-flex items-center justify-center gap-2.5 mb-reveal">
+        <div className="mb-8 flex justify-center mb-reveal">
+          <img src="/vryfid-full-logo.jpeg" alt="VryfID" className="h-9 w-auto rounded-md" />
+        </div>
+
+        <div className="mb-6 inline-flex items-center justify-center gap-2.5 mb-reveal" style={{ animationDelay: "0.04s" }}>
           <span className="h-px w-8 bg-white/15" />
           <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-sky-accent">
-            Educational Mortgage Planning
+            A VryfID Company · Educational Mortgage Planning
           </span>
           <span className="h-px w-8 bg-white/15" />
         </div>
@@ -161,6 +166,7 @@ function App() {
       </main>
 
       <Disclaimer />
+      <VryfIDFooter />
     </div>
   );
 }
