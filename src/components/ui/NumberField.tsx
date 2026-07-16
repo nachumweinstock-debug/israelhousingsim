@@ -1,4 +1,5 @@
 import { softCardShadow } from "../../styles/brand";
+import { FieldLabel } from "./FieldLabel";
 
 interface NumberFieldProps {
   label: string;
@@ -16,16 +17,9 @@ export function NumberField({ label, labelHe, value, onChange, unit, min, max, s
   const id = `field-${label.replace(/\s+/g, "-").toLowerCase()}`;
   return (
     <label htmlFor={id} className="block">
-      <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-navy/50">
-        {label}
-        {labelHe && (
-          <span className="ml-1.5 normal-case tracking-normal text-navy-mid/50" dir="rtl">
-            ({labelHe})
-          </span>
-        )}
-      </span>
+      <FieldLabel label={label} labelHe={labelHe} />
       <div
-        className="mt-1.5 flex items-center gap-2 rounded-2xl border border-warm-border bg-white px-4 py-3 transition-colors duration-150 focus-within:border-sky-accent"
+        className="flex items-center gap-2 rounded-2xl border border-warm-border bg-white px-4 py-3 transition-colors duration-150 focus-within:border-sky-accent"
         style={{ boxShadow: softCardShadow }}
       >
         <input

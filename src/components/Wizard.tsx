@@ -95,7 +95,7 @@ function CategoryStep({
   return (
     <div className="mb-reveal">
       <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-navy/40">
-        Question 1 of 5
+        Let's start with you
       </p>
       <h2 className="mb-8 font-serif text-3xl leading-tight text-navy sm:text-4xl">
         What kind of buyer are you?
@@ -138,7 +138,7 @@ function AliyahStep({
   return (
     <div className="mb-reveal">
       <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-navy/40">
-        Question 2 of 5
+        A bit more about you
       </p>
       <h2 className="mb-8 font-serif text-3xl leading-tight text-navy sm:text-4xl">
         How many years since you made aliyah?
@@ -218,9 +218,9 @@ function FinancesStep({
         Your finances
       </p>
       <h2 className="mb-8 font-serif text-3xl leading-tight text-navy sm:text-4xl">
-        Tell us about your income and existing commitments.
+        What's your household income, and any existing monthly debt?
       </h2>
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+      <div className="space-y-5">
         <CurrencyField
           label="Combined monthly net income"
           labelHe="הכנסה נטו חודשית"
@@ -239,28 +239,13 @@ function FinancesStep({
           max={50_000}
           step={100}
         />
-        <NumberField
-          label="Age of older borrower"
-          value={profile.olderBorrowerAge}
-          onChange={(v) => onChange({ ...profile, olderBorrowerAge: v })}
-          unit="yrs"
-          min={18}
-          max={90}
-        />
-        <NumberField
-          label="Requested term"
-          labelHe="תקופת ההלוואה"
-          value={profile.requestedTermYears}
-          onChange={(v) => onChange({ ...profile, requestedTermYears: v })}
-          unit="yrs"
-          min={1}
-          max={30}
-        />
       </div>
       {profile.monthlyNetIncome > 0 && (
         <p className="mt-4 text-xs text-navy-mid/55">
           Lenders typically want your total mortgage payment under ~33% of net income — for you,
-          that's roughly {formatCurrency(comfortablePayment)}/mo.
+          that's roughly {formatCurrency(comfortablePayment)}/mo. (Age and loan term default to{" "}
+          {profile.olderBorrowerAge} / {profile.requestedTermYears}yr — adjust those anytime from
+          the Profile tab.)
         </p>
       )}
       <ContinueButton onClick={onContinue} />

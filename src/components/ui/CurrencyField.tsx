@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { softCardShadow } from "../../styles/brand";
+import { FieldLabel } from "./FieldLabel";
 
 interface CurrencyFieldProps {
   label: string;
@@ -33,16 +34,9 @@ export function CurrencyField({ label, labelHe, value, onChange, min, max, step 
   return (
     <div>
       <label htmlFor={id} className="block">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-navy/50">
-          {label}
-          {labelHe && (
-            <span className="ml-1.5 normal-case tracking-normal text-navy-mid/50" dir="rtl">
-              ({labelHe})
-            </span>
-          )}
-        </span>
+        <FieldLabel label={label} labelHe={labelHe} />
         <div
-          className={`mt-1.5 flex items-center gap-2 rounded-2xl border bg-white px-4 py-3.5 transition-colors duration-150 ${
+          className={`flex items-center gap-2 rounded-2xl border bg-white px-4 py-3.5 transition-colors duration-150 ${
             focused ? "border-sky-accent" : "border-warm-border"
           }`}
           style={{ boxShadow: softCardShadow }}
