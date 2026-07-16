@@ -1,11 +1,14 @@
 import { useMemo, useState, type ReactNode } from "react";
 import type { Assumptions, BorrowerProfile, BuyerCategory, Mix } from "../types";
 import { TrackMixBuilder } from "./TrackMixBuilder";
+import { CurrencyField } from "./ui/CurrencyField";
 import { computeLoanAmount, computeLtv } from "../engine/validation";
 import { computeMixResult } from "../engine/mix";
 import { basketToMix } from "../engine/baskets";
+import { getTrack } from "../engine/tracks";
 import { RULE_SET } from "../engine/rules";
 import { formatCurrency, formatPercent } from "../engine/format";
+import { fmt, useLang } from "../i18n";
 import { navySelectedShadow, softCardBorder, softCardGradient, softCardShadow } from "../styles/brand";
 
 type StepId = "category" | "aliyah" | "price" | "equity" | "income" | "debt" | "mix";
@@ -17,51 +20,19 @@ function getSteps(profile: BorrowerProfile): StepId[] {
   return steps;
 }
 
-const CATEGORY_OPTIONS: Array<{ value: BuyerCategory; label: string; sub: string }> = [
-  { value: "first_home", label: "First home", sub: "This will be my first place" },
-  { value: "replacement_home", label: "Replacement home", sub: "I'm selling my current home to buy this one" },
-  { value: "investment", label: "Investment / additional home", sub: "This is a second home or investment property" },
-  { value: "foreign_resident", label: "Foreign resident", sub: "I live outside Israel" },
-  { value: "oleh_chadash", label: "Oleh chadash", sub: "I'm a new immigrant" },
+const CATEGORY_VALUES: BuyerCategory[] = [
+  "first_home",
+  "replacement_home",
+  "investment",
+  "foreign_resident",
+  "oleh_chadash",
 ];
 
-const ALIYAH_OPTIONS = [
-  { value: 1, label: "0–2 years ago" },
-  { value: 4, label: "3–5 years ago" },
-  { value: 8, label: "6–10 years ago" },
-  { value: 15, label: "More than 10 years ago" },
-];
-
-const PRICE_OPTIONS = [
-  { value: 1_300_000, label: "Under ₪1.5M" },
-  { value: 1_750_000, label: "₪1.5M – 2M" },
-  { value: 2_250_000, label: "₪2M – 2.5M" },
-  { value: 3_000_000, label: "₪2.5M – 3.5M" },
-  { value: 4_000_000, label: "₪3.5M+" },
-];
-
-const EQUITY_PCT_OPTIONS = [
-  { value: 0.08, label: "Less than 10%" },
-  { value: 0.18, label: "10% – 25%" },
-  { value: 0.32, label: "25% – 40%" },
-  { value: 0.5, label: "40% or more" },
-];
-
-const INCOME_OPTIONS = [
-  { value: 8_000, label: "Under ₪10k/mo" },
-  { value: 12_500, label: "₪10k – 15k/mo" },
-  { value: 17_500, label: "₪15k – 20k/mo" },
-  { value: 25_000, label: "₪20k – 30k/mo" },
-  { value: 35_000, label: "₪30k+/mo" },
-];
-
-const DEBT_OPTIONS = [
-  { value: 0, label: "None" },
-  { value: 500, label: "Under ₪1k/mo" },
-  { value: 2_000, label: "₪1k – 3k/mo" },
-  { value: 4_000, label: "₪3k – 5k/mo" },
-  { value: 6_000, label: "₪5k+/mo" },
-];
+const ALIYAH_VALUES = [1, 4, 8, 15];
+const PRICE_VALUES = [1_300_000, 1_750_000, 2_250_000, 3_000_000, 4_000_000];
+const EQUITY_MID_PCTS = [0.08, 0.175, 0.32, 0.5];
+const INCOME_VALUES = [8_000, 12_500, 17_500, 25_000, 35_000];
+const DEBT_VALUES = [0, 500, 2_000, 4_000, 6_000];
 
 function ProgressDots({ total, current }: { total: number; current: number }) {
   return (
@@ -89,6 +60,7 @@ function WizardShell({
   onBack?: () => void;
   children: ReactNode;
 }) {
+  const { t } = useLang();
   return (
     <div className="flex min-h-[calc(100vh-1px)] flex-col bg-cream">
       <div className="mx-auto flex w-full max-w-2xl items-center justify-between px-6 pt-8">
@@ -99,13 +71,19 @@ function WizardShell({
             onBack ? "text-navy-mid/60 hover:text-navy" : "invisible"
           }`}
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg
+            className="h-4 w-4 rtl:rotate-180"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
-          Back
+          {t.wizard.back}
         </button>
         <ProgressDots total={total} current={stepIndex} />
-        <span className="w-10 text-right text-xs text-navy-mid/40">
+        <span className="w-10 text-end text-xs text-navy-mid/40">
           {stepIndex + 1}/{total}
         </span>
       </div>
@@ -114,64 +92,167 @@ function WizardShell({
   );
 }
 
-/**
- * Shared "one big tappable answer at a time" question — the Kahoot-style
- * pattern this whole wizard is built around. Selecting an option shows a
- * brief selected state, then auto-advances (no separate Continue tap
- * needed), matching vryfid-demo's quiz flow.
- */
+function QuestionHeader({
+  eyebrow,
+  question,
+  subtitle,
+}: {
+  eyebrow: string;
+  question: string;
+  subtitle?: string;
+}) {
+  return (
+    <>
+      <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-navy/40">{eyebrow}</p>
+      <h2 className="mb-2 font-serif text-3xl leading-tight text-navy sm:text-4xl">{question}</h2>
+      {subtitle ? <p className="mb-6 text-sm text-navy-mid/60">{subtitle}</p> : <div className="mb-8" />}
+    </>
+  );
+}
+
+function OptionCard({
+  label,
+  sub,
+  selected,
+  onClick,
+}: {
+  label: string;
+  sub?: string;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-2xl border-2 px-5 py-4 text-start transition-all duration-200 active:scale-[0.98] ${
+        selected ? "border-navy bg-navy" : "border-warm-border bg-white hover:border-navy hover:shadow-md"
+      }`}
+      style={selected ? { boxShadow: navySelectedShadow } : { boxShadow: softCardShadow }}
+    >
+      <p className={`text-sm font-semibold leading-snug ${selected ? "text-white" : "text-navy"}`}>{label}</p>
+      {sub && <p className={`mt-0.5 text-xs ${selected ? "text-white/60" : "text-navy-mid/60"}`}>{sub}</p>}
+    </button>
+  );
+}
+
+/** One big tappable question — tap an answer, brief selected flash, auto-advance. */
 function ChoiceStep<T>({
   eyebrow,
   question,
   subtitle,
   options,
   onAdvance,
-  columns = 2,
 }: {
   eyebrow: string;
   question: string;
   subtitle?: string;
   options: Array<{ value: T; label: string; sub?: string }>;
   onAdvance: (v: T) => void;
-  columns?: 1 | 2;
 }) {
-  const [pending, setPending] = useState<T | null>(null);
+  const [pendingIdx, setPendingIdx] = useState<number | null>(null);
 
-  function select(v: T) {
-    setPending(v);
+  function select(idx: number, v: T) {
+    setPendingIdx(idx);
     setTimeout(() => onAdvance(v), 200);
   }
 
   return (
     <div className="mb-reveal">
-      <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-navy/40">{eyebrow}</p>
-      <h2 className="mb-2 font-serif text-3xl leading-tight text-navy sm:text-4xl">{question}</h2>
-      {subtitle && <p className="mb-6 text-sm text-navy-mid/60">{subtitle}</p>}
-      {!subtitle && <div className="mb-8" />}
-      <div className={`grid grid-cols-1 gap-3 ${columns === 2 ? "sm:grid-cols-2" : ""}`}>
-        {options.map((opt, i) => {
-          const selected = pending !== null && pending === opt.value;
-          return (
-            <button
-              key={i}
-              onClick={() => select(opt.value)}
-              className={`rounded-2xl border-2 px-5 py-4 text-left transition-all duration-200 active:scale-[0.98] ${
-                selected
-                  ? "border-navy bg-navy"
-                  : "border-warm-border bg-white hover:border-navy hover:shadow-md"
-              }`}
-              style={selected ? { boxShadow: navySelectedShadow } : { boxShadow: softCardShadow }}
-            >
-              <p className={`text-sm font-semibold leading-snug ${selected ? "text-white" : "text-navy"}`}>
-                {opt.label}
-              </p>
-              {opt.sub && (
-                <p className={`mt-0.5 text-xs ${selected ? "text-white/60" : "text-navy-mid/60"}`}>{opt.sub}</p>
-              )}
-            </button>
-          );
-        })}
+      <QuestionHeader eyebrow={eyebrow} question={question} subtitle={subtitle} />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {options.map((opt, i) => (
+          <OptionCard
+            key={i}
+            label={opt.label}
+            sub={opt.sub}
+            selected={pendingIdx === i}
+            onClick={() => select(i, opt.value)}
+          />
+        ))}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Two-phase money question: tap a range (fast, Kahoot-style), then confirm
+ * or fine-tune the exact shekel figure before continuing — so the flow
+ * stays simple but every ratio downstream (PTI, LTV) runs on a real number,
+ * never a rounded guess. Options with skipExact (e.g. debt "None") advance
+ * immediately since there's nothing to refine about zero.
+ */
+function RangeExactStep({
+  eyebrow,
+  question,
+  subtitle,
+  fieldLabel,
+  options,
+  min,
+  max,
+  step,
+  onContinue,
+}: {
+  eyebrow: string;
+  question: string;
+  subtitle?: string;
+  fieldLabel: string;
+  options: Array<{ value: number; label: string; sub?: string; skipExact?: boolean }>;
+  min: number;
+  max: number;
+  step: number;
+  onContinue: (v: number) => void;
+}) {
+  const { t } = useLang();
+  const [pendingIdx, setPendingIdx] = useState<number | null>(null);
+  const [exact, setExact] = useState<number | null>(null);
+
+  function select(idx: number, opt: { value: number; skipExact?: boolean }) {
+    setPendingIdx(idx);
+    setTimeout(() => {
+      if (opt.skipExact) onContinue(opt.value);
+      else setExact(opt.value);
+    }, 200);
+  }
+
+  if (exact === null) {
+    return (
+      <div className="mb-reveal">
+        <QuestionHeader eyebrow={eyebrow} question={question} subtitle={subtitle} />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {options.map((opt, i) => (
+            <OptionCard
+              key={i}
+              label={opt.label}
+              sub={opt.sub}
+              selected={pendingIdx === i}
+              onClick={() => select(i, opt)}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-reveal">
+      <QuestionHeader eyebrow={t.wizard.exactEyebrow} question={t.wizard.exactHeading} subtitle={t.wizard.exactHint} />
+      <CurrencyField label={fieldLabel} value={exact} onChange={setExact} min={min} max={max} step={step} />
+      <button
+        onClick={() => onContinue(exact)}
+        className="mt-6 w-full rounded-full bg-navy px-6 py-3.5 text-sm font-semibold text-cream transition-all duration-200 active:scale-[0.98] sm:w-auto"
+        style={{ boxShadow: navySelectedShadow }}
+      >
+        {t.wizard.continue}
+      </button>
+      <button
+        onClick={() => {
+          setExact(null);
+          setPendingIdx(null);
+        }}
+        className="mt-3 block text-sm text-navy-mid/60 transition-colors hover:text-navy"
+      >
+        {t.wizard.pickDifferentRange}
+      </button>
     </div>
   );
 }
@@ -189,6 +270,7 @@ function MixStep({
   onChange: (m: Mix) => void;
   onComplete: () => void;
 }) {
+  const { t, lang } = useLang();
   const [customizing, setCustomizing] = useState(false);
   const recommended = useMemo(() => basketToMix("basket2"), []);
   const recommendedResult = useMemo(
@@ -206,13 +288,11 @@ function MixStep({
   return (
     <div className="mb-reveal">
       <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-navy/40">
-        Your track mix
+        {t.wizard.eyebrowMix}
       </p>
-      <h2 className="mb-2 font-serif text-3xl leading-tight text-navy sm:text-4xl">
-        Ready to build your mix?
-      </h2>
+      <h2 className="mb-2 font-serif text-3xl leading-tight text-navy sm:text-4xl">{t.wizard.qMix}</h2>
       <p className="mb-6 text-sm text-navy-mid/60">
-        Loan amount {formatCurrency(loanAmount)} · LTV {formatPercent(ltv)}
+        {fmt(t.wizard.loanLine, { loan: formatCurrency(loanAmount), ltv: formatPercent(ltv) })}
       </p>
 
       {!customizing && (
@@ -222,25 +302,60 @@ function MixStep({
             style={{ background: softCardGradient, border: softCardBorder, boxShadow: softCardShadow }}
           >
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-navy/45">
-              Recommended starting mix — Basket 2
+              {t.wizard.recommendedTitle}
             </p>
-            <p className="mt-1 text-sm text-navy-mid/70">
-              One third fixed unindexed, one third variable CPI-indexed, one third prime — a
-              balanced, widely-used mix.
-            </p>
+            <p className="mt-1 text-sm text-navy-mid/70">{t.wizard.recommendedDesc}</p>
             <div className="mt-4 flex gap-6">
               <div>
-                <div className="text-[10px] uppercase tracking-wide text-navy/40">Payment today</div>
-                <div className="font-serif text-xl text-navy">
+                <div className="text-[10px] uppercase tracking-wide text-navy/40">{t.wizard.paymentToday}</div>
+                <div className="font-serif text-xl tabular-nums text-navy">
                   {formatCurrency(recommendedResult.paymentToday)}/mo
                 </div>
               </div>
               <div>
-                <div className="text-[10px] uppercase tracking-wide text-navy/40">Highest expected</div>
-                <div className="font-serif text-xl text-navy">
+                <div className="text-[10px] uppercase tracking-wide text-navy/40">
+                  {t.wizard.highestExpected}
+                </div>
+                <div className="font-serif text-xl tabular-nums text-navy">
                   {formatCurrency(recommendedResult.paymentStressed)}/mo
                 </div>
               </div>
+            </div>
+
+            <div className="mt-4 border-t border-navy/10 pt-3">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-navy/40">
+                {t.wizard.whatsInside}
+              </p>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-start text-[10px] uppercase tracking-wide text-navy/40">
+                    <th className="pb-1.5 text-start">{t.wizard.trackCol}</th>
+                    <th className="pb-1.5 text-start">{t.wizard.shareCol}</th>
+                    <th className="pb-1.5 text-start">{t.wizard.rateCol}</th>
+                    <th className="pb-1.5 text-start">{t.wizard.paymentCol}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recommendedResult.trackResults.map((r) => {
+                    const track = getTrack(r.trackId);
+                    const alloc = recommended.allocations.find((a) => a.trackId === r.trackId);
+                    return (
+                      <tr key={r.trackId} className="border-t border-navy/5">
+                        <td className="py-1.5 pe-2 font-medium text-navy">
+                          {lang === "he" ? track.nameHe : track.name}
+                        </td>
+                        <td className="py-1.5 tabular-nums text-navy-mid/75">{alloc?.percent}%</td>
+                        <td className="py-1.5 tabular-nums text-navy-mid/75">
+                          {((alloc?.annualRate ?? 0) * 100).toFixed(2)}%
+                        </td>
+                        <td className="py-1.5 tabular-nums text-navy-mid/75">
+                          {formatCurrency(r.paymentToday)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -249,13 +364,13 @@ function MixStep({
             className="mt-5 w-full rounded-full bg-navy px-6 py-3.5 text-sm font-semibold text-cream transition-all duration-200 active:scale-[0.98]"
             style={{ boxShadow: navySelectedShadow }}
           >
-            Use this mix — see my results →
+            {t.wizard.useMix}
           </button>
           <button
             onClick={() => setCustomizing(true)}
             className="mt-3 w-full rounded-full border border-warm-border bg-white px-6 py-3 text-sm font-semibold text-navy-mid/70 transition-colors hover:border-navy hover:text-navy"
           >
-            Customize manually
+            {t.wizard.customize}
           </button>
         </>
       )}
@@ -268,7 +383,7 @@ function MixStep({
             className="mt-6 w-full rounded-full bg-navy px-6 py-3.5 text-sm font-semibold text-cream transition-all duration-200 active:scale-[0.98] sm:w-auto"
             style={{ boxShadow: navySelectedShadow }}
           >
-            Finish setup — see my results →
+            {t.wizard.finish}
           </button>
         </>
       )}
@@ -291,6 +406,7 @@ export function Wizard({
   assumptions: Assumptions;
   onComplete: () => void;
 }) {
+  const { t } = useLang();
   const steps = getSteps(profile);
   const [stepIndex, setStepIndex] = useState(0);
   const currentStep = steps[Math.min(stepIndex, steps.length - 1)];
@@ -302,13 +418,36 @@ export function Wizard({
     setStepIndex((i) => Math.max(i - 1, 0));
   }
 
+  // Equity options carry the actual shekel amounts implied by the price the
+  // user just picked, so "10% – 25%" is never an abstract percentage.
+  const equityAmounts = {
+    a10: formatCurrency(profile.propertyPrice * 0.1),
+    a25: formatCurrency(profile.propertyPrice * 0.25),
+    a40: formatCurrency(profile.propertyPrice * 0.4),
+  };
+  const equitySubVars = [
+    { a: equityAmounts.a10, b: "" },
+    { a: equityAmounts.a10, b: equityAmounts.a25 },
+    { a: equityAmounts.a25, b: equityAmounts.a40 },
+    { a: equityAmounts.a40, b: "" },
+  ];
+  const equityOptions = EQUITY_MID_PCTS.map((pct, i) => ({
+    value: Math.round((profile.propertyPrice * pct) / 10_000) * 10_000,
+    label: t.wizard.equityOptions[i],
+    sub: fmt(t.wizard.equitySubs[i], equitySubVars[i]),
+  }));
+
   return (
     <WizardShell stepIndex={stepIndex} total={steps.length} onBack={stepIndex > 0 ? goBack : undefined}>
       {currentStep === "category" && (
         <ChoiceStep
-          eyebrow="Let's start with you"
-          question="What kind of buyer are you?"
-          options={CATEGORY_OPTIONS}
+          eyebrow={t.wizard.eyebrowStart}
+          question={t.wizard.qCategory}
+          options={CATEGORY_VALUES.map((v) => ({
+            value: v,
+            label: t.wizard.categoryOptions[v].label,
+            sub: t.wizard.categoryOptions[v].sub,
+          }))}
           onAdvance={(v) => {
             setProfile({ ...profile, buyerCategory: v });
             goNext();
@@ -317,9 +456,9 @@ export function Wizard({
       )}
       {currentStep === "aliyah" && (
         <ChoiceStep
-          eyebrow="A bit more about you"
-          question="How long ago did you make aliyah?"
-          options={ALIYAH_OPTIONS}
+          eyebrow={t.wizard.eyebrowAliyah}
+          question={t.wizard.qAliyah}
+          options={ALIYAH_VALUES.map((v, i) => ({ value: v, label: t.wizard.aliyahOptions[i] }))}
           onAdvance={(v) => {
             setProfile({ ...profile, yearsSinceAliyah: v });
             goNext();
@@ -327,46 +466,66 @@ export function Wizard({
         />
       )}
       {currentStep === "price" && (
-        <ChoiceStep
-          eyebrow="The property"
-          question="What's the property price?"
-          options={PRICE_OPTIONS}
-          onAdvance={(v) => {
+        <RangeExactStep
+          eyebrow={t.wizard.eyebrowPrice}
+          question={t.wizard.qPrice}
+          fieldLabel={t.wizard.qPrice}
+          options={PRICE_VALUES.map((v, i) => ({ value: v, label: t.wizard.priceOptions[i] }))}
+          min={200_000}
+          max={15_000_000}
+          step={10_000}
+          onContinue={(v) => {
             setProfile({ ...profile, propertyPrice: v });
             goNext();
           }}
         />
       )}
       {currentStep === "equity" && (
-        <ChoiceStep
-          eyebrow="Your equity"
-          question="How much of that do you already have in cash?"
-          subtitle={`As a share of the ${formatCurrency(profile.propertyPrice)} price you picked`}
-          options={EQUITY_PCT_OPTIONS}
-          onAdvance={(pct) => {
-            setProfile({ ...profile, ownEquity: Math.round(profile.propertyPrice * pct) });
+        <RangeExactStep
+          eyebrow={t.wizard.eyebrowEquity}
+          question={t.wizard.qEquity}
+          subtitle={fmt(t.wizard.equitySubtitle, { price: formatCurrency(profile.propertyPrice) })}
+          fieldLabel={t.wizard.qEquity}
+          options={equityOptions}
+          min={0}
+          max={profile.propertyPrice}
+          step={10_000}
+          onContinue={(v) => {
+            setProfile({ ...profile, ownEquity: v });
             goNext();
           }}
         />
       )}
       {currentStep === "income" && (
-        <ChoiceStep
-          eyebrow="Your finances"
-          question="What's your combined monthly net income?"
-          options={INCOME_OPTIONS}
-          onAdvance={(v) => {
+        <RangeExactStep
+          eyebrow={t.wizard.eyebrowIncome}
+          question={t.wizard.qIncome}
+          fieldLabel={t.wizard.qIncome}
+          options={INCOME_VALUES.map((v, i) => ({ value: v, label: t.wizard.incomeOptions[i] }))}
+          min={0}
+          max={200_000}
+          step={500}
+          onContinue={(v) => {
             setProfile({ ...profile, monthlyNetIncome: v });
             goNext();
           }}
         />
       )}
       {currentStep === "debt" && (
-        <ChoiceStep
-          eyebrow="Almost there"
-          question="Any existing monthly debt?"
-          subtitle="Car loans, other mortgages, or standing obligations — banks count this against you."
-          options={DEBT_OPTIONS}
-          onAdvance={(v) => {
+        <RangeExactStep
+          eyebrow={t.wizard.eyebrowDebt}
+          question={t.wizard.qDebt}
+          subtitle={t.wizard.debtSub}
+          fieldLabel={t.wizard.qDebt}
+          options={DEBT_VALUES.map((v, i) => ({
+            value: v,
+            label: t.wizard.debtOptions[i],
+            skipExact: v === 0,
+          }))}
+          min={0}
+          max={100_000}
+          step={100}
+          onContinue={(v) => {
             setProfile({ ...profile, existingMonthlyDebt: v });
             goNext();
           }}
