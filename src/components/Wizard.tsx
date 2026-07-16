@@ -1,7 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
 import type { Assumptions, BorrowerProfile, BuyerCategory, Mix } from "../types";
-import { CurrencyField } from "./ui/CurrencyField";
-import { NumberField } from "./ui/NumberField";
 import { TrackMixBuilder } from "./TrackMixBuilder";
 import { computeLoanAmount, computeLtv } from "../engine/validation";
 import { computeMixResult } from "../engine/mix";
@@ -10,12 +8,12 @@ import { RULE_SET } from "../engine/rules";
 import { formatCurrency, formatPercent } from "../engine/format";
 import { navySelectedShadow, softCardBorder, softCardGradient, softCardShadow } from "../styles/brand";
 
-type StepId = "category" | "aliyah" | "property" | "finances" | "mix";
+type StepId = "category" | "aliyah" | "price" | "equity" | "income" | "debt" | "mix";
 
 function getSteps(profile: BorrowerProfile): StepId[] {
   const steps: StepId[] = ["category"];
   if (profile.buyerCategory === "oleh_chadash") steps.push("aliyah");
-  steps.push("property", "finances", "mix");
+  steps.push("price", "equity", "income", "debt", "mix");
   return steps;
 }
 
@@ -25,6 +23,44 @@ const CATEGORY_OPTIONS: Array<{ value: BuyerCategory; label: string; sub: string
   { value: "investment", label: "Investment / additional home", sub: "This is a second home or investment property" },
   { value: "foreign_resident", label: "Foreign resident", sub: "I live outside Israel" },
   { value: "oleh_chadash", label: "Oleh chadash", sub: "I'm a new immigrant" },
+];
+
+const ALIYAH_OPTIONS = [
+  { value: 1, label: "0–2 years ago" },
+  { value: 4, label: "3–5 years ago" },
+  { value: 8, label: "6–10 years ago" },
+  { value: 15, label: "More than 10 years ago" },
+];
+
+const PRICE_OPTIONS = [
+  { value: 1_300_000, label: "Under ₪1.5M" },
+  { value: 1_750_000, label: "₪1.5M – 2M" },
+  { value: 2_250_000, label: "₪2M – 2.5M" },
+  { value: 3_000_000, label: "₪2.5M – 3.5M" },
+  { value: 4_000_000, label: "₪3.5M+" },
+];
+
+const EQUITY_PCT_OPTIONS = [
+  { value: 0.08, label: "Less than 10%" },
+  { value: 0.18, label: "10% – 25%" },
+  { value: 0.32, label: "25% – 40%" },
+  { value: 0.5, label: "40% or more" },
+];
+
+const INCOME_OPTIONS = [
+  { value: 8_000, label: "Under ₪10k/mo" },
+  { value: 12_500, label: "₪10k – 15k/mo" },
+  { value: 17_500, label: "₪15k – 20k/mo" },
+  { value: 25_000, label: "₪20k – 30k/mo" },
+  { value: 35_000, label: "₪30k+/mo" },
+];
+
+const DEBT_OPTIONS = [
+  { value: 0, label: "None" },
+  { value: 500, label: "Under ₪1k/mo" },
+  { value: 2_000, label: "₪1k – 3k/mo" },
+  { value: 4_000, label: "₪3k – 5k/mo" },
+  { value: 6_000, label: "₪5k+/mo" },
 ];
 
 function ProgressDots({ total, current }: { total: number; current: number }) {
@@ -78,34 +114,46 @@ function WizardShell({
   );
 }
 
-function CategoryStep({
-  value,
+/**
+ * Shared "one big tappable answer at a time" question — the Kahoot-style
+ * pattern this whole wizard is built around. Selecting an option shows a
+ * brief selected state, then auto-advances (no separate Continue tap
+ * needed), matching vryfid-demo's quiz flow.
+ */
+function ChoiceStep<T>({
+  eyebrow,
+  question,
+  subtitle,
+  options,
   onAdvance,
+  columns = 2,
 }: {
-  value: BuyerCategory;
-  onAdvance: (v: BuyerCategory) => void;
+  eyebrow: string;
+  question: string;
+  subtitle?: string;
+  options: Array<{ value: T; label: string; sub?: string }>;
+  onAdvance: (v: T) => void;
+  columns?: 1 | 2;
 }) {
-  const [pending, setPending] = useState<BuyerCategory | null>(null);
+  const [pending, setPending] = useState<T | null>(null);
 
-  function select(v: BuyerCategory) {
+  function select(v: T) {
     setPending(v);
     setTimeout(() => onAdvance(v), 200);
   }
 
   return (
     <div className="mb-reveal">
-      <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-navy/40">
-        Let's start with you
-      </p>
-      <h2 className="mb-8 font-serif text-3xl leading-tight text-navy sm:text-4xl">
-        What kind of buyer are you?
-      </h2>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {CATEGORY_OPTIONS.map((opt) => {
-          const selected = (pending ?? value) === opt.value && pending !== null;
+      <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-navy/40">{eyebrow}</p>
+      <h2 className="mb-2 font-serif text-3xl leading-tight text-navy sm:text-4xl">{question}</h2>
+      {subtitle && <p className="mb-6 text-sm text-navy-mid/60">{subtitle}</p>}
+      {!subtitle && <div className="mb-8" />}
+      <div className={`grid grid-cols-1 gap-3 ${columns === 2 ? "sm:grid-cols-2" : ""}`}>
+        {options.map((opt, i) => {
+          const selected = pending !== null && pending === opt.value;
           return (
             <button
-              key={opt.value}
+              key={i}
               onClick={() => select(opt.value)}
               className={`rounded-2xl border-2 px-5 py-4 text-left transition-all duration-200 active:scale-[0.98] ${
                 selected
@@ -117,138 +165,13 @@ function CategoryStep({
               <p className={`text-sm font-semibold leading-snug ${selected ? "text-white" : "text-navy"}`}>
                 {opt.label}
               </p>
-              <p className={`mt-0.5 text-xs ${selected ? "text-white/60" : "text-navy-mid/60"}`}>{opt.sub}</p>
+              {opt.sub && (
+                <p className={`mt-0.5 text-xs ${selected ? "text-white/60" : "text-navy-mid/60"}`}>{opt.sub}</p>
+              )}
             </button>
           );
         })}
       </div>
-    </div>
-  );
-}
-
-function AliyahStep({
-  years,
-  onChange,
-  onContinue,
-}: {
-  years: number;
-  onChange: (v: number) => void;
-  onContinue: () => void;
-}) {
-  return (
-    <div className="mb-reveal">
-      <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-navy/40">
-        A bit more about you
-      </p>
-      <h2 className="mb-8 font-serif text-3xl leading-tight text-navy sm:text-4xl">
-        How many years since you made aliyah?
-      </h2>
-      <NumberField label="Years since aliyah" value={years} onChange={onChange} unit="yrs" min={0} max={30} />
-      <ContinueButton onClick={onContinue} />
-    </div>
-  );
-}
-
-function PropertyStep({
-  profile,
-  onChange,
-  onContinue,
-}: {
-  profile: BorrowerProfile;
-  onChange: (p: BorrowerProfile) => void;
-  onContinue: () => void;
-}) {
-  const loanAmount = computeLoanAmount(profile);
-  const ltv = computeLtv(profile);
-  return (
-    <div className="mb-reveal">
-      <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-navy/40">
-        Property &amp; equity
-      </p>
-      <h2 className="mb-8 font-serif text-3xl leading-tight text-navy sm:text-4xl">
-        What's the property price, and how much equity do you have?
-      </h2>
-      <div className="space-y-5">
-        <CurrencyField
-          label="Property price"
-          labelHe="מחיר הנכס"
-          value={profile.propertyPrice}
-          onChange={(v) => onChange({ ...profile, propertyPrice: v })}
-          min={200_000}
-          max={10_000_000}
-          step={10_000}
-        />
-        <CurrencyField
-          label="Own equity"
-          labelHe="הון עצמי"
-          value={profile.ownEquity}
-          onChange={(v) => onChange({ ...profile, ownEquity: v })}
-          min={0}
-          max={profile.propertyPrice || 10_000_000}
-          step={10_000}
-        />
-      </div>
-      <div
-        className="mt-5 rounded-2xl p-4 text-center"
-        style={{ background: softCardGradient, border: softCardBorder, boxShadow: softCardShadow }}
-      >
-        <span className="text-sm text-navy-mid/70">Loan amount </span>
-        <span className="font-serif text-lg text-navy">{formatCurrency(loanAmount)}</span>
-        <span className="text-sm text-navy-mid/70"> · LTV </span>
-        <span className="font-serif text-lg text-navy">{formatPercent(ltv)}</span>
-      </div>
-      <ContinueButton onClick={onContinue} />
-    </div>
-  );
-}
-
-function FinancesStep({
-  profile,
-  onChange,
-  onContinue,
-}: {
-  profile: BorrowerProfile;
-  onChange: (p: BorrowerProfile) => void;
-  onContinue: () => void;
-}) {
-  const comfortablePayment = profile.monthlyNetIncome / 3;
-  return (
-    <div className="mb-reveal">
-      <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-navy/40">
-        Your finances
-      </p>
-      <h2 className="mb-8 font-serif text-3xl leading-tight text-navy sm:text-4xl">
-        What's your household income, and any existing monthly debt?
-      </h2>
-      <div className="space-y-5">
-        <CurrencyField
-          label="Combined monthly net income"
-          labelHe="הכנסה נטו חודשית"
-          value={profile.monthlyNetIncome}
-          onChange={(v) => onChange({ ...profile, monthlyNetIncome: v })}
-          min={0}
-          max={100_000}
-          step={500}
-        />
-        <CurrencyField
-          label="Existing monthly debt"
-          labelHe="החזר חודשי קיים"
-          value={profile.existingMonthlyDebt}
-          onChange={(v) => onChange({ ...profile, existingMonthlyDebt: v })}
-          min={0}
-          max={50_000}
-          step={100}
-        />
-      </div>
-      {profile.monthlyNetIncome > 0 && (
-        <p className="mt-4 text-xs text-navy-mid/55">
-          Lenders typically want your total mortgage payment under ~33% of net income — for you,
-          that's roughly {formatCurrency(comfortablePayment)}/mo. (Age and loan term default to{" "}
-          {profile.olderBorrowerAge} / {profile.requestedTermYears}yr — adjust those anytime from
-          the Profile tab.)
-        </p>
-      )}
-      <ContinueButton onClick={onContinue} />
     </div>
   );
 }
@@ -272,6 +195,8 @@ function MixStep({
     () => computeMixResult(recommended, profile, assumptions, RULE_SET),
     [recommended, profile, assumptions]
   );
+  const loanAmount = computeLoanAmount(profile);
+  const ltv = computeLtv(profile);
 
   function useRecommended() {
     onChange(recommended);
@@ -283,9 +208,12 @@ function MixStep({
       <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-navy/40">
         Your track mix
       </p>
-      <h2 className="mb-6 font-serif text-3xl leading-tight text-navy sm:text-4xl">
+      <h2 className="mb-2 font-serif text-3xl leading-tight text-navy sm:text-4xl">
         Ready to build your mix?
       </h2>
+      <p className="mb-6 text-sm text-navy-mid/60">
+        Loan amount {formatCurrency(loanAmount)} · LTV {formatPercent(ltv)}
+      </p>
 
       {!customizing && (
         <>
@@ -335,22 +263,16 @@ function MixStep({
       {customizing && (
         <>
           <TrackMixBuilder mix={mix} onChange={onChange} />
-          <ContinueButton onClick={onComplete} label="Finish setup — see my results →" />
+          <button
+            onClick={onComplete}
+            className="mt-6 w-full rounded-full bg-navy px-6 py-3.5 text-sm font-semibold text-cream transition-all duration-200 active:scale-[0.98] sm:w-auto"
+            style={{ boxShadow: navySelectedShadow }}
+          >
+            Finish setup — see my results →
+          </button>
         </>
       )}
     </div>
-  );
-}
-
-function ContinueButton({ onClick, label }: { onClick: () => void; label?: string }) {
-  return (
-    <button
-      onClick={onClick}
-      className="mt-6 w-full rounded-full bg-navy px-6 py-3.5 text-sm font-semibold text-cream transition-all duration-200 active:scale-[0.98] sm:w-auto"
-      style={{ boxShadow: navySelectedShadow }}
-    >
-      {label ?? "Continue →"}
-    </button>
   );
 }
 
@@ -383,8 +305,10 @@ export function Wizard({
   return (
     <WizardShell stepIndex={stepIndex} total={steps.length} onBack={stepIndex > 0 ? goBack : undefined}>
       {currentStep === "category" && (
-        <CategoryStep
-          value={profile.buyerCategory}
+        <ChoiceStep
+          eyebrow="Let's start with you"
+          question="What kind of buyer are you?"
+          options={CATEGORY_OPTIONS}
           onAdvance={(v) => {
             setProfile({ ...profile, buyerCategory: v });
             goNext();
@@ -392,17 +316,61 @@ export function Wizard({
         />
       )}
       {currentStep === "aliyah" && (
-        <AliyahStep
-          years={profile.yearsSinceAliyah ?? 0}
-          onChange={(v) => setProfile({ ...profile, yearsSinceAliyah: v })}
-          onContinue={goNext}
+        <ChoiceStep
+          eyebrow="A bit more about you"
+          question="How long ago did you make aliyah?"
+          options={ALIYAH_OPTIONS}
+          onAdvance={(v) => {
+            setProfile({ ...profile, yearsSinceAliyah: v });
+            goNext();
+          }}
         />
       )}
-      {currentStep === "property" && (
-        <PropertyStep profile={profile} onChange={setProfile} onContinue={goNext} />
+      {currentStep === "price" && (
+        <ChoiceStep
+          eyebrow="The property"
+          question="What's the property price?"
+          options={PRICE_OPTIONS}
+          onAdvance={(v) => {
+            setProfile({ ...profile, propertyPrice: v });
+            goNext();
+          }}
+        />
       )}
-      {currentStep === "finances" && (
-        <FinancesStep profile={profile} onChange={setProfile} onContinue={goNext} />
+      {currentStep === "equity" && (
+        <ChoiceStep
+          eyebrow="Your equity"
+          question="How much of that do you already have in cash?"
+          subtitle={`As a share of the ${formatCurrency(profile.propertyPrice)} price you picked`}
+          options={EQUITY_PCT_OPTIONS}
+          onAdvance={(pct) => {
+            setProfile({ ...profile, ownEquity: Math.round(profile.propertyPrice * pct) });
+            goNext();
+          }}
+        />
+      )}
+      {currentStep === "income" && (
+        <ChoiceStep
+          eyebrow="Your finances"
+          question="What's your combined monthly net income?"
+          options={INCOME_OPTIONS}
+          onAdvance={(v) => {
+            setProfile({ ...profile, monthlyNetIncome: v });
+            goNext();
+          }}
+        />
+      )}
+      {currentStep === "debt" && (
+        <ChoiceStep
+          eyebrow="Almost there"
+          question="Any existing monthly debt?"
+          subtitle="Car loans, other mortgages, or standing obligations — banks count this against you."
+          options={DEBT_OPTIONS}
+          onAdvance={(v) => {
+            setProfile({ ...profile, existingMonthlyDebt: v });
+            goNext();
+          }}
+        />
       )}
       {currentStep === "mix" && (
         <MixStep
