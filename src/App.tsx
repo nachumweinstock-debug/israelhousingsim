@@ -184,7 +184,7 @@ function App() {
             </details>
             <ResultsPanel result={result} />
             <div className="mt-6">
-              <NextSteps />
+              <NextSteps result={result} profile={profile} />
             </div>
           </section>
         )}

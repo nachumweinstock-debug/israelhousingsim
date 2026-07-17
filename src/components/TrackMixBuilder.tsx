@@ -1,13 +1,16 @@
 import type { Mix } from "../types";
 import { DEFAULT_TRACKS, getTrack } from "../engine/tracks";
 import { RULE_SET } from "../engine/rules";
-import { computeShares, getTrack as getTrackFromValidation } from "../engine/validation";
+import { computeShares } from "../engine/validation";
 import { allocationTotal } from "../engine/mix";
 import { formatPercent } from "../engine/format";
+import { useLang } from "../i18n";
 import { Badge } from "./ui/Badge";
 import { revealDelay, softCardBorder, softCardGradient, softCardShadow } from "../styles/brand";
 
 export function TrackMixBuilder({ mix, onChange }: { mix: Mix; onChange: (mix: Mix) => void }) {
+  const { t, lang } = useLang();
+
   function setAllocation(trackId: string, patch: Partial<{ percent: number; annualRate: number }>) {
     const exists = mix.allocations.some((a) => a.trackId === trackId);
     const allocations = exists
@@ -24,7 +27,7 @@ export function TrackMixBuilder({ mix, onChange }: { mix: Mix; onChange: (mix: M
   }
 
   const total = allocationTotal(mix);
-  const { fixedShare, variableShare } = computeShares(mix, getTrackFromValidation);
+  const { fixedShare, variableShare } = computeShares(mix, getTrack);
   const totalOk = Math.abs(total - 100) < 0.01;
   const fixedOk = fixedShare >= RULE_SET.minFixedShare;
   const variableOk = variableShare <= RULE_SET.maxVariableShare;
@@ -35,8 +38,10 @@ export function TrackMixBuilder({ mix, onChange }: { mix: Mix; onChange: (mix: M
         className="flex flex-wrap items-center gap-4 rounded-2xl p-4"
         style={{ background: softCardGradient, border: softCardBorder, boxShadow: softCardShadow }}
       >
-        <div className="flex-1 min-w-[160px]">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-navy/45">Allocated</div>
+        <div className="min-w-[160px] flex-1">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-navy/45">
+            {t.mixBuilder.allocated}
+          </div>
           <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-navy/10">
             <div
               className="h-full rounded-full transition-all duration-500"
@@ -47,16 +52,16 @@ export function TrackMixBuilder({ mix, onChange }: { mix: Mix; onChange: (mix: M
             />
           </div>
           <div className="mt-1 text-xs font-medium text-navy-mid/70">
-            {total.toFixed(0)}% {totalOk ? "" : "— should total 100%"}
+            {total.toFixed(0)}% {totalOk ? "" : `— ${t.mixBuilder.shouldTotal}`}
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-navy-mid/60">Fixed</span>
+          <span className="text-xs font-medium text-navy-mid/60">{t.mixBuilder.fixed}</span>
           <Badge status={fixedOk ? "pass" : "fail"} />
           <span className="font-serif text-navy">{formatPercent(fixedShare)}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-navy-mid/60">Variable</span>
+          <span className="text-xs font-medium text-navy-mid/60">{t.mixBuilder.variable}</span>
           <Badge status={variableOk ? "pass" : "fail"} />
           <span className="font-serif text-navy">{formatPercent(variableShare)}</span>
         </div>
@@ -67,6 +72,8 @@ export function TrackMixBuilder({ mix, onChange }: { mix: Mix; onChange: (mix: M
           const alloc = mix.allocations.find((a) => a.trackId === track.id);
           const percent = alloc?.percent ?? 0;
           const rate = alloc?.annualRate ?? track.defaultAnnualRate;
+          const primaryName = lang === "he" ? track.nameHe : track.name;
+          const secondaryName = lang === "he" ? track.name : track.nameHe;
           return (
             <div
               key={track.id}
@@ -79,13 +86,13 @@ export function TrackMixBuilder({ mix, onChange }: { mix: Mix; onChange: (mix: M
               }}
             >
               <div>
-                <div className="font-semibold text-navy">{track.name}</div>
-                <div className="text-xs text-navy-mid/60" dir="rtl">
-                  {track.nameHe}
+                <div className="font-semibold text-navy">{primaryName}</div>
+                <div className="text-xs text-navy-mid/60" dir={lang === "he" ? "ltr" : "rtl"}>
+                  {secondaryName}
                 </div>
               </div>
               <label className="flex items-center gap-2 text-sm">
-                <span className="text-xs font-medium text-navy-mid/50">Allocation</span>
+                <span className="text-xs font-medium text-navy-mid/50">{t.mixBuilder.allocation}</span>
                 <input
                   type="number"
                   min={0}
@@ -97,7 +104,7 @@ export function TrackMixBuilder({ mix, onChange }: { mix: Mix; onChange: (mix: M
                 <span className="text-navy-mid/50">%</span>
               </label>
               <label className="flex items-center gap-2 text-sm">
-                <span className="text-xs font-medium text-navy-mid/50">Rate</span>
+                <span className="text-xs font-medium text-navy-mid/50">{t.mixBuilder.rate}</span>
                 <input
                   type="number"
                   min={0}

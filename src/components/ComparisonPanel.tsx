@@ -2,6 +2,7 @@ import type { Assumptions, BorrowerProfile, MixResult, RegulatoryRuleSet } from 
 import { BASKETS, basketToMix } from "../engine/baskets";
 import { computeMixResult } from "../engine/mix";
 import { formatCurrency, formatPercent } from "../engine/format";
+import { useLang } from "../i18n";
 import { softCardBorder, softCardShadow } from "../styles/brand";
 
 export function ComparisonPanel({
@@ -15,12 +16,16 @@ export function ComparisonPanel({
   assumptions: Assumptions;
   ruleSet: RegulatoryRuleSet;
 }) {
+  const { t } = useLang();
+  const basketNames = t.comparison.basketNames as Record<string, string>;
+  const basketDescs = t.comparison.basketDescs as Record<string, string>;
+
   const rows: Array<{ label: string; result: MixResult; description?: string; isUserMix?: boolean }> = [
-    { label: "Your mix", result: userMixResult, isUserMix: true },
+    { label: t.comparison.yourMix, result: userMixResult, isUserMix: true },
     ...BASKETS.map((b) => ({
-      label: b.name,
+      label: basketNames[b.id] ?? b.name,
       result: computeMixResult(basketToMix(b.id), profile, assumptions, ruleSet),
-      description: b.description,
+      description: basketDescs[b.id] ?? b.description,
     })),
   ];
 
@@ -29,14 +34,14 @@ export function ComparisonPanel({
       className="overflow-x-auto rounded-2xl"
       style={{ background: "white", border: softCardBorder, boxShadow: softCardShadow }}
     >
-      <table className="w-full min-w-[640px] text-left text-sm">
+      <table className="w-full min-w-[640px] text-start text-sm">
         <thead>
           <tr className="border-b border-warm-border text-[10px] font-semibold uppercase tracking-[0.14em] text-navy/40">
-            <th className="p-4">Mix</th>
-            <th className="p-4">Payment today</th>
-            <th className="p-4">Highest expected</th>
-            <th className="p-4">Total interest</th>
-            <th className="p-4">Fixed share</th>
+            <th className="p-4 text-start">{t.comparison.mixCol}</th>
+            <th className="p-4 text-start">{t.results.paymentToday}</th>
+            <th className="p-4 text-start">{t.results.highestExpected}</th>
+            <th className="p-4 text-start">{t.results.totalInterest}</th>
+            <th className="p-4 text-start">{t.results.fixedShareLabel}</th>
           </tr>
         </thead>
         <tbody>
@@ -52,7 +57,9 @@ export function ComparisonPanel({
                 {row.description && <div className="text-xs text-navy-mid/55">{row.description}</div>}
               </td>
               <td className="p-4 tabular-nums text-navy-mid/80">{formatCurrency(row.result.paymentToday)}</td>
-              <td className="p-4 tabular-nums text-navy-mid/80">{formatCurrency(row.result.paymentStressed)}</td>
+              <td className="p-4 tabular-nums text-navy-mid/80">
+                {formatCurrency(row.result.paymentStressed)}
+              </td>
               <td className="p-4 tabular-nums text-navy-mid/80">
                 {formatCurrency(row.result.totalInterestStressed)}
               </td>

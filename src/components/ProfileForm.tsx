@@ -1,14 +1,15 @@
 import type { BorrowerProfile, BuyerCategory } from "../types";
+import { useLang } from "../i18n";
 import { NumberField } from "./ui/NumberField";
 import { SelectField } from "./ui/SelectField";
 import { CurrencyField } from "./ui/CurrencyField";
 
-const BUYER_CATEGORIES: Array<{ value: BuyerCategory; label: string }> = [
-  { value: "first_home", label: "First home" },
-  { value: "replacement_home", label: "Replacement home" },
-  { value: "investment", label: "Investment / additional home" },
-  { value: "foreign_resident", label: "Foreign resident" },
-  { value: "oleh_chadash", label: "Oleh chadash" },
+const BUYER_CATEGORY_VALUES: BuyerCategory[] = [
+  "first_home",
+  "replacement_home",
+  "investment",
+  "foreign_resident",
+  "oleh_chadash",
 ];
 
 export function ProfileForm({
@@ -18,6 +19,8 @@ export function ProfileForm({
   profile: BorrowerProfile;
   onChange: (profile: BorrowerProfile) => void;
 }) {
+  const { t } = useLang();
+
   function set<K extends keyof BorrowerProfile>(key: K, value: BorrowerProfile[K]) {
     onChange({ ...profile, [key]: value });
   }
@@ -44,9 +47,13 @@ export function ProfileForm({
       />
       <SelectField
         label="Buyer category"
+        labelHe="קטגוריית רוכש"
         value={profile.buyerCategory}
         onChange={(v) => set("buyerCategory", v as BuyerCategory)}
-        options={BUYER_CATEGORIES}
+        options={BUYER_CATEGORY_VALUES.map((v) => ({
+          value: v,
+          label: t.wizard.categoryOptions[v].label,
+        }))}
       />
       <CurrencyField
         label="Combined monthly net income"
@@ -59,6 +66,7 @@ export function ProfileForm({
       />
       <NumberField
         label="Age of older borrower"
+        labelHe="גיל הלווה המבוגר"
         value={profile.olderBorrowerAge}
         onChange={(v) => set("olderBorrowerAge", v)}
         unit="yrs"
@@ -86,6 +94,7 @@ export function ProfileForm({
       {profile.buyerCategory === "oleh_chadash" && (
         <NumberField
           label="Years since aliyah"
+          labelHe="שנים מאז העלייה"
           value={profile.yearsSinceAliyah ?? 0}
           onChange={(v) => set("yearsSinceAliyah", v)}
           unit="yrs"

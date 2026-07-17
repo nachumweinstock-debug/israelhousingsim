@@ -88,6 +88,25 @@ const en = {
   nextSteps: {
     eyebrow: "Next steps",
     title: "What happens now?",
+    issuesTitle: "Fix these first",
+    readyLine: "Your mix passes every regulatory check — you're ready to walk into a bank.",
+    standardPath: "The standard path",
+    issues: {
+      ltv_fail:
+        "Equity gap: at the {cap} LTV cap for your category, this price needs at least {minEquity} of equity — you're at {equity}. Close the gap with more savings, a family gift (matnat horim), or a lower-priced property.",
+      pti_fail:
+        "Payment too high: {pti} of net income is above the 50% legal ceiling — no bank can approve this as structured. Extend the term, add equity, or target a smaller loan.",
+      pti_warn:
+        "Caution zone: at {pti} of income, banks will scrutinize your file harder and may price worse. Getting under ~33% strengthens your position.",
+      fixed_fail:
+        "Mix not approvable: only {fixed} of the loan is in fixed-rate tracks — regulation requires at least a third. Shift allocation into a fixed track in the mix builder.",
+      variable_fail:
+        "Too much variable: {variable} of the mix can move with rates — the cap is two thirds. Rebalance toward fixed tracks.",
+      term_warn:
+        "Term capped: you asked for {requested} years but your effective cap is {effective} (payoff by age {maxAge}). Every figure here already uses {effective} years.",
+      stress_gap:
+        "Rate-risk exposure: your payment could climb {pct} in the stress scenario. If that jump would hurt, tilt the mix further toward fixed unindexed.",
+    },
     steps: [
       {
         title: "Get your pre-approval (ishur ikaroni · אישור עקרוני)",
@@ -107,6 +126,86 @@ const en = {
       },
     ],
     disclaimer: "General guidance, not personal financial advice.",
+  },
+  badge: { pass: "Pass", warn: "Caution", fail: "Fail" },
+  results: {
+    healthTitle: "Mortgage health",
+    healthCaption: "Based on your regulatory checks and the stress-scenario payment gap.",
+    tiers: ["Bank-ready", "Solid footing", "Needs work", "Not approvable as-is"],
+    paymentToday: "Payment today",
+    highestExpected: "Highest expected",
+    totalInterest: "Total interest",
+    baselinePrefix: "Baseline: {v}",
+    perMonth: "/mo",
+    ltvShort: "Loan-to-Value",
+    ptiShort: "Payment-to-Income",
+    fixedShareLabel: "Fixed share",
+    effectiveTermLabel: "Effective term",
+    yrsSuffix: "yrs",
+    checksTitle: "Regulatory checks",
+    byTrack: "By track",
+    totalInterestCol: "Total interest",
+    simplifiedNote:
+      "This is a simplified projection, not a bank-grade actuarial model — actual CPI and rate paths are unpredictable. Use it for planning, not as a guarantee.",
+  },
+  checks: {
+    labels: {
+      ltv: "Loan-to-Value",
+      pti: "Payment-to-Income",
+      fixed_share: "Minimum Fixed Share",
+      variable_share: "Maximum Variable Share",
+      term: "Term & Age Cap",
+    },
+    ltv: {
+      pass: "Your loan is {value} of the property price, within the {limit} cap for your buyer category.",
+      fail: "Your loan is {value} of the property price, above the {limit} cap for your buyer category. You'll need more equity or a smaller loan to bring this mix within reach.",
+    },
+    pti: {
+      pass: "Your payment (plus existing debt) is {value} of net income, comfortably under the {caution} level banks typically look for.",
+      warn: "Your payment (plus existing debt) is {value} of net income. That's legal but above the roughly {caution} mark banks self-limit around in practice — expect closer scrutiny or a less favorable rate offer.",
+      fail: "Your payment (plus existing debt) is {value} of net income, above the {limit} legal ceiling — this loan is not approvable as structured.",
+    },
+    fixed_share: {
+      pass: "{value} of your mix is fixed-rate, meeting the {limit} minimum required by regulation.",
+      fail: "Only {value} of your mix is fixed-rate. At least {limit} must be fixed — move more of the loan into a fixed track to fix this.",
+    },
+    variable_share: {
+      pass: "{value} of your mix is variable/reset-eligible, within the {limit} cap.",
+      fail: "{value} of your mix is variable/reset-eligible, above the {limit} cap — move some of the loan into a fixed track to fix this.",
+    },
+    term: {
+      pass: "Your {effective}-year term is within both the {maxTerm}-year regulatory maximum and the age-{maxAge} payoff cap.",
+      warn: "You requested a {requested}-year term, but the effective cap for you is {effective} years — the smaller of the {maxTerm}-year regulatory maximum and paying off by age {maxAge}. Figures on this page use the {effective}-year effective term.",
+    },
+  },
+  comparison: {
+    mixCol: "Mix",
+    yourMix: "Your mix",
+    basketNames: { basket1: "Basket 1", basket2: "Basket 2", basket3: "Basket 3" },
+    basketDescs: {
+      basket1: "Entirely fixed, unindexed.",
+      basket2:
+        "One third fixed unindexed, one third variable CPI-indexed (5yr reset), one third prime.",
+      basket3: "One half fixed unindexed, one half prime.",
+    },
+  },
+  mixBuilder: {
+    allocated: "Allocated",
+    shouldTotal: "should total 100%",
+    fixed: "Fixed",
+    variable: "Variable",
+    allocation: "Allocation",
+    rate: "Rate",
+  },
+  assumptions: {
+    cpiLabel: "Expected annual CPI",
+    cpiUnit: "%/yr",
+    shockLabel: "Stress test rate shock",
+    shockUnit: "pp",
+    para1:
+      "The CPI assumption compounds into every CPI-indexed track's projected payment and total interest. The stress shock is added to every variable/reset-eligible track's rate (prime immediately, 5-year reset tracks from their reset point forward) to compute the \"highest expected payment\" scenario.",
+    para2:
+      "Live Bank of Israel policy rate integration is planned for a later phase — for now, set these manually based on your own expectations.",
   },
 };
 
@@ -202,6 +301,25 @@ const he: Strings = {
   nextSteps: {
     eyebrow: "הצעדים הבאים",
     title: "אז מה עושים עכשיו?",
+    issuesTitle: "קודם מטפלים באלה",
+    readyLine: "התמהיל שלכם עובר את כל בדיקות הרגולציה — אתם מוכנים להיכנס לבנק.",
+    standardPath: "המסלול הרגיל",
+    issues: {
+      ltv_fail:
+        "פער הון עצמי: בתקרת מימון של {cap} לקטגוריה שלכם, המחיר הזה דורש לפחות {minEquity} הון עצמי — יש לכם {equity}. סגרו את הפער עם חיסכון נוסף, מתנת הורים, או נכס במחיר נמוך יותר.",
+      pti_fail:
+        "החזר גבוה מדי: {pti} מההכנסה נטו — מעל התקרה החוקית של 50%, ואף בנק לא יאשר את המבנה הזה. האריכו את התקופה, הוסיפו הון עצמי, או כוונו להלוואה קטנה יותר.",
+      pti_warn:
+        "אזור זהירות: ב־{pti} מההכנסה הבנקים יבדקו את התיק שלכם לעומק ועלולים לתמחר גבוה יותר. ירידה מתחת ל~33% מחזקת את העמדה שלכם.",
+      fixed_fail:
+        "התמהיל לא יאושר: רק {fixed} מההלוואה במסלולים בריבית קבועה — הרגולציה דורשת לפחות שליש. העבירו הקצאה למסלול קבוע בבונה התמהיל.",
+      variable_fail:
+        "יותר מדי משתנה: {variable} מהתמהיל יכול לזוז עם הריבית — התקרה היא שני שליש. אזנו מחדש לכיוון מסלולים קבועים.",
+      term_warn:
+        "התקופה קוצצה: ביקשתם {requested} שנים אך התקרה האפקטיבית שלכם היא {effective} (פירעון עד גיל {maxAge}). כל המספרים כאן כבר מחושבים לפי {effective} שנים.",
+      stress_gap:
+        "חשיפה לסיכון ריבית: ההחזר עלול לטפס {pct} בתרחיש הקיצון. אם קפיצה כזו תכאב, הטו את התמהיל עוד לכיוון קבועה לא צמודה.",
+    },
     steps: [
       {
         title: "השיגו אישור עקרוני",
@@ -221,6 +339,85 @@ const he: Strings = {
       },
     ],
     disclaimer: "הכוונה כללית, לא ייעוץ פיננסי אישי.",
+  },
+  badge: { pass: "עובר", warn: "זהירות", fail: "נכשל" },
+  results: {
+    healthTitle: "בריאות המשכנתא",
+    healthCaption: "מבוסס על בדיקות הרגולציה שלכם ופער ההחזר בתרחיש הקיצון.",
+    tiers: ["מוכנים לבנק", "בסיס יציב", "דורש עבודה", "לא יאושר במתכונת הזו"],
+    paymentToday: "החזר היום",
+    highestExpected: "החזר צפוי מקסימלי",
+    totalInterest: "סך ריבית",
+    baselinePrefix: "תרחיש בסיס: {v}",
+    perMonth: "/חודש",
+    ltvShort: "יחס מימון",
+    ptiShort: "החזר מהכנסה",
+    fixedShareLabel: "רכיב קבוע",
+    effectiveTermLabel: "תקופה אפקטיבית",
+    yrsSuffix: "שנים",
+    checksTitle: "בדיקות רגולציה",
+    byTrack: "לפי מסלול",
+    totalInterestCol: "סך ריבית",
+    simplifiedNote:
+      "זו הערכה מפושטת, לא מודל אקטוארי בנקאי — מסלולי מדד וריבית אמיתיים אינם ניתנים לחיזוי. השתמשו בזה לתכנון, לא כהתחייבות.",
+  },
+  checks: {
+    labels: {
+      ltv: "יחס מימון (LTV)",
+      pti: "יחס החזר מהכנסה",
+      fixed_share: "רכיב קבוע מינימלי",
+      variable_share: "רכיב משתנה מקסימלי",
+      term: "תקרת תקופה וגיל",
+    },
+    ltv: {
+      pass: "ההלוואה שלכם היא {value} ממחיר הנכס — בתוך תקרת {limit} לקטגוריית הרוכש שלכם.",
+      fail: "ההלוואה שלכם היא {value} ממחיר הנכס — מעל תקרת {limit} לקטגוריה שלכם. תצטרכו יותר הון עצמי או הלוואה קטנה יותר כדי שהתמהיל יעבוד.",
+    },
+    pti: {
+      pass: "ההחזר (כולל חוב קיים) הוא {value} מההכנסה נטו — בנוח מתחת לרף {caution} שהבנקים מחפשים.",
+      warn: "ההחזר (כולל חוב קיים) הוא {value} מההכנסה נטו. זה חוקי, אבל מעל רף ~{caution} שהבנקים מגבילים בפועל — צפו לבדיקה קפדנית יותר או ריבית פחות טובה.",
+      fail: "ההחזר (כולל חוב קיים) הוא {value} מההכנסה נטו — מעל התקרה החוקית של {limit}. ההלוואה במבנה הזה לא תאושר.",
+    },
+    fixed_share: {
+      pass: "{value} מהתמהיל בריבית קבועה — עומד במינימום {limit} שדורשת הרגולציה.",
+      fail: "רק {value} מהתמהיל בריבית קבועה. לפחות {limit} חייב להיות קבוע — העבירו עוד מההלוואה למסלול קבוע.",
+    },
+    variable_share: {
+      pass: "{value} מהתמהיל משתנה/עם תחנות — בתוך תקרת {limit}.",
+      fail: "{value} מהתמהיל משתנה/עם תחנות — מעל תקרת {limit}. העבירו חלק מההלוואה למסלול קבוע.",
+    },
+    term: {
+      pass: "תקופה של {effective} שנים — בתוך המקסימום הרגולטורי של {maxTerm} שנה ותקרת פירעון עד גיל {maxAge}.",
+      warn: "ביקשתם תקופה של {requested} שנים, אבל התקרה האפקטיבית שלכם היא {effective} שנים — הנמוך מבין {maxTerm} שנה לפי רגולציה ופירעון עד גיל {maxAge}. המספרים בעמוד מחושבים לפי {effective} שנים.",
+    },
+  },
+  comparison: {
+    mixCol: "תמהיל",
+    yourMix: "התמהיל שלכם",
+    basketNames: { basket1: "סל 1", basket2: "סל 2", basket3: "סל 3" },
+    basketDescs: {
+      basket1: "כולו בריבית קבועה לא צמודה.",
+      basket2: "שליש קבועה לא צמודה, שליש משתנה צמודת מדד (תחנה כל 5 שנים), שליש פריים.",
+      basket3: "מחצית קבועה לא צמודה, מחצית פריים.",
+    },
+  },
+  mixBuilder: {
+    allocated: "הוקצה",
+    shouldTotal: "צריך להסתכם ב־100%",
+    fixed: "קבועה",
+    variable: "משתנה",
+    allocation: "הקצאה",
+    rate: "ריבית",
+  },
+  assumptions: {
+    cpiLabel: "מדד שנתי צפוי",
+    cpiUnit: "% בשנה",
+    shockLabel: "תרחיש קיצון — עליית ריבית",
+    shockUnit: "נק׳",
+    para1:
+      "הנחת המדד נצברת לתוך ההחזר הצפוי וסך הריבית של כל מסלול צמוד. תרחיש הקיצון מתווסף לריבית של כל מסלול משתנה (פריים מיידית, מסלולי תחנה מנקודת העדכון והלאה) לחישוב ההחזר הצפוי המקסימלי.",
+    para2:
+      "חיבור לריבית בנק ישראל בזמן אמת מתוכנן לשלב הבא — בינתיים קבעו את ההנחות לפי הציפיות שלכם.",
   },
 };
 

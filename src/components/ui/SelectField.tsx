@@ -1,4 +1,5 @@
 import { softCardShadow } from "../../styles/brand";
+import { FieldLabel } from "./FieldLabel";
 
 interface Option {
   value: string;
@@ -7,18 +8,19 @@ interface Option {
 
 interface SelectFieldProps {
   label: string;
+  labelHe?: string;
   value: string;
   onChange: (value: string) => void;
   options: Option[];
 }
 
-export function SelectField({ label, value, onChange, options }: SelectFieldProps) {
+export function SelectField({ label, labelHe, value, onChange, options }: SelectFieldProps) {
   const id = `select-${label.replace(/\s+/g, "-").toLowerCase()}`;
   return (
     <label htmlFor={id} className="block">
-      <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-navy/50">{label}</span>
+      <FieldLabel label={label} labelHe={labelHe} />
       <div
-        className="mt-1.5 rounded-2xl border border-warm-border bg-white px-4 py-3 transition-colors duration-150 focus-within:border-sky-accent"
+        className="rounded-2xl border border-warm-border bg-white px-4 py-3 transition-colors duration-150 focus-within:border-sky-accent"
         style={{ boxShadow: softCardShadow }}
       >
         <select
