@@ -10,7 +10,7 @@ export function LanguageToggle() {
   const { lang, setLang } = useLang();
   return (
     <div
-      className="fixed top-4 z-50 flex items-center gap-0.5 rounded-full border border-warm-border bg-white/90 p-1 shadow-md backdrop-blur"
+      className="fixed top-4 z-50 flex items-center gap-0.5 rounded-full border border-warm-border bg-white/90 p-1 shadow-md backdrop-blur print:hidden"
       style={{ left: "1rem" }}
     >
       {CHOICES.map((c) => (

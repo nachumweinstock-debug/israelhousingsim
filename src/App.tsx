@@ -5,6 +5,10 @@ import { AssumptionsPanel } from "./components/AssumptionsPanel";
 import { ResultsPanel } from "./components/ResultsPanel";
 import { ComparisonPanel } from "./components/ComparisonPanel";
 import { NextSteps } from "./components/NextSteps";
+import { ExportPanel } from "./components/ExportPanel";
+import { PrintSummary } from "./components/PrintSummary";
+import { ComputingView } from "./components/ComputingView";
+import { CitySkyline } from "./components/CitySkyline";
 import { Disclaimer } from "./components/ui/Disclaimer";
 import { LanguageToggle } from "./components/ui/LanguageToggle";
 import { VryfIDFooter } from "./components/VryfIDFooter";
@@ -77,6 +81,10 @@ function Hero() {
             </div>
           ))}
         </div>
+
+        <CitySkyline
+          className="mx-auto mt-10 max-w-2xl rounded-2xl mb-reveal"
+        />
       </div>
     </div>
   );
@@ -96,11 +104,16 @@ function App() {
   } = useSimulatorState();
   const { t } = useLang();
   const [tab, setTab] = useState<TabId>("results");
+  const [finishing, setFinishing] = useState(false);
 
   const result = useMemo(
     () => computeMixResult(mix, profile, assumptions, RULE_SET),
     [mix, profile, assumptions]
   );
+
+  if (finishing) {
+    return <ComputingView />;
+  }
 
   if (!onboarded) {
     return (
@@ -113,8 +126,12 @@ function App() {
           setMix={setMix}
           assumptions={assumptions}
           onComplete={() => {
-            setOnboarded(true);
-            setTab("results");
+            setFinishing(true);
+            setTimeout(() => {
+              setOnboarded(true);
+              setTab("results");
+              setFinishing(false);
+            }, 2400);
           }}
         />
       </>
@@ -122,7 +139,9 @@ function App() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-cream">
+    <>
+    <PrintSummary profile={profile} mix={mix} result={result} assumptions={assumptions} />
+    <div className="flex min-h-screen flex-col bg-cream print:hidden">
       <LanguageToggle />
       <Hero />
 
@@ -186,6 +205,9 @@ function App() {
             <div className="mt-6">
               <NextSteps result={result} profile={profile} />
             </div>
+            <div className="mt-6">
+              <ExportPanel profile={profile} mix={mix} result={result} assumptions={assumptions} />
+            </div>
           </section>
         )}
         {tab === "comparison" && (
@@ -204,6 +226,7 @@ function App() {
       <Disclaimer />
       <VryfIDFooter />
     </div>
+    </>
   );
 }
 
