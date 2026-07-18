@@ -2,6 +2,7 @@ import type { BorrowerProfile, MixResult } from "../types";
 import { RULE_SET } from "../engine/rules";
 import { formatCurrency, formatPercent } from "../engine/format";
 import { fmt, useLang } from "../i18n";
+import { ShareLinks } from "./ShareLinks";
 import { softCardBorder, softCardGradient, softCardShadow } from "../styles/brand";
 
 interface Issue {
@@ -123,6 +124,7 @@ export function NextSteps({ result, profile }: { result: MixResult; profile: Bor
           </li>
         ))}
       </ol>
+      <ShareLinks placement="next_steps" className="mt-5 justify-start" />
       <p className="mt-4 text-xs text-navy-mid/50">{t.nextSteps.disclaimer}</p>
     </div>
   );

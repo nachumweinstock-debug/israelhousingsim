@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import { useLang } from "../i18n";
-import { CitySkyline } from "./CitySkyline";
 
 /**
  * Brief "running your numbers" interlude between finishing the wizard and
- * landing on Results — the vibes-style skyline scene with cycling status
- * messages. The calculation itself is instant; this beat exists so the
- * reveal reads as earned, matching vryfid-demo's AnalyzingView pacing.
+ * landing on Results. The calculation itself is instant; this beat gives
+ * the transition a calm, bank-grade pause without changing any numbers.
  */
 export function ComputingView() {
   const { t } = useLang();
@@ -18,11 +16,21 @@ export function ComputingView() {
   }, [t.computing.length]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-[#07051A] px-6">
-      <CitySkyline className="w-full max-w-md rounded-2xl shadow-[0_0_60px_rgba(13,148,136,0.08),0_2px_8px_rgba(0,0,0,0.4)]" />
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-cream px-6">
+      <div className="w-full max-w-sm border-y border-warm-border py-8" aria-hidden="true">
+        <div className="flex items-end justify-center gap-3">
+          {[44, 68, 92, 58, 78].map((height, i) => (
+            <div
+              key={height}
+              className="w-9 origin-bottom rounded-t-lg bg-sky-accent/70"
+              style={{ height, animation: "mb-pulse 1.6s ease-in-out infinite", animationDelay: `${i * 0.12}s` }}
+            />
+          ))}
+        </div>
+      </div>
       <p
         key={msgIdx}
-        className="font-serif text-xl italic text-white/85 mb-reveal"
+        className="font-serif text-xl italic text-navy mb-reveal"
       >
         {t.computing[msgIdx]}
       </p>
@@ -31,7 +39,7 @@ export function ComputingView() {
           <div
             key={i}
             className={`h-1 rounded-full transition-all duration-300 ${
-              i <= msgIdx ? "w-6 bg-[#5EEAD4]" : "w-2 bg-white/20"
+              i <= msgIdx ? "w-6 bg-navy" : "w-2 bg-warm-border"
             }`}
           />
         ))}

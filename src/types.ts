@@ -50,8 +50,6 @@ export interface BorrowerProfile {
   olderBorrowerAge: number;
   existingMonthlyDebt: number;
   requestedTermYears: number;
-  /** Only relevant when buyerCategory === "oleh_chadash" */
-  yearsSinceAliyah?: number;
 }
 
 export interface Assumptions {

@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
+import { track } from "@vercel/analytics";
 import type { Assumptions, BorrowerProfile, BuyerCategory, Mix } from "../types";
 import { TrackMixBuilder } from "./TrackMixBuilder";
 import { CurrencyField } from "./ui/CurrencyField";
@@ -11,13 +12,10 @@ import { formatCurrency, formatPercent } from "../engine/format";
 import { fmt, useLang } from "../i18n";
 import { navySelectedShadow, softCardBorder, softCardGradient, softCardShadow } from "../styles/brand";
 
-type StepId = "category" | "aliyah" | "price" | "equity" | "income" | "debt" | "mix";
+type StepId = "category" | "price" | "equity" | "income" | "debt" | "age" | "mix";
 
-function getSteps(profile: BorrowerProfile): StepId[] {
-  const steps: StepId[] = ["category"];
-  if (profile.buyerCategory === "oleh_chadash") steps.push("aliyah");
-  steps.push("price", "equity", "income", "debt", "mix");
-  return steps;
+function getSteps(): StepId[] {
+  return ["category", "price", "equity", "income", "debt", "age", "mix"];
 }
 
 const CATEGORY_VALUES: BuyerCategory[] = [
@@ -28,11 +26,12 @@ const CATEGORY_VALUES: BuyerCategory[] = [
   "oleh_chadash",
 ];
 
-const ALIYAH_VALUES = [1, 4, 8, 15];
 const PRICE_VALUES = [1_300_000, 1_750_000, 2_250_000, 3_000_000, 4_000_000];
 const EQUITY_MID_PCTS = [0.08, 0.175, 0.32, 0.5];
 const INCOME_VALUES = [8_000, 12_500, 17_500, 25_000, 35_000];
 const DEBT_VALUES = [0, 500, 2_000, 4_000, 6_000];
+const AGE_MIN = 18;
+const AGE_MAX = 90;
 
 function ProgressDots({ total, current }: { total: number; current: number }) {
   return (
@@ -87,7 +86,18 @@ function WizardShell({
           {stepIndex + 1}/{total}
         </span>
       </div>
-      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-6 py-10">{children}</div>
+      <div className="mx-auto mt-5 h-1 w-full max-w-sm overflow-hidden rounded-full bg-white">
+        <div
+          key={stepIndex}
+          className="h-full rounded-full bg-sky-accent wizard-progress-sweep"
+          style={{ width: `${((stepIndex + 1) / total) * 100}%` }}
+        />
+      </div>
+      <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-6 py-10">
+        <div key={stepIndex} className="wizard-question-stage">
+          {children}
+        </div>
+      </div>
     </div>
   );
 }
@@ -257,6 +267,81 @@ function RangeExactStep({
   );
 }
 
+function SliderExactStep({
+  eyebrow,
+  question,
+  subtitle,
+  value,
+  min,
+  max,
+  unit,
+  onContinue,
+}: {
+  eyebrow: string;
+  question: string;
+  subtitle?: string;
+  value: number;
+  min: number;
+  max: number;
+  unit: string;
+  onContinue: (v: number) => void;
+}) {
+  const { t } = useLang();
+  const [exact, setExact] = useState(() => Math.min(Math.max(value, min), max));
+
+  function update(next: number) {
+    if (!Number.isFinite(next)) return;
+    setExact(Math.min(Math.max(Math.round(next), min), max));
+  }
+
+  return (
+    <div className="mb-reveal">
+      <QuestionHeader eyebrow={eyebrow} question={question} subtitle={subtitle} />
+      <div
+        className="rounded-2xl border border-warm-border bg-white p-5"
+        style={{ boxShadow: softCardShadow }}
+      >
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="font-serif text-5xl tabular-nums text-navy">{exact}</p>
+            <p className="mt-1 text-sm text-navy-mid/60">{unit}</p>
+          </div>
+          <input
+            type="number"
+            min={min}
+            max={max}
+            value={exact}
+            onChange={(e) => update(e.target.valueAsNumber)}
+            className="w-24 rounded-xl border border-warm-border bg-warm-gray px-3 py-2 text-center font-serif text-xl tabular-nums text-navy outline-none transition-colors focus:border-sky-accent"
+            aria-label={question}
+          />
+        </div>
+        <input
+          type="range"
+          min={min}
+          max={max}
+          step={1}
+          value={exact}
+          onChange={(e) => update(e.target.valueAsNumber)}
+          className="mt-6 w-full accent-navy"
+          aria-label={`${question} slider`}
+        />
+        <div className="mt-2 flex justify-between text-xs text-navy-mid/45">
+          <span>{min}</span>
+          <span>{max}</span>
+        </div>
+      </div>
+      <button
+        onClick={() => onContinue(exact)}
+        className="mt-6 w-full rounded-full bg-navy px-6 py-3.5 text-sm font-semibold text-cream transition-all duration-200 active:scale-[0.98] sm:w-auto"
+        style={{ boxShadow: navySelectedShadow }}
+      >
+        {t.wizard.continue}
+      </button>
+    </div>
+  );
+}
+
 function MixStep({
   profile,
   assumptions,
@@ -407,9 +492,13 @@ export function Wizard({
   onComplete: () => void;
 }) {
   const { t } = useLang();
-  const steps = getSteps(profile);
+  const steps = getSteps();
   const [stepIndex, setStepIndex] = useState(0);
   const currentStep = steps[Math.min(stepIndex, steps.length - 1)];
+
+  function trackStep(step: StepId, detail?: Record<string, string | number | boolean>) {
+    track("wizard_step_completed", { step, ...detail });
+  }
 
   function goNext() {
     setStepIndex((i) => Math.min(i + 1, steps.length - 1));
@@ -449,18 +538,8 @@ export function Wizard({
             sub: t.wizard.categoryOptions[v].sub,
           }))}
           onAdvance={(v) => {
+            trackStep("category", { buyerCategory: v });
             setProfile({ ...profile, buyerCategory: v });
-            goNext();
-          }}
-        />
-      )}
-      {currentStep === "aliyah" && (
-        <ChoiceStep
-          eyebrow={t.wizard.eyebrowAliyah}
-          question={t.wizard.qAliyah}
-          options={ALIYAH_VALUES.map((v, i) => ({ value: v, label: t.wizard.aliyahOptions[i] }))}
-          onAdvance={(v) => {
-            setProfile({ ...profile, yearsSinceAliyah: v });
             goNext();
           }}
         />
@@ -475,6 +554,7 @@ export function Wizard({
           max={15_000_000}
           step={10_000}
           onContinue={(v) => {
+            trackStep("price");
             setProfile({ ...profile, propertyPrice: v });
             goNext();
           }}
@@ -491,6 +571,7 @@ export function Wizard({
           max={profile.propertyPrice}
           step={10_000}
           onContinue={(v) => {
+            trackStep("equity");
             setProfile({ ...profile, ownEquity: v });
             goNext();
           }}
@@ -506,6 +587,7 @@ export function Wizard({
           max={200_000}
           step={500}
           onContinue={(v) => {
+            trackStep("income");
             setProfile({ ...profile, monthlyNetIncome: v });
             goNext();
           }}
@@ -526,7 +608,24 @@ export function Wizard({
           max={100_000}
           step={100}
           onContinue={(v) => {
+            trackStep("debt", { hasDebt: v > 0 });
             setProfile({ ...profile, existingMonthlyDebt: v });
+            goNext();
+          }}
+        />
+      )}
+      {currentStep === "age" && (
+        <SliderExactStep
+          eyebrow={t.wizard.eyebrowAge}
+          question={t.wizard.qAge}
+          subtitle={t.wizard.qAgeSub}
+          value={profile.olderBorrowerAge}
+          min={AGE_MIN}
+          max={AGE_MAX}
+          unit={t.wizard.ageUnit}
+          onContinue={(v) => {
+            trackStep("age");
+            setProfile({ ...profile, olderBorrowerAge: v });
             goNext();
           }}
         />

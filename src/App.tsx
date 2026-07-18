@@ -6,9 +6,9 @@ import { ResultsPanel } from "./components/ResultsPanel";
 import { ComparisonPanel } from "./components/ComparisonPanel";
 import { NextSteps } from "./components/NextSteps";
 import { ExportPanel } from "./components/ExportPanel";
-import { PrintSummary } from "./components/PrintSummary";
+import { PrintSummary, type PrintMode } from "./components/PrintSummary";
+import { ShareLinks } from "./components/ShareLinks";
 import { ComputingView } from "./components/ComputingView";
-import { CitySkyline } from "./components/CitySkyline";
 import { Disclaimer } from "./components/ui/Disclaimer";
 import { LanguageToggle } from "./components/ui/LanguageToggle";
 import { VryfIDFooter } from "./components/VryfIDFooter";
@@ -17,7 +17,6 @@ import { useSimulatorState } from "./state/useSimulatorState";
 import { computeMixResult } from "./engine/mix";
 import { RULE_SET } from "./engine/rules";
 import { useLang } from "./i18n";
-import { heroGradient } from "./styles/brand";
 
 type TabId = "profile" | "mix" | "results" | "comparison";
 
@@ -26,17 +25,8 @@ const TAB_IDS: TabId[] = ["profile", "mix", "results", "comparison"];
 function Hero() {
   const { t } = useLang();
   return (
-    <div className="relative overflow-hidden" style={{ background: heroGradient }}>
-      <div
-        className="pointer-events-none absolute left-1/2 top-0 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/3 rounded-full"
-        style={{ background: "radial-gradient(circle, rgba(93,155,230,0.14) 0%, transparent 68%)" }}
-      />
-      <div
-        className="pointer-events-none absolute -right-24 top-1/2 h-[320px] w-[320px] -translate-y-1/2 rounded-full"
-        style={{ background: "radial-gradient(circle, rgba(59,108,196,0.16) 0%, transparent 70%)" }}
-      />
-
-      <div className="relative mx-auto w-full max-w-5xl px-4 py-14 text-center sm:px-8 sm:py-20">
+    <div className="border-b border-warm-border bg-cream">
+      <div className="mx-auto w-full max-w-5xl px-4 py-12 text-center sm:px-8 sm:py-16">
         <div className="mb-8 flex justify-center mb-reveal">
           <img src="/vryfid-full-logo.jpeg" alt="VryfID" className="h-9 w-auto rounded-md" />
         </div>
@@ -45,46 +35,55 @@ function Hero() {
           className="mb-6 inline-flex items-center justify-center gap-2.5 mb-reveal"
           style={{ animationDelay: "0.04s" }}
         >
-          <span className="h-px w-8 bg-white/15" />
+          <span className="h-px w-8 bg-navy/15" />
           <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-sky-accent">
             {t.hero.eyebrow}
           </span>
-          <span className="h-px w-8 bg-white/15" />
+          <span className="h-px w-8 bg-navy/15" />
         </div>
 
         <h1
-          className="mb-5 font-serif leading-[1.08] text-white mb-reveal"
+          className="mb-5 font-serif leading-[1.08] text-navy mb-reveal"
           style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)", animationDelay: "0.06s" }}
         >
           {t.hero.h1a}
           <br />
-          <em className="not-italic" style={{ color: "#BFDBFE" }}>
-            {t.hero.h1b}
-          </em>
+          <em className="not-italic text-sky-accent">{t.hero.h1b}</em>
         </h1>
 
         <p
-          className="mx-auto mb-10 max-w-lg text-base font-light leading-relaxed text-white/55 mb-reveal"
+          className="mx-auto mb-10 max-w-lg text-base font-light leading-relaxed text-navy-mid/65 mb-reveal"
           style={{ animationDelay: "0.12s" }}
         >
           {t.hero.sub}
         </p>
 
         <div
-          className="flex justify-center gap-10 border-t pt-6 mb-reveal"
-          style={{ borderColor: "rgba(255,255,255,0.08)", animationDelay: "0.18s" }}
+          className="mx-auto flex max-w-lg justify-center gap-8 border-y border-warm-border py-5 mb-reveal sm:gap-12"
+          style={{ animationDelay: "0.18s" }}
         >
           {t.hero.stats.map(([value, label]) => (
             <div key={label} className="text-center">
-              <p className="font-serif text-2xl tracking-tight text-white">{value}</p>
-              <p className="mt-1 text-xs tracking-wide text-white/30">{label}</p>
+              <p className="font-serif text-2xl tracking-tight text-navy">{value}</p>
+              <p className="mt-1 text-xs tracking-wide text-navy-mid/50">{label}</p>
             </div>
           ))}
         </div>
 
-        <CitySkyline
-          className="mx-auto mt-10 max-w-2xl rounded-2xl mb-reveal"
-        />
+        <div className="mx-auto mt-8 max-w-xl mb-reveal" style={{ animationDelay: "0.24s" }} aria-hidden="true">
+          <svg viewBox="0 0 640 120" className="h-auto w-full">
+            <path d="M24 86 C112 74 154 42 234 52 C314 62 344 96 426 70 C492 49 548 43 616 34" fill="none" stroke="#5D9BE6" strokeWidth="4" strokeLinecap="round" />
+            <path d="M24 98 H616" stroke="#DCE6F3" strokeWidth="2" strokeLinecap="round" />
+            {[96, 224, 352, 480, 608].map((x, i) => (
+              <g key={x}>
+                <line x1={x} y1={96} x2={x} y2={42 + i * 5} stroke="#DCE6F3" strokeWidth="2" strokeDasharray="4 6" />
+                <circle cx={x} cy={i === 0 ? 75 : i === 1 ? 52 : i === 2 ? 85 : i === 3 ? 54 : 36} r="6" fill="#1B3A6B" />
+              </g>
+            ))}
+          </svg>
+        </div>
+
+        <ShareLinks placement="hero" className="mt-6 mb-reveal" />
       </div>
     </div>
   );
@@ -105,6 +104,7 @@ function App() {
   const { t } = useLang();
   const [tab, setTab] = useState<TabId>("results");
   const [finishing, setFinishing] = useState(false);
+  const [printMode, setPrintMode] = useState<PrintMode>("both");
 
   const result = useMemo(
     () => computeMixResult(mix, profile, assumptions, RULE_SET),
@@ -138,9 +138,16 @@ function App() {
     );
   }
 
+  function printSummary(mode: PrintMode) {
+    setPrintMode(mode);
+    window.requestAnimationFrame(() => {
+      window.setTimeout(() => window.print(), 50);
+    });
+  }
+
   return (
     <>
-    <PrintSummary profile={profile} mix={mix} result={result} assumptions={assumptions} />
+    <PrintSummary profile={profile} mix={mix} result={result} assumptions={assumptions} mode={printMode} />
     <div className="flex min-h-screen flex-col bg-cream print:hidden">
       <LanguageToggle />
       <Hero />
@@ -206,7 +213,13 @@ function App() {
               <NextSteps result={result} profile={profile} />
             </div>
             <div className="mt-6">
-              <ExportPanel profile={profile} mix={mix} result={result} assumptions={assumptions} />
+              <ExportPanel
+                profile={profile}
+                mix={mix}
+                result={result}
+                assumptions={assumptions}
+                onPrint={printSummary}
+              />
             </div>
           </section>
         )}

@@ -1,0 +1,34 @@
+{
+  "id": "israelhousingsim",
+  "name": "VryfID Mortgage Readiness Check",
+  "url": "https://israelhousingsim.vercel.app/",
+  "owner": "VryfID",
+  "repository": "nachumweinstock-debug/israelhousingsim",
+  "social": {
+    "website": "https://www.vryfid.com/",
+    "linkedin": "https://www.linkedin.com/company/vryfidllc/",
+    "whatsappShare": "https://wa.me/?text=Check%20if%20your%20mortgage%20is%20bank-ready%20with%20VryfID%3A%20https%3A%2F%2Fisraelhousingsim.vercel.app%2F"
+  },
+  "brain": {
+    "path": "/Users/nachumweinstock/mega-brain/graphify-out/graph.html",
+    "tool": "graphify"
+  },
+  "category": "finance",
+  "audience": ["Israeli home buyers", "new olim", "mortgage advisors", "bank-preapproval applicants"],
+  "features": [
+    "guided mortgage readiness wizard",
+    "loan-to-value check",
+    "payment-to-income check",
+    "borrower-age effective term cap",
+    "required fixed and variable track mix checks",
+    "Hebrew PDF export",
+    "English PDF export",
+    "bilingual PDF export",
+    "bank handoff links"
+  ],
+  "analytics": {
+    "provider": "Vercel Analytics",
+    "events": ["wizard_step_completed", "pdf_download_started", "summary_copied", "bank_link_clicked", "share_clicked"],
+    "policy": "No property price, income, equity, debt, or personal identifiers are sent as custom analytics properties."
+  }
+}

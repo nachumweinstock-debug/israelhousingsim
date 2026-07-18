@@ -91,17 +91,6 @@ export function ProfileForm({
         min={1}
         max={30}
       />
-      {profile.buyerCategory === "oleh_chadash" && (
-        <NumberField
-          label="Years since aliyah"
-          labelHe="שנים מאז העלייה"
-          value={profile.yearsSinceAliyah ?? 0}
-          onChange={(v) => set("yearsSinceAliyah", v)}
-          unit="yrs"
-          min={0}
-          max={30}
-        />
-      )}
     </div>
   );
 }

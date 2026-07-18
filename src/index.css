@@ -9,6 +9,31 @@ body {
   color: #1b3a6b;
 }
 
+html[lang="he"] body {
+  font-family: "Heebo", "Noto Sans Hebrew", Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+html[lang="he"] .font-serif {
+  font-family: "Frank Ruhl Libre", "Heebo", serif;
+  letter-spacing: 0;
+}
+
+html[lang="he"] h1,
+html[lang="he"] h2,
+html[lang="he"] h3 {
+  line-height: 1.16;
+}
+
+html[lang="he"] .text-xs {
+  font-size: 0.82rem;
+}
+
+html[lang="he"] .text-sm {
+  font-size: 0.94rem;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -46,7 +71,50 @@ body {
   animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@keyframes questionStageIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes progressSweep {
+  0% {
+    opacity: 0.55;
+    transform: translateX(-16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.wizard-question-stage {
+  animation: questionStageIn 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.wizard-progress-sweep {
+  animation: progressSweep 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes mb-pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scaleY(0.72);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
-
