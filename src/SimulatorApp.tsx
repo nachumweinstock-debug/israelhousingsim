@@ -22,7 +22,6 @@ import { PropertyPrice } from "./routes/propertyPrice";
 import { DownPayment } from "./routes/downPayment";
 import { Term } from "./routes/term";
 import { TrackMixStep } from "./routes/trackMix";
-import { InflationScenario } from "./routes/inflationScenario";
 import { Costs } from "./routes/costs";
 import { Summary } from "./routes/summary";
 
@@ -69,14 +68,14 @@ function FlowChrome() {
       <header className="fixed inset-x-0 top-0 z-40 bg-cream/90 backdrop-blur-sm">
         <div className="h-1.5 w-full bg-accentSoft/35">
           <motion.div
-            className="h-full overflow-hidden rounded-r-pill bg-accent"
+            className="relative h-full rounded-r-pill bg-accent"
             initial={false}
             animate={{ width: `${progress * 100}%` }}
             transition={{ type: "spring", stiffness: 170, damping: 26 }}
           >
             <motion.div
               aria-hidden="true"
-              className="h-full w-full"
+              className="h-full w-full overflow-hidden rounded-r-pill"
               style={{
                 background:
                   "linear-gradient(100deg, transparent 32%, rgba(255,255,255,0.55) 50%, transparent 68%)",
@@ -85,6 +84,17 @@ function FlowChrome() {
               animate={{ backgroundPosition: ["220% 0", "-220% 0"] }}
               transition={{ duration: 2.6, repeat: Infinity, ease: "linear" }}
             />
+            {progress > 0 ? (
+              <motion.span
+                aria-hidden="true"
+                className="absolute -end-1 top-1/2 -mt-1.5 h-3 w-3 rounded-pill bg-accent"
+                animate={{ boxShadow: [
+                  "0 0 0 0 rgba(91, 155, 213, 0.5)",
+                  "0 0 0 7px rgba(91, 155, 213, 0)",
+                ] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+              />
+            ) : null}
           </motion.div>
         </div>
         <div className="mx-auto flex h-14 w-full max-w-2xl items-center justify-between gap-3 px-4">
@@ -107,7 +117,13 @@ function FlowChrome() {
             </AnimatePresence>
           </div>
           <div className="flex flex-1 justify-center">
-            <img src="/vryfid-full-logo.jpeg" alt="VryfID" className="h-7 w-auto rounded-md" />
+            <motion.img
+              src="/vryfid-full-logo.jpeg"
+              alt="VryfID"
+              className="h-10 w-auto rounded-lg shadow-lift"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            />
           </div>
           <div className="flex w-24 justify-end">
             <div className="flex items-center gap-0.5 rounded-pill border border-hairline bg-card p-1 shadow-lift">
@@ -130,7 +146,19 @@ function FlowChrome() {
         </div>
       </header>
 
-      <main className="flex-1 pt-[68px]">
+      <main className="relative flex-1 overflow-x-clip pt-[68px]">
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none fixed -left-32 top-1/4 -z-0 h-80 w-80 rounded-pill bg-accentSoft/30 blur-3xl"
+          animate={{ x: [0, 30, 0], y: [0, 20, 0] }}
+          transition={{ duration: 13, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none fixed -right-28 top-1/2 -z-0 h-72 w-72 rounded-pill bg-accent/10 blur-3xl"
+          animate={{ x: [0, -26, 0], y: [0, -18, 0] }}
+          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+        />
         <FlowDirectionContext.Provider value={direction}>
           <AnimatePresence mode="wait" custom={direction} initial={false}>
             <Routes location={location} key={location.pathname}>
@@ -142,7 +170,10 @@ function FlowChrome() {
               <Route path="/simulator/downPayment" element={<DownPayment />} />
               <Route path="/simulator/term" element={<Term />} />
               <Route path="/simulator/trackMix" element={<TrackMixStep />} />
-              <Route path="/simulator/inflationScenario" element={<InflationScenario />} />
+              <Route
+                path="/simulator/inflationScenario"
+                element={<Navigate to="/simulator/costs" replace />}
+              />
               <Route path="/simulator/costs" element={<Costs />} />
               <Route path="/simulator/summary" element={<Summary />} />
               <Route path="*" element={<Navigate to="/simulator/welcome" replace />} />

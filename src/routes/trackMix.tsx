@@ -31,8 +31,14 @@ export function TrackMixStep() {
 
       <Reveal className="flex items-center justify-between gap-4 rounded-2xl border border-accentSoft bg-accentSoft/25 px-5 py-4">
         <p className="text-[14px] font-semibold text-inkMuted">{s.mix.paymentPreview}</p>
-        <p className="text-2xl font-bold tabular-nums text-ink">
+        <p className="text-2xl font-bold tabular-nums text-ink" dir="ltr">
           {formatShekels(plan.monthlyPayment)}
+        </p>
+      </Reveal>
+
+      <Reveal>
+        <p className="text-center text-[13px] leading-relaxed text-inkMuted">
+          {s.mix.inflationNote}
         </p>
       </Reveal>
     </QuestionShell>

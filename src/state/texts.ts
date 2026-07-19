@@ -66,6 +66,7 @@ export interface SimStrings {
     primeCapWarning: string;
     fixedFloorWarning: string;
     paymentPreview: string;
+    inflationNote: string;
   };
   tracks: Record<TrackKey, { name: string; tagline: string }>;
   inflation: {
@@ -176,7 +177,7 @@ const en: SimStrings = {
     titleWords: ["Let's", "figure", "out", "your", "mortgage."],
     sub: "A few quick questions to a realistic picture of your Israeli mortgage, the monthly payment, the loan mix behind it, and the real cash you'll need to close. About two minutes.",
     start: "Start",
-    caption: "No signup · Nothing saved · Estimate only",
+    caption: "No signup · Estimate only",
   },
   residency: {
     title: "Where do you stand with Israeli residency?",
@@ -249,6 +250,8 @@ const en: SimStrings = {
     fixedFloorWarning:
       "At least a third of the mix has to sit in a fixed rate track, nudge one of them up.",
     paymentPreview: "Estimated monthly payment with this mix",
+    inflationNote:
+      "Assumes inflation of about 2.5% a year (the Bank of Israel target) on the inflation linked track.",
   },
   tracks: {
     prime: { name: "Prime (variable)", tagline: "Follows the Bank of Israel rate, can move any month" },
@@ -390,7 +393,7 @@ const he: SimStrings = {
     titleWords: ["בואו", "נבין", "את", "המשכנתא", "שלכם."],
     sub: "כמה שאלות קצרות בדרך לתמונה ריאלית של המשכנתא שלכם, ההחזר החודשי, התמהיל שמאחוריו, והמזומן האמיתי שתצטרכו לסגירה. בערך שתי דקות.",
     start: "מתחילים",
-    caption: "בלי הרשמה · שום דבר לא נשמר · הערכה בלבד",
+    caption: "בלי הרשמה · הערכה בלבד",
   },
   residency: {
     title: "מה מעמד התושבות שלכם בישראל?",
@@ -454,6 +457,7 @@ const he: SimStrings = {
     primeCapWarning: "הוראות בנק ישראל מגבילות את הפריים לשני שליש מהתמהיל, הבנקים לא יאשרו יותר מ־66% כאן.",
     fixedFloorWarning: "לפחות שליש מהתמהיל חייב לשבת במסלול בריבית קבועה, העלו אחד מהם.",
     paymentPreview: "החזר חודשי משוער עם התמהיל הזה",
+    inflationNote: "מניח אינפלציה של בערך 2.5% בשנה (יעד בנק ישראל) על המסלול הצמוד למדד.",
   },
   tracks: {
     prime: { name: "פריים", tagline: "צמוד לריבית בנק ישראל, יכול להשתנות בכל חודש" },

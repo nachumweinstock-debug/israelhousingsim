@@ -15,7 +15,6 @@ export const ALL_STEPS = [
   "downPayment",
   "term",
   "trackMix",
-  "inflationScenario",
   "costs",
   "summary",
 ] as const;

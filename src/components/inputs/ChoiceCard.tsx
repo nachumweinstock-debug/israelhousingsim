@@ -32,7 +32,7 @@ export function ChoiceCard({ title, subtitle, emoji, selected, dimmed, onSelect 
             : { scale: 1, opacity: 1 }
       }
       transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-      className={`relative flex w-full items-center gap-4 rounded-2xl border p-5 pe-14 text-start transition-shadow ${
+      className={`group relative flex w-full items-center gap-4 rounded-2xl border p-5 pe-14 text-start transition-shadow ${
         selected
           ? "border-accent bg-accentSoft/25 shadow-liftHover ring-2 ring-accent/25"
           : "border-hairline bg-card shadow-lift hover:shadow-liftHover"
@@ -41,7 +41,7 @@ export function ChoiceCard({ title, subtitle, emoji, selected, dimmed, onSelect 
       {emoji ? (
         <span
           aria-hidden="true"
-          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-2xl ${
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-2xl transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${
             selected ? "bg-accentSoft/70" : "bg-cream"
           }`}
         >

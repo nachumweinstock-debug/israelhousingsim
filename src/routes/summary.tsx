@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { AnimatePresence, animate, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -273,6 +273,54 @@ export function Summary() {
   const ltv = state.propertyPrice > 0 ? loanAmount / state.propertyPrice : 0;
   const cashToClose = state.downPayment + breakdown.total;
 
+  // One anonymous capture per summary visit — the inputs and results are
+  // the product signal this demo exists to collect.
+  const capturedRef = useRef(false);
+  useEffect(() => {
+    if (capturedRef.current) return;
+    capturedRef.current = true;
+    track("simulation_completed", {
+      price: state.propertyPrice,
+      loan: loanAmount,
+      payment: Math.round(plan.monthlyPayment),
+      lang,
+    });
+    const payload = {
+      lang,
+      answers: {
+        residency: state.residency,
+        aliyahYears: state.residency === "oleh" ? state.aliyahYears : null,
+        ownedPropertyBefore: state.residency === "oleh" ? state.ownedPropertyBefore : null,
+        buyerStatus: state.buyerStatus,
+        propertyPrice: state.propertyPrice,
+        downPayment: state.downPayment,
+        termYears: state.termYears,
+        mix: state.mix,
+        inflation: state.inflation,
+        costs: state.costs,
+      },
+      results: {
+        loanAmount,
+        monthlyPayment: Math.round(plan.monthlyPayment),
+        totalInterest: Math.round(plan.totalInterest),
+        totalRepayment: Math.round(plan.totalRepayment),
+        ltv: Math.round(ltv * 1000) / 1000,
+        cashToClose: Math.round(cashToClose),
+        stressPlus1: Math.round(stress1),
+        stressPlus2: Math.round(stress2),
+      },
+    };
+    fetch("/api/capture", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    }).catch(() => {
+      // Capture must never affect the user-facing flow.
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <motion.section
       custom={direction}
@@ -304,8 +352,20 @@ export function Summary() {
 
             <motion.div
               variants={heroReveal}
-              className="mt-7 rounded-3xl border border-accentSoft bg-accentSoft/35 p-7 text-center shadow-lift"
+              className="relative mt-7 overflow-hidden rounded-3xl border border-accentSoft bg-accentSoft/35 p-7 text-center shadow-lift"
             >
+              <motion.div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(110deg, transparent 35%, rgba(255,255,255,0.55) 50%, transparent 65%)",
+                  backgroundSize: "250% 100%",
+                }}
+                initial={{ backgroundPosition: "250% 0" }}
+                animate={{ backgroundPosition: "-250% 0" }}
+                transition={{ duration: 1.6, delay: 0.7, ease: "easeInOut" }}
+              />
               <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-inkMuted">
                 {s.summary.heroLabel}
               </p>

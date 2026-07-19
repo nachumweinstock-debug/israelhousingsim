@@ -13,25 +13,30 @@ const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
 export const shellVariants = {
   enter: (direction: number) => ({
-    x: direction >= 0 ? 64 : -64,
+    x: direction >= 0 ? 84 : -84,
     opacity: 0,
-    filter: "blur(4px)",
+    scale: 0.98,
+    filter: "blur(6px)",
   }),
   center: {
     x: 0,
     opacity: 1,
+    scale: 1,
     filter: "blur(0px)",
     transition: {
-      duration: 0.34,
-      ease: EASE_OUT,
+      x: { type: "spring" as const, stiffness: 300, damping: 32 },
+      scale: { type: "spring" as const, stiffness: 300, damping: 32 },
+      opacity: { duration: 0.3, ease: EASE_OUT },
+      filter: { duration: 0.32, ease: EASE_OUT },
       staggerChildren: 0.05,
       delayChildren: 0.03,
     },
   },
   exit: (direction: number) => ({
-    x: direction >= 0 ? -56 : 56,
+    x: direction >= 0 ? -64 : 64,
     opacity: 0,
-    filter: "blur(3px)",
+    scale: 0.985,
+    filter: "blur(4px)",
     transition: { duration: 0.2, ease: [0.4, 0, 1, 1] as const },
   }),
 };
