@@ -43,6 +43,7 @@ const en = {
     continue: "Continue →",
     eyebrowStart: "Let's start with you",
     qCategory: "What kind of buyer are you?",
+    qCategorySub: "This decides how much a bank is allowed to lend you.",
     categoryOptions: {
       first_home: { label: "First home", sub: "This will be my first place" },
       replacement_home: { label: "Replacement home", sub: "I'm selling my current home to buy this one" },
@@ -52,6 +53,7 @@ const en = {
     },
     eyebrowPrice: "The property",
     qPrice: "What's the property price?",
+    qPriceSub: "Pick the closest range. You will set the exact number right after.",
     priceOptions: ["Under ₪1.5M", "₪1.5M – 2M", "₪2M – 2.5M", "₪2.5M – 3.5M", "₪3.5M+"],
     eyebrowEquity: "Your equity",
     qEquity: "How much of that do you already have in cash?",
@@ -60,6 +62,7 @@ const en = {
     equitySubs: ["Up to {a}", "{a} – {b}", "{a} – {b}", "{a} or more"],
     eyebrowIncome: "Your finances",
     qIncome: "What's your combined monthly net income?",
+    qIncomeSub: "Net, after taxes, everyone on the loan together.",
     incomeOptions: ["Under ₪10k/mo", "₪10k – 15k/mo", "₪15k – 20k/mo", "₪20k – 30k/mo", "₪30k+/mo"],
     eyebrowDebt: "Almost there",
     qDebt: "Any existing monthly debt?",
@@ -279,6 +282,7 @@ const he: Strings = {
     continue: "המשך ←",
     eyebrowStart: "נתחיל בכם",
     qCategory: "איזה סוג רוכשים אתם?",
+    qCategorySub: "זה קובע כמה הבנק רשאי להלוות לכם.",
     categoryOptions: {
       first_home: { label: "דירה ראשונה", sub: "זו תהיה הדירה הראשונה שלי" },
       replacement_home: { label: "דירה חלופית", sub: "מוכרים את הדירה הנוכחית וקונים חדשה" },
@@ -288,6 +292,7 @@ const he: Strings = {
     },
     eyebrowPrice: "הנכס",
     qPrice: "מה מחיר הנכס?",
+    qPriceSub: "בחרו את הטווח הקרוב ביותר. את המספר המדויק תקבעו מיד אחר כך.",
     priceOptions: [
       "עד 1.5 מיליון ₪",
       "1.5–2 מיליון ₪",
@@ -302,6 +307,7 @@ const he: Strings = {
     equitySubs: ["עד {a}", "{a} – {b}", "{a} – {b}", "{a} ומעלה"],
     eyebrowIncome: "הכספים שלכם",
     qIncome: "מה ההכנסה החודשית נטו של משק הבית?",
+    qIncomeSub: "נטו, אחרי מסים, כל הלווים יחד.",
     incomeOptions: [
       "עד 10,000 ₪ בחודש",
       "10–15 אלף ₪ בחודש",

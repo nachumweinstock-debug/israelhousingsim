@@ -71,17 +71,114 @@ html[lang="he"] .text-sm {
   animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-@keyframes questionStageIn {
+/* Wizard step choreography: questions slide out one side and in from the
+   other, direction aware (forward vs back) and mirrored under RTL. */
+@keyframes wizInFwd {
   from {
     opacity: 0;
-    transform: translateY(18px) scale(0.985);
+    transform: translateX(56px) scale(0.985);
     filter: blur(3px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: none;
     filter: blur(0);
   }
+}
+
+@keyframes wizInBack {
+  from {
+    opacity: 0;
+    transform: translateX(-56px) scale(0.985);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+@keyframes wizOutFwd {
+  to {
+    opacity: 0;
+    transform: translateX(-44px) scale(0.985);
+    filter: blur(2px);
+  }
+}
+
+@keyframes wizOutBack {
+  to {
+    opacity: 0;
+    transform: translateX(44px) scale(0.985);
+    filter: blur(2px);
+  }
+}
+
+.wiz-in-fwd {
+  animation: wizInFwd 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.wiz-in-back {
+  animation: wizInBack 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.wiz-out-fwd {
+  animation: wizOutFwd 0.19s ease-in both;
+}
+.wiz-out-back {
+  animation: wizOutBack 0.19s ease-in both;
+}
+
+/* RTL mirrors: forward means leftward in Hebrew */
+html[dir="rtl"] .wiz-in-fwd {
+  animation-name: wizInBack;
+}
+html[dir="rtl"] .wiz-in-back {
+  animation-name: wizInFwd;
+}
+html[dir="rtl"] .wiz-out-fwd {
+  animation-name: wizOutBack;
+}
+html[dir="rtl"] .wiz-out-back {
+  animation-name: wizOutFwd;
+}
+
+/* Answer cards cascade in a beat behind the question */
+@keyframes wizCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.wiz-card-in {
+  animation: wizCardIn 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Picked answer pops, the rest step back */
+@keyframes wizPop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.wiz-pop {
+  animation: wizPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.wiz-dim {
+  opacity: 0.35;
+  transform: scale(0.98);
+  transition: opacity 0.22s ease, transform 0.22s ease;
 }
 
 @keyframes progressSweep {
@@ -95,12 +192,21 @@ html[lang="he"] .text-sm {
   }
 }
 
-.wizard-question-stage {
-  animation: questionStageIn 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
 .wizard-progress-sweep {
   animation: progressSweep 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wiz-in-fwd,
+  .wiz-in-back,
+  .wiz-out-fwd,
+  .wiz-out-back,
+  .wiz-card-in,
+  .wiz-pop,
+  .mb-reveal {
+    animation-duration: 0.01ms;
+    animation-delay: 0ms;
+  }
 }
 
 @keyframes mb-pulse {

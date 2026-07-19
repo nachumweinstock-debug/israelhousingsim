@@ -13,6 +13,7 @@ import { fmt, useLang } from "../i18n";
 import { navySelectedShadow, softCardBorder, softCardGradient, softCardShadow } from "../styles/brand";
 
 type StepId = "category" | "price" | "equity" | "income" | "debt" | "age" | "mix";
+type Direction = "fwd" | "back";
 
 function getSteps(): StepId[] {
   return ["category", "price", "equity", "income", "debt", "age", "mix"];
@@ -26,12 +27,25 @@ const CATEGORY_VALUES: BuyerCategory[] = [
   "oleh_chadash",
 ];
 
+const CATEGORY_ICONS: Record<BuyerCategory, string> = {
+  first_home: "🏡",
+  replacement_home: "🔁",
+  investment: "📈",
+  foreign_resident: "🌍",
+  oleh_chadash: "✈️",
+};
+
 const PRICE_VALUES = [1_300_000, 1_750_000, 2_250_000, 3_000_000, 4_000_000];
 const EQUITY_MID_PCTS = [0.08, 0.175, 0.32, 0.5];
 const INCOME_VALUES = [8_000, 12_500, 17_500, 25_000, 35_000];
 const DEBT_VALUES = [0, 500, 2_000, 4_000, 6_000];
 const AGE_MIN = 18;
 const AGE_MAX = 90;
+
+/** How long the outgoing question takes to clear the stage. */
+const STEP_OUT_MS = 190;
+/** Pause after tapping an answer so the pop animation reads before advancing. */
+const SELECT_ADVANCE_MS = 340;
 
 function ProgressDots({ total, current }: { total: number; current: number }) {
   return (
@@ -51,17 +65,19 @@ function ProgressDots({ total, current }: { total: number; current: number }) {
 function WizardShell({
   stepIndex,
   total,
+  stageClass,
   onBack,
   children,
 }: {
   stepIndex: number;
   total: number;
+  stageClass: string;
   onBack?: () => void;
   children: ReactNode;
 }) {
   const { t } = useLang();
   return (
-    <div className="flex min-h-[calc(100vh-1px)] flex-col bg-cream">
+    <div className="flex min-h-[calc(100vh-1px)] flex-col overflow-x-hidden bg-cream">
       <div className="mx-auto flex w-full max-w-2xl items-center justify-between px-6 pt-8">
         <button
           onClick={onBack}
@@ -94,7 +110,7 @@ function WizardShell({
         />
       </div>
       <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-6 py-10">
-        <div key={stepIndex} className="wizard-question-stage">
+        <div key={stepIndex} className={stageClass}>
           {children}
         </div>
       </div>
@@ -123,59 +139,104 @@ function QuestionHeader({
 function OptionCard({
   label,
   sub,
+  icon,
+  emphasis,
   selected,
+  dimmed,
+  index,
   onClick,
 }: {
   label: string;
   sub?: string;
+  icon?: string;
+  emphasis?: boolean;
   selected: boolean;
+  dimmed: boolean;
+  index: number;
   onClick: () => void;
 }) {
   return (
     <button
       onClick={onClick}
-      className={`rounded-2xl border-2 px-5 py-4 text-start transition-all duration-200 active:scale-[0.98] ${
-        selected ? "border-navy bg-navy" : "border-warm-border bg-white hover:border-navy hover:shadow-md"
+      className={`wiz-card-in flex items-center gap-3.5 rounded-2xl border-2 px-5 py-4 text-start transition-all duration-200 active:scale-[0.98] ${
+        selected
+          ? "wiz-pop border-navy bg-navy"
+          : dimmed
+            ? "wiz-dim border-warm-border bg-white"
+            : "border-warm-border bg-white hover:border-navy hover:shadow-md"
       }`}
-      style={selected ? { boxShadow: navySelectedShadow } : { boxShadow: softCardShadow }}
+      style={{
+        boxShadow: selected ? navySelectedShadow : softCardShadow,
+        animationDelay: `${0.08 + index * 0.05}s`,
+      }}
     >
-      <p className={`text-sm font-semibold leading-snug ${selected ? "text-white" : "text-navy"}`}>{label}</p>
-      {sub && <p className={`mt-0.5 text-xs ${selected ? "text-white/60" : "text-navy-mid/60"}`}>{sub}</p>}
+      {icon && (
+        <span
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-xl ${
+            selected ? "bg-white/15" : "bg-sky-soft/60"
+          }`}
+          aria-hidden
+        >
+          {icon}
+        </span>
+      )}
+      <span className="min-w-0">
+        <span
+          className={`block leading-snug ${emphasis ? "font-serif text-xl" : "text-sm font-semibold"} ${
+            selected ? "text-white" : "text-navy"
+          }`}
+        >
+          {label}
+        </span>
+        {sub && (
+          <span className={`mt-0.5 block text-xs ${selected ? "text-white/60" : "text-navy-mid/60"}`}>
+            {sub}
+          </span>
+        )}
+      </span>
     </button>
   );
 }
 
-/** One big tappable question — tap an answer, brief selected flash, auto-advance. */
+/** One big tappable question. Tap an answer, it pops while the rest step
+ * back, then the step auto-advances. */
 function ChoiceStep<T>({
   eyebrow,
   question,
   subtitle,
   options,
+  emphasis,
   onAdvance,
 }: {
   eyebrow: string;
   question: string;
   subtitle?: string;
-  options: Array<{ value: T; label: string; sub?: string }>;
+  options: Array<{ value: T; label: string; sub?: string; icon?: string }>;
+  emphasis?: boolean;
   onAdvance: (v: T) => void;
 }) {
   const [pendingIdx, setPendingIdx] = useState<number | null>(null);
 
   function select(idx: number, v: T) {
+    if (pendingIdx !== null) return;
     setPendingIdx(idx);
-    setTimeout(() => onAdvance(v), 200);
+    setTimeout(() => onAdvance(v), SELECT_ADVANCE_MS);
   }
 
   return (
-    <div className="mb-reveal">
+    <div>
       <QuestionHeader eyebrow={eyebrow} question={question} subtitle={subtitle} />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {options.map((opt, i) => (
           <OptionCard
             key={i}
+            index={i}
             label={opt.label}
             sub={opt.sub}
+            icon={opt.icon}
+            emphasis={emphasis}
             selected={pendingIdx === i}
+            dimmed={pendingIdx !== null && pendingIdx !== i}
             onClick={() => select(i, opt.value)}
           />
         ))}
@@ -186,10 +247,10 @@ function ChoiceStep<T>({
 
 /**
  * Two-phase money question: tap a range (fast, Kahoot-style), then confirm
- * or fine-tune the exact shekel figure before continuing — so the flow
- * stays simple but every ratio downstream (PTI, LTV) runs on a real number,
- * never a rounded guess. Options with skipExact (e.g. debt "None") advance
- * immediately since there's nothing to refine about zero.
+ * or fine-tune the exact shekel figure before continuing. The two phases
+ * slide between each other with the same direction language as the steps.
+ * Options with skipExact (e.g. debt "None") advance immediately since
+ * there is nothing to refine about zero.
  */
 function RangeExactStep({
   eyebrow,
@@ -215,26 +276,31 @@ function RangeExactStep({
   const { t } = useLang();
   const [pendingIdx, setPendingIdx] = useState<number | null>(null);
   const [exact, setExact] = useState<number | null>(null);
+  const [cameBack, setCameBack] = useState(false);
 
   function select(idx: number, opt: { value: number; skipExact?: boolean }) {
+    if (pendingIdx !== null) return;
     setPendingIdx(idx);
     setTimeout(() => {
       if (opt.skipExact) onContinue(opt.value);
       else setExact(opt.value);
-    }, 200);
+    }, SELECT_ADVANCE_MS);
   }
 
   if (exact === null) {
     return (
-      <div className="mb-reveal">
+      <div key="range" className={cameBack ? "wiz-in-back" : undefined}>
         <QuestionHeader eyebrow={eyebrow} question={question} subtitle={subtitle} />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {options.map((opt, i) => (
             <OptionCard
               key={i}
+              index={i}
               label={opt.label}
               sub={opt.sub}
+              emphasis
               selected={pendingIdx === i}
+              dimmed={pendingIdx !== null && pendingIdx !== i}
               onClick={() => select(i, opt)}
             />
           ))}
@@ -244,7 +310,7 @@ function RangeExactStep({
   }
 
   return (
-    <div className="mb-reveal">
+    <div key="exact" className="wiz-in-fwd">
       <QuestionHeader eyebrow={t.wizard.exactEyebrow} question={t.wizard.exactHeading} subtitle={t.wizard.exactHint} />
       <CurrencyField label={fieldLabel} value={exact} onChange={setExact} min={min} max={max} step={step} />
       <button
@@ -258,6 +324,7 @@ function RangeExactStep({
         onClick={() => {
           setExact(null);
           setPendingIdx(null);
+          setCameBack(true);
         }}
         className="mt-3 block text-sm text-navy-mid/60 transition-colors hover:text-navy"
       >
@@ -295,11 +362,11 @@ function SliderExactStep({
   }
 
   return (
-    <div className="mb-reveal">
+    <div>
       <QuestionHeader eyebrow={eyebrow} question={question} subtitle={subtitle} />
       <div
-        className="rounded-2xl border border-warm-border bg-white p-5"
-        style={{ boxShadow: softCardShadow }}
+        className="wiz-card-in rounded-2xl border border-warm-border bg-white p-5"
+        style={{ boxShadow: softCardShadow, animationDelay: "0.08s" }}
       >
         <div className="flex items-end justify-between gap-4">
           <div>
@@ -371,7 +438,7 @@ function MixStep({
   }
 
   return (
-    <div className="mb-reveal">
+    <div>
       <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-navy/40">
         {t.wizard.eyebrowMix}
       </p>
@@ -383,8 +450,13 @@ function MixStep({
       {!customizing && (
         <>
           <div
-            className="rounded-2xl p-5"
-            style={{ background: softCardGradient, border: softCardBorder, boxShadow: softCardShadow }}
+            className="wiz-card-in rounded-2xl p-5"
+            style={{
+              background: softCardGradient,
+              border: softCardBorder,
+              boxShadow: softCardShadow,
+              animationDelay: "0.08s",
+            }}
           >
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-navy/45">
               {t.wizard.recommendedTitle}
@@ -494,18 +566,38 @@ export function Wizard({
   const { t } = useLang();
   const steps = getSteps();
   const [stepIndex, setStepIndex] = useState(0);
+  const [direction, setDirection] = useState<Direction>("fwd");
+  const [leaving, setLeaving] = useState(false);
   const currentStep = steps[Math.min(stepIndex, steps.length - 1)];
 
   function trackStep(step: StepId, detail?: Record<string, string | number | boolean>) {
     track("wizard_step_completed", { step, ...detail });
   }
 
-  function goNext() {
-    setStepIndex((i) => Math.min(i + 1, steps.length - 1));
+  // Two-beat transition: the current question slides out, then the next
+  // mounts and slides in from the opposite side (mirrored under RTL).
+  function transitionTo(dir: Direction) {
+    if (leaving) return;
+    setDirection(dir);
+    setLeaving(true);
+    window.setTimeout(() => {
+      setStepIndex((i) =>
+        dir === "fwd" ? Math.min(i + 1, steps.length - 1) : Math.max(i - 1, 0)
+      );
+      setLeaving(false);
+    }, STEP_OUT_MS);
   }
-  function goBack() {
-    setStepIndex((i) => Math.max(i - 1, 0));
-  }
+
+  const goNext = () => transitionTo("fwd");
+  const goBack = () => transitionTo("back");
+
+  const stageClass = leaving
+    ? direction === "fwd"
+      ? "wiz-out-fwd"
+      : "wiz-out-back"
+    : direction === "fwd"
+      ? "wiz-in-fwd"
+      : "wiz-in-back";
 
   // Equity options carry the actual shekel amounts implied by the price the
   // user just picked, so "10% – 25%" is never an abstract percentage.
@@ -527,15 +619,22 @@ export function Wizard({
   }));
 
   return (
-    <WizardShell stepIndex={stepIndex} total={steps.length} onBack={stepIndex > 0 ? goBack : undefined}>
+    <WizardShell
+      stepIndex={stepIndex}
+      total={steps.length}
+      stageClass={stageClass}
+      onBack={stepIndex > 0 ? goBack : undefined}
+    >
       {currentStep === "category" && (
         <ChoiceStep
           eyebrow={t.wizard.eyebrowStart}
           question={t.wizard.qCategory}
+          subtitle={t.wizard.qCategorySub}
           options={CATEGORY_VALUES.map((v) => ({
             value: v,
             label: t.wizard.categoryOptions[v].label,
             sub: t.wizard.categoryOptions[v].sub,
+            icon: CATEGORY_ICONS[v],
           }))}
           onAdvance={(v) => {
             trackStep("category", { buyerCategory: v });
@@ -548,6 +647,7 @@ export function Wizard({
         <RangeExactStep
           eyebrow={t.wizard.eyebrowPrice}
           question={t.wizard.qPrice}
+          subtitle={t.wizard.qPriceSub}
           fieldLabel={t.wizard.qPrice}
           options={PRICE_VALUES.map((v, i) => ({ value: v, label: t.wizard.priceOptions[i] }))}
           min={200_000}
@@ -581,6 +681,7 @@ export function Wizard({
         <RangeExactStep
           eyebrow={t.wizard.eyebrowIncome}
           question={t.wizard.qIncome}
+          subtitle={t.wizard.qIncomeSub}
           fieldLabel={t.wizard.qIncome}
           options={INCOME_VALUES.map((v, i) => ({ value: v, label: t.wizard.incomeOptions[i] }))}
           min={0}
