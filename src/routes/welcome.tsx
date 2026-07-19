@@ -2,8 +2,8 @@ import { useContext } from "react";
 import { motion } from "framer-motion";
 import { FlowDirectionContext, shellVariants } from "../components/QuestionShell";
 import { useFlowNav } from "../state/useFlowNav";
+import { useSimLang } from "../state/useSimLang";
 
-const TITLE_WORDS = ["Let's", "figure", "out", "your", "mashkanta."];
 const SKYLINE = [
   { height: 40, delay: 0.15 },
   { height: 72, delay: 0.25 },
@@ -17,6 +17,7 @@ const SKYLINE = [
 export function Welcome() {
   const direction = useContext(FlowDirectionContext);
   const { goNext } = useFlowNav();
+  const { s } = useSimLang();
 
   return (
     <motion.section
@@ -64,13 +65,13 @@ export function Welcome() {
       </motion.div>
 
       <h1 className="text-[32px] font-bold leading-[1.2] tracking-tight text-ink sm:text-[40px]">
-        {TITLE_WORDS.map((word, i) => (
+        {s.welcome.titleWords.map((word, i) => (
           <motion.span
-            key={word}
-            initial={{ opacity: 0, y: 22 }}
+            key={`${word}${i}`}
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 + i * 0.09, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="mr-[0.28em] inline-block"
+            className="me-[0.28em] inline-block"
           >
             {word}
           </motion.span>
@@ -78,18 +79,16 @@ export function Welcome() {
       </h1>
 
       <motion.p
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.75, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="mt-5 max-w-md text-[16px] leading-relaxed text-inkMuted"
       >
-        A few quick questions to a realistic picture of your Israeli mortgage, the monthly
-        payment, the track mix behind it, and the real cash you'll need to close. About two
-        minutes.
+        {s.welcome.sub}
       </motion.p>
 
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
+        initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.95, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="mt-10"
@@ -109,11 +108,9 @@ export function Welcome() {
           transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
           className="rounded-pill bg-accent px-12 py-4 text-[18px] font-semibold text-white hover:bg-accentDeep"
         >
-          Start
+          {s.welcome.start}
         </motion.button>
-        <p className="mt-4 text-[13px] text-inkMuted">
-          No signup · Nothing saved · Estimate only
-        </p>
+        <p className="mt-4 text-[13px] text-inkMuted">{s.welcome.caption}</p>
       </motion.div>
     </motion.section>
   );

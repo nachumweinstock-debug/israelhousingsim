@@ -13,46 +13,32 @@ const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
 export const shellVariants = {
   enter: (direction: number) => ({
-    x: direction >= 0 ? 96 : -96,
+    x: direction >= 0 ? 64 : -64,
     opacity: 0,
-    scale: 0.975,
-    filter: "blur(8px)",
+    filter: "blur(4px)",
   }),
   center: {
     x: 0,
     opacity: 1,
-    scale: 1,
     filter: "blur(0px)",
     transition: {
-      x: { type: "spring" as const, stiffness: 320, damping: 30 },
-      scale: { type: "spring" as const, stiffness: 320, damping: 30 },
-      opacity: { duration: 0.3, ease: EASE_OUT },
-      filter: { duration: 0.32, ease: EASE_OUT },
-      staggerChildren: 0.06,
-      delayChildren: 0.05,
+      duration: 0.34,
+      ease: EASE_OUT,
+      staggerChildren: 0.05,
+      delayChildren: 0.03,
     },
   },
   exit: (direction: number) => ({
-    x: direction >= 0 ? -80 : 80,
+    x: direction >= 0 ? -56 : 56,
     opacity: 0,
-    scale: 0.975,
-    filter: "blur(6px)",
-    transition: { duration: 0.22, ease: [0.4, 0, 1, 1] as const },
+    filter: "blur(3px)",
+    transition: { duration: 0.2, ease: [0.4, 0, 1, 1] as const },
   }),
 };
 
 export const revealVariants = {
-  enter: { opacity: 0, y: 26, scale: 0.98 },
-  center: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      y: { type: "spring" as const, stiffness: 380, damping: 26 },
-      scale: { type: "spring" as const, stiffness: 380, damping: 26 },
-      opacity: { duration: 0.35, ease: EASE_OUT },
-    },
-  },
+  enter: { opacity: 0, y: 14 },
+  center: { opacity: 1, y: 0, transition: { duration: 0.38, ease: EASE_OUT } },
 };
 
 /** Staggered child of a QuestionShell, fades and rises in on its beat. */
@@ -91,18 +77,21 @@ export function QuestionShell({ title, helper, children, footer, wide }: Questio
     >
       <motion.h1
         variants={revealVariants}
-        className="text-[28px] font-semibold leading-[1.25] tracking-tight text-ink sm:text-[32px]"
+        className="text-center text-[28px] font-semibold leading-[1.25] tracking-tight text-ink sm:text-[32px]"
       >
         {title}
       </motion.h1>
       {helper ? (
-        <motion.p variants={revealVariants} className="mt-3 text-[15px] leading-relaxed text-inkMuted">
+        <motion.p
+          variants={revealVariants}
+          className="mx-auto mt-3 max-w-md text-center text-[15px] leading-relaxed text-inkMuted"
+        >
           {helper}
         </motion.p>
       ) : null}
       <div className="mt-8 space-y-5">{children}</div>
       {footer ? (
-        <motion.div variants={revealVariants} className="mt-10">
+        <motion.div variants={revealVariants} className="mt-10 flex justify-center">
           {footer}
         </motion.div>
       ) : null}

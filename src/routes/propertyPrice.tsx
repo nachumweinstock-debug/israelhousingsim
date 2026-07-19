@@ -3,20 +3,23 @@ import { AmountSlider } from "../components/inputs/AmountSlider";
 import { formatShekels } from "../lib/mortgageMath";
 import { useSimulatorStore } from "../state/simulatorStore";
 import { useFlowNav } from "../state/useFlowNav";
+import { useSimLang } from "../state/useSimLang";
 
 export function PropertyPrice() {
   const propertyPrice = useSimulatorStore((state) => state.propertyPrice);
   const setPropertyPrice = useSimulatorStore((state) => state.setPropertyPrice);
   const { goNext } = useFlowNav();
+  const { s } = useSimLang();
 
   return (
     <QuestionShell
-      title="What's the property price?"
-      helper="A rough number is fine, you can come back and adjust it any time."
+      title={s.price.title}
+      helper={s.price.helper}
+      footer={<ContinueButton label={s.common.continueLabel} onClick={goNext} />}
     >
       <Reveal className="rounded-2xl border border-hairline bg-card p-6 shadow-lift">
         <AmountSlider
-          ariaLabel="Property price in shekels"
+          ariaLabel={s.price.aria}
           value={propertyPrice}
           onChange={setPropertyPrice}
           min={500_000}
@@ -25,9 +28,6 @@ export function PropertyPrice() {
           format={formatShekels}
           editable
         />
-      </Reveal>
-      <Reveal>
-        <ContinueButton onClick={goNext} />
       </Reveal>
     </QuestionShell>
   );

@@ -12,8 +12,9 @@ interface ChoiceCardProps {
 }
 
 /**
- * Big tap-friendly answer card. Participates in the QuestionShell stagger
- * on entry; pops on selection while unselected siblings dim.
+ * Big tap friendly answer card. Enters with the QuestionShell stagger,
+ * settles calmly, and marks selection with a check that doesn't shift the
+ * layout (absolutely positioned at the inline end).
  */
 export function ChoiceCard({ title, subtitle, emoji, selected, dimmed, onSelect }: ChoiceCardProps) {
   return (
@@ -21,32 +22,22 @@ export function ChoiceCard({ title, subtitle, emoji, selected, dimmed, onSelect 
       type="button"
       variants={revealVariants}
       onClick={onSelect}
-      whileHover={{ y: -2, scale: 1.008 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={{ y: -1 }}
+      whileTap={{ scale: 0.985 }}
       animate={
         selected
-          ? { scale: [1, 1.045, 1], opacity: 1 }
+          ? { scale: [1, 1.015, 1], opacity: 1 }
           : dimmed
-            ? { scale: 0.985, opacity: 0.45 }
+            ? { scale: 1, opacity: 0.5 }
             : { scale: 1, opacity: 1 }
       }
-      transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
-      className={`relative flex w-full items-center gap-4 rounded-2xl border p-5 text-left transition-shadow ${
+      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+      className={`relative flex w-full items-center gap-4 rounded-2xl border p-5 pe-14 text-start transition-shadow ${
         selected
           ? "border-accent bg-accentSoft/25 shadow-liftHover ring-2 ring-accent/25"
           : "border-hairline bg-card shadow-lift hover:shadow-liftHover"
       }`}
     >
-      {selected ? (
-        <motion.span
-          key="selectionBurst"
-          aria-hidden="true"
-          initial={{ opacity: 0.7, scale: 1 }}
-          animate={{ opacity: 0, scale: 1.09 }}
-          transition={{ duration: 0.55, ease: "easeOut" }}
-          className="pointer-events-none absolute inset-0 rounded-2xl border-2 border-accent"
-        />
-      ) : null}
       {emoji ? (
         <span
           aria-hidden="true"
@@ -66,9 +57,9 @@ export function ChoiceCard({ title, subtitle, emoji, selected, dimmed, onSelect 
       <motion.span
         aria-hidden="true"
         initial={false}
-        animate={selected ? { scale: 1, opacity: 1 } : { scale: 0.5, opacity: 0 }}
-        transition={{ type: "spring", stiffness: 500, damping: 28 }}
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-pill bg-accent text-sm font-bold text-white"
+        animate={selected ? { scale: 1, opacity: 1 } : { scale: 0.6, opacity: 0 }}
+        transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        className="absolute end-5 top-1/2 -mt-3.5 flex h-7 w-7 items-center justify-center rounded-pill bg-accent text-sm font-bold text-white"
       >
         ✓
       </motion.span>

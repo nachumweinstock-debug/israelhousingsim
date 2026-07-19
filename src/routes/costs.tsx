@@ -1,13 +1,11 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
 import { ContinueButton, QuestionShell, Reveal } from "../components/QuestionShell";
-import {
-  computeCosts,
-  estimatePurchaseTax,
-  formatShekels,
-} from "../lib/mortgageMath";
+import { computeCosts, estimatePurchaseTax, formatShekels } from "../lib/mortgageMath";
+import { fmt } from "../i18n";
 import { useSimulatorStore } from "../state/simulatorStore";
 import { useFlowNav } from "../state/useFlowNav";
+import { useSimLang } from "../state/useSimLang";
 
 interface FieldProps {
   label: string;
@@ -38,11 +36,12 @@ function CostField({ label, note, value, onCommit, suffix, computed, extra }: Fi
         {note ? <p className="mt-0.5 text-[13px] leading-snug text-inkMuted">{note}</p> : null}
         {extra}
       </div>
-      <div className="shrink-0 text-right">
+      <div className="shrink-0 text-end">
         <div className="flex items-center gap-1.5">
           <input
             type="text"
             inputMode="decimal"
+            dir="ltr"
             aria-label={label}
             className="noSpin w-28 rounded-xl border border-hairline bg-cream px-3 py-2 text-right text-[15px] tabular-nums text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/25"
             value={draft ?? String(Math.round(value * 100) / 100)}
@@ -71,6 +70,7 @@ export function Costs() {
   const costs = useSimulatorStore((state) => state.costs);
   const setCosts = useSimulatorStore((state) => state.setCosts);
   const { goNext } = useFlowNav();
+  const { s } = useSimLang();
 
   const breakdown = computeCosts(propertyPrice, residency, buyerStatus, costs);
   const estimatedTax = estimatePurchaseTax(propertyPrice, residency, buyerStatus);
@@ -79,17 +79,14 @@ export function Costs() {
   return (
     <QuestionShell
       wide
-      title="The real cost to close."
-      helper="Beyond the down payment, plan for these. Defaults are typical for Israeli deals, edit anything to match yours."
+      title={s.costs.title}
+      helper={s.costs.helper}
+      footer={<ContinueButton label={s.costs.continueLabel} onClick={goNext} />}
     >
       <Reveal>
         <CostField
-          label="Purchase tax (mas rechisha)"
-          note={
-            residency === "oleh"
-              ? "Estimate includes the possible oleh reduction, verify your eligibility."
-              : "Estimated from simplified brackets, the exact figure depends on the deal."
-          }
+          label={s.costs.purchaseTaxLabel}
+          note={residency === "oleh" ? s.costs.purchaseTaxNoteOleh : s.costs.purchaseTaxNote}
           value={breakdown.purchaseTax}
           onCommit={(value) => setCosts({ purchaseTaxOverride: value })}
           extra={
@@ -99,7 +96,7 @@ export function Costs() {
                 onClick={() => setCosts({ purchaseTaxOverride: null })}
                 className="mt-1.5 text-[12px] font-semibold text-accent hover:text-accentDeep"
               >
-                Reset to estimate ({formatShekels(estimatedTax)})
+                {fmt(s.costs.resetToEstimate, { amount: formatShekels(estimatedTax) })}
               </button>
             ) : null
           }
@@ -108,50 +105,44 @@ export function Costs() {
 
       <Reveal>
         <CostField
-          label="Legal fees"
-          note="Plus VAT, typical range is 0.5% to 1.5% of the price."
+          label={s.costs.legalLabel}
+          note={s.costs.legalNote}
           value={costs.legalPct}
           onCommit={(value) => setCosts({ legalPct: value })}
           suffix="%"
-          computed={`≈ ${formatShekels(breakdown.legalFee)} incl. VAT`}
+          computed={fmt(s.costs.vatIncl, { amount: formatShekels(breakdown.legalFee) })}
         />
       </Reveal>
 
       <Reveal>
         <CostField
-          label="Agent commission"
-          note="Plus VAT, skip by setting 0 if there's no agent."
+          label={s.costs.agentLabel}
+          note={s.costs.agentNote}
           value={costs.agentPct}
           onCommit={(value) => setCosts({ agentPct: value })}
           suffix="%"
-          computed={`≈ ${formatShekels(breakdown.agentFee)} incl. VAT`}
+          computed={fmt(s.costs.vatIncl, { amount: formatShekels(breakdown.agentFee) })}
         />
       </Reveal>
 
       <Reveal>
         <CostField
-          label="Appraiser & registration"
-          note="Placeholder for appraisal, registration, and mortgage file fees."
+          label={s.costs.otherLabel}
+          note={s.costs.otherNote}
           value={costs.otherFees}
           onCommit={(value) => setCosts({ otherFees: value })}
         />
       </Reveal>
 
       <Reveal className="rounded-2xl border border-accentSoft bg-accentSoft/25 px-5 py-4">
-        <div className="flex items-center justify-between">
-          <p className="text-[14px] font-semibold text-inkMuted">Costs beyond the loan</p>
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-[14px] font-semibold text-inkMuted">{s.costs.costsTotal}</p>
           <p className="text-xl font-bold tabular-nums text-ink">{formatShekels(breakdown.total)}</p>
         </div>
-        <div className="mt-2 flex items-center justify-between border-t border-accentSoft/70 pt-2">
-          <p className="text-[14px] font-semibold text-inkMuted">
-            Total cash to close (with down payment)
-          </p>
+        <div className="mt-2 flex items-center justify-between gap-4 border-t border-accentSoft/70 pt-2">
+          <p className="text-[14px] font-semibold text-inkMuted">{s.costs.cashTotal}</p>
           <p className="text-xl font-bold tabular-nums text-ink">{formatShekels(cashToClose)}</p>
         </div>
-      </Reveal>
-
-      <Reveal>
-        <ContinueButton label="See my plan" onClick={goNext} />
       </Reveal>
     </QuestionShell>
   );

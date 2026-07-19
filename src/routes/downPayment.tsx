@@ -3,8 +3,10 @@ import { motion } from "framer-motion";
 import { ContinueButton, QuestionShell, Reveal } from "../components/QuestionShell";
 import { AmountSlider } from "../components/inputs/AmountSlider";
 import { formatPct, formatShekels, ltvCeiling } from "../lib/mortgageMath";
+import { fmt } from "../i18n";
 import { loanAmountOf, useSimulatorStore } from "../state/simulatorStore";
 import { useFlowNav } from "../state/useFlowNav";
+import { useSimLang } from "../state/useSimLang";
 
 type EntryMode = "shekels" | "percent";
 
@@ -15,6 +17,7 @@ export function DownPayment() {
   const residency = useSimulatorStore((state) => state.residency);
   const buyerStatus = useSimulatorStore((state) => state.buyerStatus);
   const { goNext } = useFlowNav();
+  const { s } = useSimLang();
   const [mode, setMode] = useState<EntryMode>("shekels");
 
   const loanAmount = loanAmountOf({ propertyPrice, downPayment });
@@ -24,15 +27,16 @@ export function DownPayment() {
 
   return (
     <QuestionShell
-      title="How much can you put down?"
-      helper="Set it in shekels or as a percent of the price, both stay in sync."
+      title={s.down.title}
+      helper={s.down.helper}
+      footer={<ContinueButton label={s.common.continueLabel} onClick={goNext} />}
     >
       <Reveal className="rounded-2xl border border-hairline bg-card p-6 shadow-lift">
-        <div className="mb-5 flex gap-2">
+        <div className="mb-5 flex justify-center gap-2">
           {(
             [
-              { id: "shekels", label: "₪ amount" },
-              { id: "percent", label: "% of price" },
+              { id: "shekels", label: s.down.modeShekels },
+              { id: "percent", label: s.down.modePercent },
             ] as Array<{ id: EntryMode; label: string }>
           ).map((option) => (
             <button
@@ -52,7 +56,7 @@ export function DownPayment() {
 
         {mode === "shekels" ? (
           <AmountSlider
-            ariaLabel="Down payment in shekels"
+            ariaLabel={s.down.title}
             value={downPayment}
             onChange={setDownPayment}
             min={0}
@@ -63,7 +67,7 @@ export function DownPayment() {
           />
         ) : (
           <AmountSlider
-            ariaLabel="Down payment as percent of price"
+            ariaLabel={s.down.title}
             value={Math.round(downPct)}
             onChange={(pct) => setDownPayment(Math.round((propertyPrice * pct) / 100))}
             min={0}
@@ -74,8 +78,8 @@ export function DownPayment() {
 
         <p className="mt-4 text-[14px] text-inkMuted">
           {mode === "shekels"
-            ? `That's ${Math.round(downPct)}% of the price.`
-            : `That's ${formatShekels(downPayment)}.`}
+            ? fmt(s.down.pctOfPrice, { pct: Math.round(downPct) })
+            : fmt(s.down.amountIs, { amount: formatShekels(downPayment) })}
         </p>
       </Reveal>
 
@@ -86,13 +90,13 @@ export function DownPayment() {
         >
           <div>
             <p className="text-[13px] font-semibold uppercase tracking-wide text-inkMuted">
-              Loan amount
+              {s.down.loanAmount}
             </p>
             <p className="text-2xl font-bold tabular-nums text-ink">{formatShekels(loanAmount)}</p>
           </div>
-          <div className="text-right">
+          <div className="text-end">
             <p className="text-[13px] font-semibold uppercase tracking-wide text-inkMuted">
-              Loan to value
+              {s.down.ltv}
             </p>
             <p className="text-2xl font-bold tabular-nums text-ink">{formatPct(ltv)}</p>
           </div>
@@ -103,14 +107,9 @@ export function DownPayment() {
             animate={{ opacity: 1, y: 0 }}
             className="mt-3 rounded-2xl border border-warn/25 bg-warn/5 px-4 py-3 text-[14px] leading-relaxed text-warn"
           >
-            That's above the roughly {formatPct(ceiling)} banks can lend for your situation, you'd
-            likely need a bigger down payment or a cheaper property.
+            {fmt(s.down.warning, { ceiling: formatPct(ceiling) })}
           </motion.p>
         ) : null}
-      </Reveal>
-
-      <Reveal>
-        <ContinueButton onClick={goNext} />
       </Reveal>
     </QuestionShell>
   );

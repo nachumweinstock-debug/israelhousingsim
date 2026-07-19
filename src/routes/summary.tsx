@@ -1,11 +1,13 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { palette } from "../theme/palette.js";
 import { AnimatePresence, animate, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { track } from "@vercel/analytics";
+import { palette } from "../theme/palette.js";
 import { FlowDirectionContext, shellVariants } from "../components/QuestionShell";
+import { PrintPlan } from "../components/PrintPlan";
+import type { PrintMode } from "../components/PrintPlan";
 import {
-  TRACK_INFO,
   computeCosts,
   computePlan,
   formatPct,
@@ -13,13 +15,9 @@ import {
   stressedMonthlyPayment,
 } from "../lib/mortgageMath";
 import type { TrackKey } from "../lib/mortgageMath";
+import { fmt } from "../i18n";
 import { loanAmountOf, useSimulatorStore } from "../state/simulatorStore";
-
-const CRUNCH_MESSAGES = [
-  "Blending your track mix…",
-  "Projecting the Madad…",
-  "Stress testing Prime…",
-];
+import { useSimLang } from "../state/useSimLang";
 
 const TRACK_BAR_CLASS: Record<TrackKey, string> = {
   prime: "bg-accent",
@@ -27,7 +25,47 @@ const TRACK_BAR_CLASS: Record<TrackKey, string> = {
   katz: "bg-accentMid",
 };
 
-/** Animated count-up numeral for the reveal moment. */
+/**
+ * Bank sites block embedding, so the hand off is: download your plan,
+ * then open the bank's own pre approval flow in a new tab or call their
+ * mortgage line. Plain outbound links, no affiliation.
+ */
+const BANKS = [
+  {
+    nameEn: "Bank Hapoalim",
+    nameHe: "בנק הפועלים",
+    mark: "P",
+    color: "#D71920",
+    url: "https://www.bankhapoalim.co.il",
+    phone: "*2408",
+  },
+  {
+    nameEn: "Bank Leumi",
+    nameHe: "בנק לאומי",
+    mark: "L",
+    color: "#004B9B",
+    url: "https://www.leumi.co.il",
+    phone: "*3200",
+  },
+  {
+    nameEn: "Mizrahi-Tefahot",
+    nameHe: "מזרחי טפחות",
+    mark: "M",
+    color: "#F47B20",
+    url: "https://www.mizrahi-tefahot.co.il",
+    phone: "*8860",
+  },
+  {
+    nameEn: "Discount Bank",
+    nameHe: "בנק דיסקונט",
+    mark: "D",
+    color: "#009B77",
+    url: "https://www.discountbank.co.il",
+    phone: "*2009",
+  },
+];
+
+/** Animated count up numeral for the reveal moment. */
 function CountUp({
   value,
   format,
@@ -49,7 +87,11 @@ function CountUp({
     });
     return () => controls.stop();
   }, [value, duration, delay]);
-  return <span className="tabular-nums">{format(display)}</span>;
+  return (
+    <span className="tabular-nums" dir="ltr">
+      {format(display)}
+    </span>
+  );
 }
 
 const gridReveal = {
@@ -58,28 +100,23 @@ const gridReveal = {
 };
 
 const cardReveal = {
-  hidden: { opacity: 0, y: 22, scale: 0.97 },
-  show: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const },
-  },
+  hidden: { opacity: 0, y: 22 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const } },
 };
 
 const heroReveal = {
-  hidden: { opacity: 0, y: 34, scale: 0.88 },
+  hidden: { opacity: 0, y: 30, scale: 0.92 },
   show: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { type: "spring" as const, stiffness: 240, damping: 17 },
+    transition: { type: "spring" as const, stiffness: 240, damping: 20 },
   },
 };
 
 const CONFETTI_COLORS = [palette.accent, palette.accentSoft, palette.accentMid, palette.card];
 
-/** One-shot light blue confetti burst behind the hero payment card. */
+/** One shot light blue confetti burst behind the hero payment card. */
 function ConfettiBurst() {
   const pieces = useMemo(
     () =>
@@ -95,7 +132,10 @@ function ConfettiBurst() {
     []
   );
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-10 flex justify-center" aria-hidden="true">
+    <div
+      className="pointer-events-none absolute inset-x-0 top-10 flex justify-center"
+      aria-hidden="true"
+    >
       {pieces.map((piece) => (
         <motion.span
           key={piece.id}
@@ -141,15 +181,15 @@ function MetricCard({
   );
 }
 
-function Crunching() {
+function Crunching({ messages }: { messages: string[] }) {
   const [msgIdx, setMsgIdx] = useState(0);
   useEffect(() => {
     const timer = window.setInterval(
-      () => setMsgIdx((i) => Math.min(i + 1, CRUNCH_MESSAGES.length - 1)),
+      () => setMsgIdx((i) => Math.min(i + 1, messages.length - 1)),
       650
     );
     return () => window.clearInterval(timer);
-  }, []);
+  }, [messages.length]);
 
   return (
     <motion.div
@@ -178,11 +218,11 @@ function Crunching() {
           transition={{ duration: 0.25 }}
           className="text-lg font-medium text-ink"
         >
-          {CRUNCH_MESSAGES[msgIdx]}
+          {messages[msgIdx]}
         </motion.p>
       </AnimatePresence>
       <div className="flex items-center gap-2">
-        {CRUNCH_MESSAGES.map((_, i) => (
+        {messages.map((_, i) => (
           <div
             key={i}
             className={`h-1 rounded-pill transition-all duration-300 ${
@@ -199,12 +239,20 @@ export function Summary() {
   const direction = useContext(FlowDirectionContext);
   const navigate = useNavigate();
   const state = useSimulatorStore();
+  const { s, lang, isHe } = useSimLang();
   const [phase, setPhase] = useState<"crunching" | "ready">("crunching");
+  const [printMode, setPrintMode] = useState<PrintMode>("both");
 
   useEffect(() => {
     const timer = window.setTimeout(() => setPhase("ready"), 2000);
     return () => window.clearTimeout(timer);
   }, []);
+
+  function downloadPdf(mode: PrintMode) {
+    track("pdf_download_started", { mode });
+    setPrintMode(mode);
+    window.setTimeout(() => window.print(), 60);
+  }
 
   const loanAmount = loanAmountOf(state);
   const planInputs = {
@@ -216,7 +264,12 @@ export function Summary() {
   const plan = computePlan(planInputs);
   const stress1 = stressedMonthlyPayment(planInputs, 1);
   const stress2 = stressedMonthlyPayment(planInputs, 2);
-  const breakdown = computeCosts(state.propertyPrice, state.residency, state.buyerStatus, state.costs);
+  const breakdown = computeCosts(
+    state.propertyPrice,
+    state.residency,
+    state.buyerStatus,
+    state.costs
+  );
   const ltv = state.propertyPrice > 0 ? loanAmount / state.propertyPrice : 0;
   const cashToClose = state.downPayment + breakdown.total;
 
@@ -229,9 +282,10 @@ export function Summary() {
       exit="exit"
       className="mx-auto w-full max-w-2xl px-6 pb-24 pt-8 sm:pt-12"
     >
+      <PrintPlan answers={state} mode={printMode} />
       <AnimatePresence mode="wait">
         {phase === "crunching" ? (
-          <Crunching />
+          <Crunching messages={s.summary.crunch} />
         ) : (
           <motion.div
             key="ready"
@@ -243,9 +297,9 @@ export function Summary() {
             <ConfettiBurst />
             <motion.h1
               variants={cardReveal}
-              className="text-[28px] font-semibold leading-[1.25] tracking-tight text-ink sm:text-[32px]"
+              className="text-center text-[28px] font-semibold leading-[1.25] tracking-tight text-ink sm:text-[32px]"
             >
-              Your mashkanta plan.
+              {s.summary.title}
             </motion.h1>
 
             <motion.div
@@ -253,27 +307,30 @@ export function Summary() {
               className="mt-7 rounded-3xl border border-accentSoft bg-accentSoft/35 p-7 text-center shadow-lift"
             >
               <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-inkMuted">
-                Estimated monthly payment
+                {s.summary.heroLabel}
               </p>
               <p className="mt-2 text-5xl font-bold text-ink sm:text-6xl">
                 <CountUp value={plan.monthlyPayment} format={formatShekels} delay={0.15} />
               </p>
               <p className="mt-2 text-[14px] text-inkMuted">
-                Blended across Prime, Kalatz, and Katz over {state.termYears} years
+                {fmt(s.summary.heroSub, { years: state.termYears })}
               </p>
             </motion.div>
 
             <div className="mt-4 grid grid-cols-2 gap-4">
-              <MetricCard label="Total interest">
+              <MetricCard label={s.summary.totalInterest}>
                 <CountUp value={plan.totalInterest} format={formatShekels} delay={0.3} />
               </MetricCard>
-              <MetricCard label="Total repayment">
+              <MetricCard label={s.summary.totalRepayment}>
                 <CountUp value={plan.totalRepayment} format={formatShekels} delay={0.4} />
               </MetricCard>
-              <MetricCard label="Loan to value" sub={`On a ${formatShekels(state.propertyPrice)} property`}>
-                {formatPct(ltv)}
+              <MetricCard
+                label={s.summary.ltv}
+                sub={fmt(s.summary.ltvSub, { price: formatShekels(state.propertyPrice) })}
+              >
+                <span dir="ltr">{formatPct(ltv)}</span>
               </MetricCard>
-              <MetricCard label="Cash to close" sub="Down payment plus taxes and fees">
+              <MetricCard label={s.summary.cashToClose} sub={s.summary.cashSub}>
                 <CountUp value={cashToClose} format={formatShekels} delay={0.5} />
               </MetricCard>
             </div>
@@ -283,7 +340,7 @@ export function Summary() {
               className="mt-4 rounded-2xl border border-hairline bg-card p-5 shadow-lift"
             >
               <p className="mb-3 text-[13px] font-semibold uppercase tracking-wide text-inkMuted">
-                Your mix
+                {s.summary.mixTitle}
               </p>
               <div className="flex h-3 w-full overflow-hidden rounded-pill border border-hairline">
                 {(Object.keys(TRACK_BAR_CLASS) as TrackKey[]).map((key) => (
@@ -297,17 +354,18 @@ export function Summary() {
                 ))}
               </div>
               <div className="mt-3 grid gap-1.5 sm:grid-cols-3">
-                {plan.perTrack.map((track) => (
-                  <div key={track.track} className="flex items-center gap-2 text-[13px] text-inkMuted">
+                {plan.perTrack.map((item) => (
+                  <div key={item.track} className="flex items-center gap-2 text-[13px] text-inkMuted">
                     <span
-                      className={`inline-block h-2.5 w-2.5 shrink-0 rounded-pill ${TRACK_BAR_CLASS[track.track]}`}
+                      className={`inline-block h-2.5 w-2.5 shrink-0 rounded-pill ${TRACK_BAR_CLASS[item.track]}`}
                       aria-hidden="true"
                     />
                     <span>
                       <span className="font-semibold text-ink">
-                        {TRACK_INFO[track.track].name} {track.percent}%
+                        {s.tracks[item.track].name} {item.percent}%
                       </span>{" "}
-                      · {formatShekels(track.monthlyPayment)}/mo
+                      · <span dir="ltr">{formatShekels(item.monthlyPayment)}</span>
+                      {s.summary.perMonth}
                     </span>
                   </div>
                 ))}
@@ -319,32 +377,123 @@ export function Summary() {
               className="mt-4 rounded-2xl border border-hairline bg-card p-5 shadow-lift"
             >
               <p className="text-[13px] font-semibold uppercase tracking-wide text-inkMuted">
-                If Prime rates rise
+                {s.summary.stressTitle}
               </p>
               <p className="mt-2 text-[15px] leading-relaxed text-ink">
-                Prime up 1 point:{" "}
-                <span className="font-bold tabular-nums">{formatShekels(stress1)}</span>
-                <span className="text-inkMuted"> (+{formatShekels(stress1 - plan.monthlyPayment)}/mo)</span>
+                {s.summary.stressUp1}{" "}
+                <span className="font-bold tabular-nums" dir="ltr">
+                  {formatShekels(stress1)}
+                </span>
+                <span className="text-inkMuted" dir="ltr">
+                  {" "}
+                  (+{formatShekels(stress1 - plan.monthlyPayment)})
+                </span>
                 <br />
-                Prime up 2 points:{" "}
-                <span className="font-bold tabular-nums">{formatShekels(stress2)}</span>
-                <span className="text-inkMuted"> (+{formatShekels(stress2 - plan.monthlyPayment)}/mo)</span>
+                {s.summary.stressUp2}{" "}
+                <span className="font-bold tabular-nums" dir="ltr">
+                  {formatShekels(stress2)}
+                </span>
+                <span className="text-inkMuted" dir="ltr">
+                  {" "}
+                  (+{formatShekels(stress2 - plan.monthlyPayment)})
+                </span>
               </p>
             </motion.div>
 
-            <motion.div variants={cardReveal} className="mt-7 flex flex-col items-center gap-4">
-              <div className="relative w-full sm:w-auto">
+            <motion.div
+              variants={cardReveal}
+              className="mt-4 rounded-2xl border border-hairline bg-card p-5 shadow-lift"
+            >
+              <p className="text-[15px] font-bold text-ink">{s.exportPanel.title}</p>
+              <p className="mt-1 text-[13px] text-inkMuted">{s.exportPanel.sub}</p>
+              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <button
                   type="button"
-                  disabled
-                  className="w-full cursor-not-allowed rounded-pill bg-hairline px-10 py-4 text-[16px] font-semibold text-inkMuted/70 sm:min-w-[260px]"
+                  onClick={() => downloadPdf("he")}
+                  className="rounded-pill bg-accent px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-accentDeep active:scale-[0.98]"
                 >
-                  Email me this plan
+                  {s.exportPanel.downloadHe}
                 </button>
-                <span className="absolute -right-2 -top-2 rounded-pill bg-accentSoft px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-ink/70">
-                  Soon
-                </span>
+                <button
+                  type="button"
+                  onClick={() => downloadPdf("en")}
+                  className="rounded-pill bg-accent px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-accentDeep active:scale-[0.98]"
+                >
+                  {s.exportPanel.downloadEn}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => downloadPdf("both")}
+                  className="rounded-pill border border-accent bg-card px-5 py-3 text-sm font-semibold text-accent transition-colors hover:bg-accentSoft/30 active:scale-[0.98]"
+                >
+                  {s.exportPanel.downloadBoth}
+                </button>
               </div>
+
+              <div className="mt-6 border-t border-hairline pt-4">
+                <p className="text-[15px] font-bold text-ink">{s.exportPanel.banksTitle}</p>
+                <p className="mt-1 text-[13px] leading-relaxed text-inkMuted">
+                  {s.exportPanel.banksNote}
+                </p>
+                <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {BANKS.map((bank) => (
+                    <div
+                      key={bank.nameEn}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-hairline bg-cream px-4 py-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white"
+                          style={{ backgroundColor: bank.color }}
+                          aria-hidden="true"
+                        >
+                          {bank.mark}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-ink">
+                            {isHe ? bank.nameHe : bank.nameEn}
+                          </p>
+                          <p className="text-xs text-inkMuted" dir="ltr">
+                            {s.exportPanel.call} {bank.phone}
+                          </p>
+                        </div>
+                      </div>
+                      <a
+                        href={bank.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={() => track("bank_link_clicked", { bank: bank.nameEn, lang })}
+                        className="shrink-0 rounded-pill border border-hairline bg-card px-3 py-1.5 text-xs font-semibold text-inkMuted transition-colors hover:border-accent hover:text-accent"
+                      >
+                        {s.exportPanel.visit} ↗
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              variants={cardReveal}
+              className="mt-4 rounded-2xl border border-hairline bg-card p-5 shadow-lift"
+            >
+              <p className="text-[15px] font-bold text-ink">{s.nextSteps.title}</p>
+              <ol className="mt-4 space-y-4">
+                {s.nextSteps.steps.map((step, i) => (
+                  <li key={step.title} className="flex gap-3">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-pill bg-accent text-sm font-bold text-white">
+                      {i + 1}
+                    </span>
+                    <div>
+                      <p className="font-semibold text-ink">{step.title}</p>
+                      <p className="mt-0.5 text-sm leading-relaxed text-inkMuted">{step.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </motion.div>
+
+            <motion.div variants={cardReveal} className="mt-7 flex justify-center">
               <button
                 type="button"
                 onClick={() => {
@@ -353,17 +502,15 @@ export function Summary() {
                 }}
                 className="text-[14px] font-semibold text-accent hover:text-accentDeep"
               >
-                Start over
+                {s.summary.startOver}
               </button>
             </motion.div>
 
             <motion.p
               variants={cardReveal}
-              className="mt-8 text-center text-[12px] leading-relaxed text-inkMuted"
+              className="mt-6 text-center text-[12px] leading-relaxed text-inkMuted"
             >
-              This is an estimate for planning purposes, not a binding offer. Rates, tax brackets,
-              and eligibility rules change, a licensed mortgage advisor should confirm real terms
-              with a bank.
+              {s.summary.disclaimer}
             </motion.p>
           </motion.div>
         )}

@@ -1,52 +1,38 @@
+import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ContinueButton, QuestionShell, Reveal } from "../components/QuestionShell";
+import { QuestionShell } from "../components/QuestionShell";
 import { ChoiceCard } from "../components/inputs/ChoiceCard";
 import { formatPct, ltvCeiling } from "../lib/mortgageMath";
 import type { BuyerStatus as BuyerStatusValue, Residency } from "../lib/mortgageMath";
+import { fmt } from "../i18n";
+import type { SimStrings } from "../state/texts";
 import { useSimulatorStore } from "../state/simulatorStore";
 import { useFlowNav } from "../state/useFlowNav";
+import { useSimLang } from "../state/useSimLang";
 
-const OPTIONS: Array<{
-  value: BuyerStatusValue;
-  title: string;
-  subtitle: string;
-  emoji: string;
-}> = [
-  {
-    value: "firstHome",
-    title: "First home in Israel",
-    subtitle: "Your first property here",
-    emoji: "🔑",
-  },
-  {
-    value: "replacingHome",
-    title: "Replacing an existing home",
-    subtitle: "Selling one place, buying another",
-    emoji: "🏠",
-  },
-  {
-    value: "investment",
-    title: "Investment property",
-    subtitle: "You already own where you live",
-    emoji: "📊",
-  },
-];
+const OPTION_EMOJI: Record<BuyerStatusValue, string> = {
+  firstHome: "🔑",
+  replacingHome: "🏠",
+  investment: "📊",
+};
 
-function contextNote(residency: Residency | null, buyerStatus: BuyerStatusValue): string {
+const OPTION_ORDER: BuyerStatusValue[] = ["firstHome", "replacingHome", "investment"];
+
+function contextNote(
+  s: SimStrings,
+  residency: Residency | null,
+  buyerStatus: BuyerStatusValue
+): string {
   const ceiling = formatPct(ltvCeiling(residency, buyerStatus));
-  if (residency === "oleh") {
-    return `As an oleh chadash, banks can generally lend you up to ${ceiling} of the property value.`;
-  }
-  if (residency === "foreign") {
-    return `As a foreign resident, banks generally cap lending around ${ceiling} of the property value.`;
-  }
+  if (residency === "oleh") return fmt(s.buyerStatus.olehNote, { ceiling });
+  if (residency === "foreign") return fmt(s.buyerStatus.foreignNote, { ceiling });
   switch (buyerStatus) {
     case "firstHome":
-      return `For a first home, banks can lend up to about ${ceiling}, plan for at least 25% down.`;
+      return fmt(s.buyerStatus.firstHomeNote, { ceiling });
     case "replacingHome":
-      return `When replacing a home, banks can lend up to about ${ceiling} of the new property's value.`;
+      return fmt(s.buyerStatus.replacingNote, { ceiling });
     case "investment":
-      return `For an investment property, lending is capped around ${ceiling}, half the price comes from you.`;
+      return fmt(s.buyerStatus.investmentNote, { ceiling });
   }
 }
 
@@ -55,42 +41,49 @@ export function BuyerStatus() {
   const buyerStatus = useSimulatorStore((state) => state.buyerStatus);
   const setBuyerStatus = useSimulatorStore((state) => state.setBuyerStatus);
   const { goNext } = useFlowNav();
+  const { s } = useSimLang();
+  const [picked, setPicked] = useState<BuyerStatusValue | null>(null);
+  const advancing = useRef(false);
+
+  function pick(value: BuyerStatusValue) {
+    if (advancing.current) return;
+    advancing.current = true;
+    setPicked(value);
+    setBuyerStatus(value);
+    // A beat longer than usual so the loan to value note registers.
+    window.setTimeout(goNext, 950);
+  }
+
+  const selected = picked ?? buyerStatus;
 
   return (
-    <QuestionShell
-      title="What are you buying?"
-      helper="This sets how much of the price a bank is allowed to finance."
-    >
-      {OPTIONS.map((option) => (
+    <QuestionShell title={s.buyerStatus.title} helper={s.buyerStatus.helper}>
+      {OPTION_ORDER.map((value) => (
         <ChoiceCard
-          key={option.value}
-          title={option.title}
-          subtitle={option.subtitle}
-          emoji={option.emoji}
-          selected={buyerStatus === option.value}
-          dimmed={buyerStatus !== null && buyerStatus !== option.value}
-          onSelect={() => setBuyerStatus(option.value)}
+          key={value}
+          title={s.buyerStatus[value].title}
+          subtitle={s.buyerStatus[value].sub}
+          emoji={OPTION_EMOJI[value]}
+          selected={selected === value}
+          dimmed={picked !== null && picked !== value}
+          onSelect={() => pick(value)}
         />
       ))}
 
       <AnimatePresence mode="wait">
-        {buyerStatus ? (
+        {selected ? (
           <motion.div
-            key={buyerStatus}
-            initial={{ opacity: 0, y: 10 }}
+            key={selected}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="rounded-2xl border border-accentSoft bg-accentSoft/25 px-4 py-3 text-[14px] leading-relaxed text-ink/85"
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className="rounded-2xl border border-accentSoft bg-accentSoft/25 px-4 py-3 text-center text-[14px] leading-relaxed text-ink/85"
           >
-            {contextNote(residency, buyerStatus)}
+            {contextNote(s, residency, selected)}
           </motion.div>
         ) : null}
       </AnimatePresence>
-
-      <Reveal>
-        <ContinueButton onClick={goNext} disabled={buyerStatus === null} />
-      </Reveal>
     </QuestionShell>
   );
 }

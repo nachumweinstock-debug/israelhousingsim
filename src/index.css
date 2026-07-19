@@ -97,6 +97,18 @@ html[lang="he"] .text-sm {
   margin: 0;
 }
 
+/* When printing, only the PrintPlan portal (a sibling of #root on body)
+   should exist. Kill the app root entirely so it leaves no blank space. */
+@media print {
+  #root {
+    display: none;
+  }
+  html,
+  body {
+    background: #ffffff;
+  }
+}
+
 @layer utilities {
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
