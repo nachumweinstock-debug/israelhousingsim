@@ -1,10 +1,22 @@
 /** @type {import('tailwindcss').Config} */
+import { palette } from "./src/theme/palette.js";
+
 export default {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        cream: "#FAF7F2",
+        // Mashkanta simulator design system — see src/theme/palette.js
+        cream: palette.cream,
+        card: palette.card,
+        accentSoft: palette.accentSoft,
+        accentMid: palette.accentMid,
+        accent: palette.accent,
+        accentDeep: palette.accentDeep,
+        ink: palette.ink,
+        inkMuted: palette.inkMuted,
+        hairline: palette.hairline,
+        // Legacy tokens kept so the previous tabbed app still compiles/styles
         navy: "#1B3A6B",
         "navy-dark": "#0D2144",
         "navy-mid": "#2A5298",
@@ -19,7 +31,14 @@ export default {
       },
       fontFamily: {
         serif: ['"DM Serif Display"', "Georgia", "serif"],
-        sans: ["Outfit", "system-ui", "sans-serif"],
+        sans: ["Figtree", "Outfit", "system-ui", "sans-serif"],
+      },
+      boxShadow: {
+        lift: "0 1px 2px rgba(42, 42, 40, 0.04), 0 6px 18px rgba(42, 42, 40, 0.05)",
+        liftHover: "0 2px 4px rgba(42, 42, 40, 0.05), 0 10px 28px rgba(42, 42, 40, 0.08)",
+      },
+      borderRadius: {
+        pill: "999px",
       },
     },
   },

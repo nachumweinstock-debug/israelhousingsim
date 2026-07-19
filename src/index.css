@@ -4,9 +4,9 @@
 
 html,
 body {
-  background-color: #faf7f2;
-  font-family: "Outfit", system-ui, sans-serif;
-  color: #1b3a6b;
+  background-color: #faf7f0;
+  font-family: "Figtree", "Outfit", system-ui, sans-serif;
+  color: #2a2a28;
 }
 
 html[lang="he"] body {
@@ -44,9 +44,57 @@ html[lang="he"] .text-sm {
 
 @layer base {
   ::selection {
-    background-color: #bfdbfe;
-    color: #1b3a6b;
+    background-color: #b8d8f0;
+    color: #2a2a28;
   }
+}
+
+/* Simulator range sliders: hairline track painted with an accent fill via
+   inline gradient, big friendly thumb. Class names stay hyphen free. */
+.sliderInput {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+}
+
+.sliderInput::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 28px;
+  width: 28px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 3px solid #5b9bd5;
+  box-shadow: 0 2px 8px rgba(42, 42, 40, 0.18);
+  transition: transform 0.15s ease;
+}
+
+.sliderInput::-webkit-slider-thumb:hover,
+.sliderInput::-webkit-slider-thumb:active {
+  transform: scale(1.12);
+}
+
+.sliderInput::-moz-range-thumb {
+  height: 28px;
+  width: 28px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 3px solid #5b9bd5;
+  box-shadow: 0 2px 8px rgba(42, 42, 40, 0.18);
+  transition: transform 0.15s ease;
+}
+
+.sliderInput:focus-visible {
+  box-shadow: 0 0 0 3px rgba(91, 155, 213, 0.35);
+}
+
+.noSpin::-webkit-outer-spin-button,
+.noSpin::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 @layer utilities {
