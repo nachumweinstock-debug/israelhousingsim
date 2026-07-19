@@ -41,7 +41,10 @@ test("full English flow: oleh branch, mix presets, costs, summary with export an
 
   // Crunching interlude resolves into the plan.
   await expect(page.getByText("Your mortgage plan.")).toBeVisible({ timeout: 8000 });
-  await expect(page.getByText("Estimated monthly payment", { exact: true })).toBeVisible();
+  // Scope to the app root: the hidden PrintPlan pages repeat this label.
+  await expect(
+    page.locator("#root").getByText("Estimated monthly payment", { exact: true })
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: /Download PDF · English/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /Download both/ })).toBeVisible();
   await expect(page.getByText("Bank Hapoalim")).toBeVisible();
