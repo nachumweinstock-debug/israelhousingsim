@@ -97,7 +97,7 @@ function FlowChrome() {
             ) : null}
           </motion.div>
         </div>
-        <div className="mx-auto flex h-14 w-full max-w-2xl items-center justify-between gap-3 px-4">
+        <div className="mx-auto flex h-[72px] w-full max-w-2xl items-center justify-between gap-3 px-4">
           <div className="flex w-24 justify-start">
             <AnimatePresence>
               {backTarget ? (
@@ -120,7 +120,7 @@ function FlowChrome() {
             <motion.img
               src="/vryfid-full-logo.jpeg"
               alt="VryfID"
-              className="h-10 w-auto rounded-lg shadow-lift"
+              className="h-14 w-auto rounded-xl border border-hairline bg-card p-1 shadow-lift"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             />
@@ -146,7 +146,7 @@ function FlowChrome() {
         </div>
       </header>
 
-      <main className="relative flex-1 overflow-x-clip pt-[68px]">
+      <main className="relative flex-1 overflow-x-clip pt-[86px]">
         <motion.div
           aria-hidden="true"
           className="pointer-events-none fixed -left-32 top-1/4 -z-0 h-80 w-80 rounded-pill bg-accentSoft/30 blur-3xl"
