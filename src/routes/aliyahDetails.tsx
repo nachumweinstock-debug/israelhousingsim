@@ -62,12 +62,14 @@ export function AliyahDetails() {
         </p>
         <div className="grid grid-cols-2 gap-3">
           <ChoiceCard
+            index={0}
             title={s.aliyah.yes}
             selected={ownedBefore === true}
             dimmed={ownedBefore === false}
             onSelect={() => pickOwned(true)}
           />
           <ChoiceCard
+            index={1}
             title={s.aliyah.no}
             selected={ownedBefore === false}
             dimmed={ownedBefore === true}

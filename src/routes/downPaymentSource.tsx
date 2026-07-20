@@ -42,9 +42,10 @@ export function DownPaymentSource() {
 
   return (
     <QuestionShell title={s.downPaymentSource.title} helper={s.downPaymentSource.helper}>
-      {OPTION_ORDER.map((value) => (
+      {OPTION_ORDER.map((value, i) => (
         <ChoiceCard
           key={value}
+          index={i}
           title={s.downPaymentSource[value].title}
           subtitle={s.downPaymentSource[value].sub}
           emoji={OPTION_EMOJI[value]}
@@ -78,12 +79,14 @@ export function DownPaymentSource() {
             </p>
             <div className="grid grid-cols-2 gap-3">
               <ChoiceCard
+                index={0}
                 title={s.downPaymentSource.inHand}
                 selected={downPaymentSource.homeSaleStatus === "inHand"}
                 dimmed={downPaymentSource.homeSaleStatus === "pending"}
                 onSelect={() => pickHomeSaleStatus("inHand")}
               />
               <ChoiceCard
+                index={1}
                 title={s.downPaymentSource.pending}
                 selected={downPaymentSource.homeSaleStatus === "pending"}
                 dimmed={downPaymentSource.homeSaleStatus === "inHand"}

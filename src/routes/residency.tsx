@@ -32,9 +32,10 @@ export function Residency() {
 
   return (
     <QuestionShell title={s.residency.title} helper={s.residency.helper}>
-      {OPTION_ORDER.map((value) => (
+      {OPTION_ORDER.map((value, i) => (
         <ChoiceCard
           key={value}
+          index={i}
           title={s.residency[value].title}
           subtitle={s.residency[value].sub}
           emoji={OPTION_EMOJI[value]}

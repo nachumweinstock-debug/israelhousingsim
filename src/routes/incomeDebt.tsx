@@ -46,12 +46,14 @@ export function IncomeDebt() {
         <p className="mb-3 text-[15px] font-semibold text-ink">{s.incomeDebt.coApplicantToggle}</p>
         <div className="grid grid-cols-2 gap-3">
           <ChoiceCard
+            index={0}
             title={s.common.yes}
             selected={income.hasCoApplicant}
             dimmed={!income.hasCoApplicant}
             onSelect={() => setIncome({ hasCoApplicant: true })}
           />
           <ChoiceCard
+            index={1}
             title={s.common.no}
             selected={!income.hasCoApplicant}
             dimmed={income.hasCoApplicant}
@@ -88,9 +90,10 @@ export function IncomeDebt() {
       <Reveal className="rounded-3xl border border-hairline bg-card p-6 shadow-lift">
         <p className="mb-3 text-[15px] font-semibold text-ink">{s.incomeDebt.employmentLabel}</p>
         <div className="space-y-3">
-          {EMPLOYMENT_ORDER.map((value) => (
+          {EMPLOYMENT_ORDER.map((value, i) => (
             <ChoiceCard
               key={value}
+              index={i}
               title={s.incomeDebt[value]}
               emoji={EMPLOYMENT_EMOJI[value]}
               selected={income.employmentType === value}

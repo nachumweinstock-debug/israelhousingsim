@@ -34,12 +34,14 @@ export function CreditStanding() {
           <p className="mb-3 text-[15px] font-semibold text-ink">{questionText[key]}</p>
           <div className="grid grid-cols-2 gap-3">
             <ChoiceCard
+              index={0}
               title={s.creditStanding.yes}
               selected={creditStanding[key] === true}
               dimmed={creditStanding[key] === false}
               onSelect={() => setCreditStanding({ [key]: true })}
             />
             <ChoiceCard
+              index={1}
               title={s.creditStanding.no}
               selected={creditStanding[key] === false}
               dimmed={creditStanding[key] === true}

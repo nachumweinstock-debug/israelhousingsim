@@ -58,9 +58,10 @@ export function BuyerStatus() {
 
   return (
     <QuestionShell title={s.buyerStatus.title} helper={s.buyerStatus.helper}>
-      {OPTION_ORDER.map((value) => (
+      {OPTION_ORDER.map((value, i) => (
         <ChoiceCard
           key={value}
+          index={i}
           title={s.buyerStatus[value].title}
           subtitle={s.buyerStatus[value].sub}
           emoji={OPTION_EMOJI[value]}

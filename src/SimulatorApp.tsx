@@ -202,28 +202,27 @@ function FlowChrome() {
   );
 }
 
-function scrollToFooter() {
-  document.getElementById("site-footer")?.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
 /**
  * Header badge, mirrors the language toggle on the header's other side.
  * A direct port of the "Powered by VryfID" pill from vryfidvibes.com
  * (client/src/App.jsx + index.css .powered-by-badge / badgeShimmer),
  * same deep teal gradient, amber glow border, amber dot, mint "Powered
- * by" label, and the warm-to-teal shimmering "VryfID" wordmark. Clicking
- * scrolls down to the VryfID footer; the footer logo scrolls back up.
+ * by" label, and the warm-to-teal shimmering "VryfID" wordmark. A real
+ * outbound link to vryfid.com, same as the reference site, not an in
+ * page scroll, which is also what the trailing external-link arrow
+ * already implied.
  */
 function PoweredByPill() {
   return (
-    <motion.button
-      type="button"
-      onClick={scrollToFooter}
-      aria-label="Powered by VryfID, jump to footer"
+    <motion.a
+      href="https://www.vryfid.com/"
+      target="_blank"
+      rel="noreferrer"
+      aria-label="Powered by VryfID, opens vryfid.com"
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.96 }}
       transition={{ duration: 0.2 }}
-      className="flex shrink-0 items-center gap-[7px] rounded-pill"
+      className="flex shrink-0 items-center gap-[7px] rounded-pill no-underline"
       style={{
         background: "linear-gradient(135deg, #0C3C38 0%, #115E59 100%)",
         border: "1px solid rgba(251, 191, 36, 0.35)",
@@ -266,6 +265,6 @@ function PoweredByPill() {
       <span aria-hidden="true" style={{ fontSize: 11, color: "#FBBF24", fontWeight: 700 }}>
         ↗
       </span>
-    </motion.button>
+    </motion.a>
   );
 }

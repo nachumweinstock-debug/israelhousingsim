@@ -41,9 +41,10 @@ export function ExistingHomeStatus() {
 
   return (
     <QuestionShell title={s.existingHome.title} helper={s.existingHome.helper}>
-      {OPTION_ORDER.map((value) => (
+      {OPTION_ORDER.map((value, i) => (
         <ChoiceCard
           key={value}
+          index={i}
           title={s.existingHome[value].title}
           subtitle={s.existingHome[value].sub}
           emoji={OPTION_EMOJI[value]}
