@@ -104,8 +104,8 @@ function FlowChrome() {
             ) : null}
           </motion.div>
         </div>
-        <div className="mx-auto flex h-[72px] w-full max-w-2xl items-center justify-between gap-3 px-4">
-          <div className="flex items-center gap-2">
+        <div className="mx-auto flex h-16 w-full max-w-2xl items-center justify-between gap-1.5 px-2 sm:h-[72px] sm:gap-3 sm:px-4">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <AnimatePresence>
               {backTarget ? (
                 <motion.button
@@ -116,7 +116,7 @@ function FlowChrome() {
                   exit={{ opacity: 0 }}
                   whileTap={{ scale: 0.92 }}
                   onClick={() => navigate(stepPath(backTarget))}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-pill border border-hairline bg-card text-lg text-ink shadow-lift hover:border-accent/50"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-pill border border-hairline bg-card text-lg text-ink shadow-lift hover:border-accent/50 sm:h-10 sm:w-10"
                 >
                   {isHe ? "→" : "←"}
                 </motion.button>
@@ -128,7 +128,7 @@ function FlowChrome() {
             <motion.img
               src="/vryfid-full-logo.jpeg"
               alt="VryfID"
-              className="h-14 w-auto rounded-xl border border-hairline bg-card p-1 shadow-lift"
+              className="h-10 w-auto rounded-xl border border-hairline bg-card p-1 shadow-lift sm:h-14"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             />
@@ -140,7 +140,7 @@ function FlowChrome() {
                   key={choice.value}
                   type="button"
                   onClick={() => setLang(choice.value)}
-                  className={`rounded-pill px-2.5 py-1 text-xs font-semibold transition-colors ${
+                  className={`rounded-pill px-2 py-1 text-xs font-semibold transition-colors sm:px-2.5 ${
                     lang === choice.value
                       ? "bg-accent text-white"
                       : "text-inkMuted hover:text-ink"
@@ -154,7 +154,7 @@ function FlowChrome() {
         </div>
       </header>
 
-      <main className="relative flex-1 overflow-x-clip pt-[86px]">
+      <main className="relative flex-1 overflow-x-clip pt-[78px] sm:pt-[86px]">
         <motion.div
           aria-hidden="true"
           className="pointer-events-none fixed -left-32 top-1/4 -z-0 h-80 w-80 rounded-pill bg-accentSoft/30 blur-3xl"
@@ -222,11 +222,10 @@ function PoweredByPill() {
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.96 }}
       transition={{ duration: 0.2 }}
-      className="flex shrink-0 items-center gap-[7px] rounded-pill no-underline"
+      className="flex shrink-0 items-center gap-[7px] rounded-pill px-2.5 py-1.5 no-underline sm:px-4 sm:py-[7px]"
       style={{
         background: "linear-gradient(135deg, #0C3C38 0%, #115E59 100%)",
         border: "1px solid rgba(251, 191, 36, 0.35)",
-        padding: "7px 16px 7px 11px",
         boxShadow: "0 0 20px rgba(251, 191, 36, 0.18), inset 0 1px 0 rgba(255,255,255,0.08)",
       }}
     >
@@ -241,7 +240,10 @@ function PoweredByPill() {
           flexShrink: 0,
         }}
       />
-      <span style={{ fontSize: 11, color: "#99F6E4", fontWeight: 500, letterSpacing: "0.3px" }}>
+      <span
+        className="hidden sm:inline"
+        style={{ fontSize: 11, color: "#99F6E4", fontWeight: 500, letterSpacing: "0.3px" }}
+      >
         Powered by
       </span>
       <motion.span
@@ -262,7 +264,11 @@ function PoweredByPill() {
       >
         VryfID
       </motion.span>
-      <span aria-hidden="true" style={{ fontSize: 11, color: "#FBBF24", fontWeight: 700 }}>
+      <span
+        aria-hidden="true"
+        className="hidden sm:inline"
+        style={{ fontSize: 11, color: "#FBBF24", fontWeight: 700 }}
+      >
         ↗
       </span>
     </motion.a>

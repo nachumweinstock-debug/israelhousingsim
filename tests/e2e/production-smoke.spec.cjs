@@ -61,7 +61,11 @@ test("full English flow: identity, income, down payment source, credit standing,
   await page.getByRole("button", { name: "Continue" }).click();
   await expect(page).toHaveURL(/\/simulator\/summary$/);
 
-  await expect(page.getByText("Your mortgage readiness report.")).toBeVisible({ timeout: 8000 });
+  // Personalized from the name entered on identityVerification ("Test Applicant" -> "Test").
+  // Scoped to #root: the hidden print portal repeats the same heading.
+  await expect(page.locator("#root").getByText("Test's Mortgage Readiness Report")).toBeVisible({
+    timeout: 8000,
+  });
   await expect(page.getByText(/Identity verified via VryfID on/).first()).toBeVisible();
   await expect(page.locator("#root").getByText("What this confirms")).toBeVisible();
   await expect(page.locator("#root").getByText("What the bank will still need")).toBeVisible();
@@ -122,7 +126,10 @@ test("Hebrew flow: RTL, Hebrew copy, Hebrew tracks, replacing home bridge cautio
   await page.getByRole("button", { name: "לא", exact: true }).nth(2).click();
   await page.getByRole("button", { name: "המשך" }).click();
 
-  await expect(page.getByText("דוח המוכנות למשכנתא שלכם.")).toBeVisible({ timeout: 8000 });
+  // Personalized from the name entered on identityVerification ("בודק בדיקה" -> "בודק").
+  await expect(page.locator("#root").getByText("דוח המוכנות למשכנתא של בודק")).toBeVisible({
+    timeout: 8000,
+  });
   await expect(page.getByRole("button", { name: /הורדת PDF · עברית/ })).toBeVisible();
 });
 

@@ -248,8 +248,25 @@ export function Summary() {
   function downloadPdf(mode: PrintMode) {
     track("pdf_download_started", { mode });
     setPrintMode(mode);
+    // Chrome and Safari suggest document.title as the save-as filename in
+    // the print to PDF dialog, there is no direct API for it. Swap the
+    // title just for the print, then restore it once the dialog closes
+    // so the browser tab itself doesn't keep showing someone's name.
+    const originalTitle = document.title;
+    const trimmedName = state.identity.fullName.trim();
+    document.title = trimmedName
+      ? `VryfID Mortgage Readiness Report for ${trimmedName}`
+      : "VryfID Mortgage Readiness Report";
+    const restoreTitle = () => {
+      document.title = originalTitle;
+      window.removeEventListener("afterprint", restoreTitle);
+    };
+    window.addEventListener("afterprint", restoreTitle);
     window.setTimeout(() => window.print(), 60);
   }
+
+  const firstName = state.identity.fullName.trim().split(/\s+/)[0] || "";
+  const reportTitle = firstName ? fmt(s.report.personalizedTitle, { name: firstName }) : s.summary.title;
 
   const model = buildReportModel(state, s, lang);
   const {
@@ -363,7 +380,7 @@ export function Summary() {
               variants={cardReveal}
               className="text-center text-[28px] font-semibold leading-[1.25] tracking-tight text-ink sm:text-[32px]"
             >
-              {s.summary.title}
+              {reportTitle}
             </motion.h1>
 
             {state.identity.verified && verifiedDate ? (

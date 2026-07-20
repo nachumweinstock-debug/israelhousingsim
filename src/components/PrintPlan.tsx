@@ -75,6 +75,8 @@ function ReportPage({
     mixed: s.incomeDebt.mixed,
   }[answers.income.employmentType];
 
+  const firstName = answers.identity.fullName.trim().split(/\s+/)[0] || "";
+
   return (
     <article className={`bg-white p-8 text-black ${pageBreak ? "break-before-page" : ""}`} dir={dir}>
       <header className="pb-5" style={{ borderBottom: `4px solid ${ACCENT}` }}>
@@ -95,7 +97,9 @@ function ReportPage({
             aria-hidden="true"
           />
         </div>
-        <h1 className="mt-6 text-3xl font-bold text-black">{p.title}</h1>
+        <h1 className="mt-6 text-3xl font-bold text-black">
+          {firstName ? fmt(s.report.personalizedTitle, { name: firstName }) : p.title}
+        </h1>
         <p className="mt-1 text-lg font-semibold text-gray-700">{p.subtitle}</p>
         <p className="mt-2 text-xs text-gray-500">{fmt(p.generated, { date })}</p>
         {answers.identity.verified && verifiedDate ? (

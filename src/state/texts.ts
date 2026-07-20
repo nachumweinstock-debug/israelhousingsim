@@ -160,6 +160,7 @@ export interface SimStrings {
     disclosureNote: string;
   };
   report: {
+    personalizedTitle: string;
     confirmsTitle: string;
     stillNeedsTitle: string;
     bannerHeading: string;
@@ -468,6 +469,7 @@ const en: SimStrings = {
       "These answers aren't scored or verified here. Your bank will pull an independent credit report regardless of what you enter.",
   },
   report: {
+    personalizedTitle: "{name}'s Mortgage Readiness Report",
     confirmsTitle: "What this confirms",
     stillNeedsTitle: "What the bank will still need",
     bannerHeading: "This doesn't meet every requirement yet.",
@@ -786,6 +788,7 @@ const he: SimStrings = {
     disclosureNote: "התשובות האלה לא מדורגות ולא נבדקות כאן. הבנק שלכם יבצע בדיקת אשראי עצמאית בכל מקרה.",
   },
   report: {
+    personalizedTitle: "דוח המוכנות למשכנתא של {name}",
     confirmsTitle: "מה זה מאשר",
     stillNeedsTitle: "מה שהבנק עדיין יצטרך",
     bannerHeading: "זה עדיין לא עומד בכל הדרישות.",
