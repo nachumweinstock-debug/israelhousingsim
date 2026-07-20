@@ -34,20 +34,6 @@ export interface SimStrings {
     no: string;
     infoNote: string;
   };
-  identity: {
-    title: string;
-    helper: string;
-    nameLabel: string;
-    namePlaceholder: string;
-    idLabel: string;
-    idPlaceholder: string;
-    idInvalid: string;
-    verifyButton: string;
-    verifying: string;
-    verifiedLabel: string;
-    editLink: string;
-    methodNote: string;
-  };
   buyerStatus: {
     title: string;
     helper: string;
@@ -160,11 +146,9 @@ export interface SimStrings {
     disclosureNote: string;
   };
   report: {
-    personalizedTitle: string;
     confirmsTitle: string;
     stillNeedsTitle: string;
     bannerHeading: string;
-    identityLine: string;
     dtiPassLine: string;
     dtiWarningFriction: string;
     dtiWarningHard: string;
@@ -186,7 +170,6 @@ export interface SimStrings {
       bankruptcy: string;
     };
     stillNeeds: {
-      identityPending: string;
       credit: string;
       incomeDocsSalaried: string;
       incomeDocsSelfEmployed: string;
@@ -309,22 +292,6 @@ const en: SimStrings = {
     no: "No",
     infoNote:
       "New immigrants can generally borrow up to 75% of the property value versus 50% for foreign residents, may be eligible for a small government backed loan at a reduced fixed rate, and often pay reduced purchase tax. This simulator gives an estimate only, a licensed mortgage advisor should confirm actual eligibility and terms.",
-  },
-  identity: {
-    title: "Let's verify who you are.",
-    helper:
-      "A report tied to a verified identity carries more weight with a bank than an anonymous number. This takes a few seconds.",
-    nameLabel: "Full legal name",
-    namePlaceholder: "As it appears on your teudat zehut",
-    idLabel: "Teudat zehut number",
-    idPlaceholder: "9 digits",
-    idInvalid: "That doesn't look like a valid teudat zehut number, check the digits.",
-    verifyButton: "Verify identity",
-    verifying: "Verifying…",
-    verifiedLabel: "Identity verified via VryfID on {date}",
-    editLink: "Edit and reverify",
-    methodNote:
-      "This checks that the number is well formed using the standard teudat zehut check digit, it does not look up a government registry.",
   },
   buyerStatus: {
     title: "What are you buying?",
@@ -469,11 +436,9 @@ const en: SimStrings = {
       "These answers aren't scored or verified here. Your bank will pull an independent credit report regardless of what you enter.",
   },
   report: {
-    personalizedTitle: "{name}'s Mortgage Readiness Report",
     confirmsTitle: "What this confirms",
     stillNeedsTitle: "What the bank will still need",
     bannerHeading: "This doesn't meet every requirement yet.",
-    identityLine: "Identity verified via VryfID on {date}.",
     dtiPassLine: "Payment to income is {dti}, comfortably within the practical comfort line banks use.",
     dtiWarningFriction:
       "Payment to income is {dti}, above the 40% comfort line banks typically use. Expect closer scrutiny or a smaller loan.",
@@ -501,7 +466,6 @@ const en: SimStrings = {
       bankruptcy: "Bankruptcy history.",
     },
     stillNeeds: {
-      identityPending: "Identity verification, not completed in this session.",
       credit: "An independent credit bureau report, self declared answers here don't replace it.",
       incomeDocsSalaried: "Recent payslips confirming the income entered.",
       incomeDocsSelfEmployed: "Tax filings and an accountant's letter confirming income.",
@@ -644,20 +608,6 @@ const he: SimStrings = {
     infoNote:
       "עולים חדשים יכולים בדרך כלל לקבל מימון של עד 75% משווי הנכס לעומת 50% לתושבי חוץ, ייתכן שיהיו זכאים להלוואת זכאות ממשלתית בריבית קבועה מופחתת, ולעיתים קרובות משלמים מס רכישה מופחת. הסימולטור נותן הערכה בלבד, יועץ משכנתאות מורשה צריך לאשר זכאות ותנאים בפועל.",
   },
-  identity: {
-    title: "בואו נאמת מי אתם.",
-    helper: "דוח שמקושר לזהות מאומתת שווה יותר בעיני בנק ממספר אנונימי. זה לוקח כמה שניות.",
-    nameLabel: "שם מלא רשמי",
-    namePlaceholder: "כפי שמופיע בתעודת הזהות",
-    idLabel: "מספר תעודת זהות",
-    idPlaceholder: "9 ספרות",
-    idInvalid: "זה לא נראה כמו מספר תעודת זהות תקין, בדקו את הספרות.",
-    verifyButton: "אימות זהות",
-    verifying: "מאמתים…",
-    verifiedLabel: "הזהות אומתה דרך VryfID בתאריך {date}",
-    editLink: "עריכה ואימות מחדש",
-    methodNote: "זו בדיקה שהמספר תקין לפי ספרת הביקורת הרגילה של תעודת הזהות, לא בדיקה מול מרשם ממשלתי.",
-  },
   buyerStatus: {
     title: "מה אתם קונים?",
     helper: "זה קובע איזה חלק מהמחיר הבנק רשאי לממן.",
@@ -788,11 +738,9 @@ const he: SimStrings = {
     disclosureNote: "התשובות האלה לא מדורגות ולא נבדקות כאן. הבנק שלכם יבצע בדיקת אשראי עצמאית בכל מקרה.",
   },
   report: {
-    personalizedTitle: "דוח המוכנות למשכנתא של {name}",
     confirmsTitle: "מה זה מאשר",
     stillNeedsTitle: "מה שהבנק עדיין יצטרך",
     bannerHeading: "זה עדיין לא עומד בכל הדרישות.",
-    identityLine: "הזהות אומתה דרך VryfID בתאריך {date}.",
     dtiPassLine: "יחס ההחזר מהכנסה הוא {dti}, בנוחות מתחת לקו הנוחות המקובל בבנקים.",
     dtiWarningFriction:
       "יחס ההחזר מהכנסה הוא {dti}, מעל קו הנוחות של 40% שהבנקים בדרך כלל משתמשים בו. צפו לבדיקה מוקפדת יותר או להלוואה קטנה יותר.",
@@ -817,7 +765,6 @@ const he: SimStrings = {
       bankruptcy: "היסטוריה של פשיטת רגל.",
     },
     stillNeeds: {
-      identityPending: "אימות זהות, לא הושלם במהלך השימוש הזה.",
       credit: "דוח אשראי עצמאי, ההצהרה העצמית כאן לא מחליפה אותו.",
       incomeDocsSalaried: "תלושי שכר עדכניים שמאשרים את ההכנסה שהוזנה.",
       incomeDocsSelfEmployed: "דוחות מס ומכתב רואה חשבון שמאשרים את ההכנסה.",

@@ -17,14 +17,6 @@ import type {
   TrackMix,
 } from "../lib/mortgageMath";
 
-export interface IdentityAnswers {
-  fullName: string;
-  teudatZehut: string;
-  verified: boolean;
-  /** ISO timestamp of the moment the format/checksum check passed */
-  verifiedAt: string | null;
-}
-
 export interface IncomeAnswers {
   applicantIncome: number;
   hasCoApplicant: boolean;
@@ -47,7 +39,6 @@ export interface CreditStandingAnswers {
 }
 
 export interface SimulatorAnswers {
-  identity: IdentityAnswers;
   residency: Residency | null;
   aliyahYears: number;
   ownedPropertyBefore: boolean | null;
@@ -65,10 +56,6 @@ export interface SimulatorAnswers {
 }
 
 interface SimulatorStore extends SimulatorAnswers {
-  setFullName: (value: string) => void;
-  setTeudatZehut: (value: string) => void;
-  setIdentityVerified: (verifiedAt: string) => void;
-  resetIdentityVerified: () => void;
   setResidency: (value: Residency) => void;
   setAliyahYears: (value: number) => void;
   setOwnedPropertyBefore: (value: boolean) => void;
@@ -87,7 +74,6 @@ interface SimulatorStore extends SimulatorAnswers {
 }
 
 const initialAnswers: SimulatorAnswers = {
-  identity: { fullName: "", teudatZehut: "", verified: false, verifiedAt: null },
   residency: null,
   aliyahYears: 3,
   ownedPropertyBefore: null,
@@ -113,14 +99,6 @@ const initialAnswers: SimulatorAnswers = {
 
 export const useSimulatorStore = create<SimulatorStore>((set) => ({
   ...initialAnswers,
-  setFullName: (fullName) =>
-    set((state) => ({ identity: { ...state.identity, fullName, verified: false, verifiedAt: null } })),
-  setTeudatZehut: (teudatZehut) =>
-    set((state) => ({ identity: { ...state.identity, teudatZehut, verified: false, verifiedAt: null } })),
-  setIdentityVerified: (verifiedAt) =>
-    set((state) => ({ identity: { ...state.identity, verified: true, verifiedAt } })),
-  resetIdentityVerified: () =>
-    set((state) => ({ identity: { ...state.identity, verified: false, verifiedAt: null } })),
   setResidency: (residency) => set({ residency }),
   setAliyahYears: (aliyahYears) => set({ aliyahYears }),
   setOwnedPropertyBefore: (ownedPropertyBefore) => set({ ownedPropertyBefore }),

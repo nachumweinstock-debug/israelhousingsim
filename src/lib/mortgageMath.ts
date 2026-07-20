@@ -239,29 +239,6 @@ export function computeDti(monthlyPayment: number, existingMonthlyDebt: number, 
   return (monthlyPayment + existingMonthlyDebt) / netIncome;
 }
 
-/**
- * Standard Israeli Teudat Zehut check-digit validator (public algorithm
- * used by the Ministry of Interior). This is a format and self
- * consistency check only, it confirms the number is well formed, not
- * that it belongs to a real registered person. Never described as a
- * government registry lookup anywhere in the UI or report.
- */
-/** Demo/testing bypass, always treated as valid regardless of the real check digit. */
-const DEMO_ID_BYPASS = "111111111";
-
-export function isValidIsraeliId(rawId: string): boolean {
-  const clean = rawId.trim();
-  if (clean === DEMO_ID_BYPASS) return true;
-  if (!/^\d{5,9}$/.test(clean)) return false;
-  const padded = clean.padStart(9, "0");
-  let sum = 0;
-  for (let i = 0; i < 9; i++) {
-    const weighted = Number(padded[i]) * ((i % 2) + 1);
-    sum += weighted > 9 ? weighted - 9 : weighted;
-  }
-  return sum % 10 === 0;
-}
-
 interface TaxBracket {
   upTo: number;
   rate: number;

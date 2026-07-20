@@ -15,7 +15,7 @@ import { basketToMix } from "../src/engine/baskets";
 import { effectiveTermYears } from "../src/engine/validation";
 import { RULE_SET } from "../src/engine/rules";
 import type { Allocation, Assumptions, BorrowerProfile } from "../src/types";
-import { estimatePurchaseTax, isValidIsraeliId } from "../src/lib/mortgageMath";
+import { estimatePurchaseTax } from "../src/lib/mortgageMath";
 
 let failures = 0;
 function check(name: string, ok: boolean, detail = "") {
@@ -170,44 +170,7 @@ console.log("\n[10] Regulatory boundary conditions");
   check("basket2 fixed share ~1/3 passes minimum", atCap.checks.find((c) => c.id === "fixed_share")?.status === "pass");
 }
 
-console.log("\n[11] Teudat zehut check digit, correctness so real users never get falsely rejected");
-{
-  // Derives the correct 9th check digit for any 8 digit prefix using the
-  // same weighting rule as isValidIsraeliId, so we can generate real
-  // passing numbers without depending on a hardcoded "known good" ID from
-  // an external source we have no way to verify here.
-  function deriveCheckDigit(prefix8: string): number {
-    let sum = 0;
-    for (let i = 0; i < 8; i++) {
-      const weighted = Number(prefix8[i]) * ((i % 2) + 1);
-      sum += weighted > 9 ? weighted - 9 : weighted;
-    }
-    return (10 - (sum % 10)) % 10;
-  }
-
-  const prefixes = ["20345846", "00000001", "12345678", "99999999", "40312200", "00300123"];
-  for (const prefix of prefixes) {
-    const id = prefix + deriveCheckDigit(prefix);
-    check(`derived check digit accepted: ${id}`, isValidIsraeliId(id));
-    const tampered = prefix + String((deriveCheckDigit(prefix) + 1) % 10);
-    check(`tampering the check digit is rejected: ${tampered}`, !isValidIsraeliId(tampered));
-  }
-
-  // A real ID is often written without its leading zeros, both forms must
-  // validate identically once padded, or short real numbers get falsely
-  // rejected.
-  const shortPrefix = "1234567";
-  const shortId = shortPrefix + deriveCheckDigit("0" + shortPrefix);
-  check("unpadded 8 digit id validates", isValidIsraeliId(shortId));
-  check("same id, manually zero padded to 9, also validates", isValidIsraeliId("0" + shortId));
-
-  check("demo bypass 111111111 always accepted", isValidIsraeliId("111111111"));
-  check("empty string rejected", !isValidIsraeliId(""));
-  check("non numeric rejected", !isValidIsraeliId("abcdefghi"));
-  check("10 digits rejected", !isValidIsraeliId("1234567890"));
-}
-
-console.log("\n[12] Oleh purchase tax benefit is never worse than a regular resident's, at prices real buyers actually pay");
+console.log("\n[11] Oleh purchase tax benefit is never worse than a regular resident's, at prices real buyers actually pay");
 {
   for (const price of [1_500_000, 2_000_000, 2_500_000, 3_000_000, 4_500_000, 7_000_000]) {
     const regular = estimatePurchaseTax(price, "israeli", "firstHome");

@@ -15,7 +15,6 @@ import { useSimulatorStore } from "./state/simulatorStore";
 import { useSimLang } from "./state/useSimLang";
 import type { Lang } from "./i18n";
 import { Welcome } from "./routes/welcome";
-import { IdentityVerification } from "./routes/identityVerification";
 import { Residency } from "./routes/residency";
 import { AliyahDetails } from "./routes/aliyahDetails";
 import { BuyerStatus } from "./routes/buyerStatus";
@@ -171,7 +170,6 @@ function FlowChrome() {
           <AnimatePresence mode="wait" custom={direction} initial={false}>
             <Routes location={location} key={location.pathname}>
               <Route path="/simulator/welcome" element={<Welcome />} />
-              <Route path="/simulator/identityVerification" element={<IdentityVerification />} />
               <Route path="/simulator/residency" element={<Residency />} />
               <Route path="/simulator/aliyahDetails" element={<AliyahDetails />} />
               <Route path="/simulator/buyerStatus" element={<BuyerStatus />} />

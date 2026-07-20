@@ -11,7 +11,6 @@
  * pass, not buried in a paragraph above the list that states it.
  */
 import { fmt } from "../i18n";
-import type { Lang } from "../i18n";
 import type { SimStrings } from "../state/texts";
 import type { SimulatorAnswers } from "../state/simulatorStore";
 import { loanAmountOf, totalIncomeOf } from "../state/simulatorStore";
@@ -50,7 +49,6 @@ export interface ReportModel {
   paymentAtHorizon: number;
   dti: number;
   showsBridgeCaution: boolean;
-  verifiedDate: string | null;
   downPaymentSourceLabel: string | null;
   checks: CheckItem[];
   hasFailure: boolean;
@@ -59,7 +57,7 @@ export interface ReportModel {
   creditNotes: string[];
 }
 
-export function buildReportModel(answers: SimulatorAnswers, s: SimStrings, lang: Lang): ReportModel {
+export function buildReportModel(answers: SimulatorAnswers, s: SimStrings): ReportModel {
   const loanAmount = loanAmountOf(answers);
   const planInputs = {
     loanAmount,
@@ -88,10 +86,6 @@ export function buildReportModel(answers: SimulatorAnswers, s: SimStrings, lang:
   const showsBridgeCaution =
     answers.buyerStatus === "replacingHome" && answers.existingHomeStatus !== "sold";
 
-  const verifiedDate = answers.identity.verifiedAt
-    ? new Date(answers.identity.verifiedAt).toLocaleDateString(lang === "he" ? "he-IL" : "en-GB")
-    : null;
-
   const downPaymentSourceLabel = answers.downPaymentSource.source
     ? s.downPaymentSource[answers.downPaymentSource.source].title
     : null;
@@ -100,10 +94,6 @@ export function buildReportModel(answers: SimulatorAnswers, s: SimStrings, lang:
   // A failure must be exactly as visible as a pass, never demoted to a
   // paragraph elsewhere on the page.
   const checks: CheckItem[] = [];
-
-  if (answers.identity.verified && verifiedDate) {
-    checks.push({ id: "identity", status: "pass", text: fmt(s.report.identityLine, { date: verifiedDate }) });
-  }
 
   if (dti > DTI_HARD_CEILING) {
     checks.push({ id: "dti", status: "fail", text: fmt(s.report.dtiWarningHard, { dti: formatPct(dti) }) });
@@ -147,7 +137,6 @@ export function buildReportModel(answers: SimulatorAnswers, s: SimStrings, lang:
   const hasFailure = failingChecks.length > 0;
 
   const stillNeedsLines: string[] = [];
-  if (!answers.identity.verified) stillNeedsLines.push(s.report.stillNeeds.identityPending);
   stillNeedsLines.push(s.report.stillNeeds.credit);
   if (answers.income.employmentType === "selfEmployed") {
     stillNeedsLines.push(s.report.stillNeeds.incomeDocsSelfEmployed);
@@ -180,7 +169,6 @@ export function buildReportModel(answers: SimulatorAnswers, s: SimStrings, lang:
     paymentAtHorizon,
     dti,
     showsBridgeCaution,
-    verifiedDate,
     downPaymentSourceLabel,
     checks,
     hasFailure,

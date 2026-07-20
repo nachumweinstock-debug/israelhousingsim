@@ -1,19 +1,8 @@
 const { test, expect } = require("@playwright/test");
 
 const BASE_URL = (process.env.E2E_BASE_URL || "https://israelhousingsim.vercel.app").replace(/\/$/, "");
-const VALID_TEUDAT_ZEHUT = "203458468";
 
-async function verifyIdentity(page) {
-  await expect(page).toHaveURL(/\/simulator\/identityVerification$/);
-  await page.getByPlaceholder(/As it appears on your teudat zehut|כפי שמופיע בתעודת הזהות/).fill("Test Applicant");
-  await page.getByPlaceholder(/9 digits|9 ספרות/).fill(VALID_TEUDAT_ZEHUT);
-  await page.getByRole("button", { name: /Verify identity|אימות זהות/ }).click();
-  await expect(page.getByText(/Identity verified via VryfID on|הזהות אומתה דרך VryfID בתאריך/)).toBeVisible({
-    timeout: 3000,
-  });
-}
-
-test("full English flow: identity, income, down payment source, credit standing, oleh branch, summary", async ({
+test("full English flow: income, down payment source, credit standing, oleh branch, summary", async ({
   page,
 }) => {
   const pageErrors = [];
@@ -23,8 +12,6 @@ test("full English flow: identity, income, down payment source, credit standing,
   await expect(page).toHaveURL(/\/simulator\/welcome$/);
 
   await page.getByRole("button", { name: "Start" }).click();
-  await verifyIdentity(page);
-  await page.getByRole("button", { name: "Continue" }).click();
   await expect(page).toHaveURL(/\/simulator\/residency$/);
 
   await page.getByRole("button", { name: /New immigrant/ }).click();
@@ -61,12 +48,10 @@ test("full English flow: identity, income, down payment source, credit standing,
   await page.getByRole("button", { name: "Continue" }).click();
   await expect(page).toHaveURL(/\/simulator\/summary$/);
 
-  // Personalized from the name entered on identityVerification ("Test Applicant" -> "Test").
   // Scoped to #root: the hidden print portal repeats the same heading.
-  await expect(page.locator("#root").getByText("Test's Mortgage Readiness Report")).toBeVisible({
+  await expect(page.locator("#root").getByText("Your mortgage readiness report.")).toBeVisible({
     timeout: 8000,
   });
-  await expect(page.getByText(/Identity verified via VryfID on/).first()).toBeVisible();
   await expect(page.locator("#root").getByText("What this confirms")).toBeVisible();
   await expect(page.locator("#root").getByText("What the bank will still need")).toBeVisible();
   await expect(page.getByRole("button", { name: /Download PDF · English/ })).toBeVisible();
@@ -75,6 +60,8 @@ test("full English flow: identity, income, down payment source, credit standing,
   await expect(page.locator('a[href*="leumi.co.il"]')).toBeVisible();
   await expect(page.getByText("VryfID LLC")).toBeVisible();
   await expect(page.getByText(/approved|preapproved|qualified/i)).toHaveCount(0);
+  // No name or identifying number is collected anywhere in this flow.
+  await expect(page.getByPlaceholder(/teudat zehut|תעודת זהות/i)).toHaveCount(0);
   // Default income/debt lands in the 40 to 50 percent DTI band, a warn,
   // not a fail, so the prominent failure banner must stay hidden here.
   await expect(page.locator("#root").getByText("comfort line banks typically use")).toBeVisible();
@@ -91,12 +78,7 @@ test("Hebrew flow: RTL, Hebrew copy, Hebrew tracks, replacing home bridge cautio
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
 
   await page.getByRole("button", { name: "מתחילים" }).click();
-  await expect(page).toHaveURL(/\/simulator\/identityVerification$/);
-  await page.getByPlaceholder("כפי שמופיע בתעודת הזהות").fill("בודק בדיקה");
-  await page.getByPlaceholder("9 ספרות").fill(VALID_TEUDAT_ZEHUT);
-  await page.getByRole("button", { name: "אימות זהות" }).click();
-  await expect(page.getByText(/הזהות אומתה דרך VryfID בתאריך/)).toBeVisible({ timeout: 3000 });
-  await page.getByRole("button", { name: "המשך" }).click();
+  await expect(page).toHaveURL(/\/simulator\/residency$/);
 
   await page.getByRole("button", { name: /תושב ישראל/ }).click();
   await expect(page).toHaveURL(/\/simulator\/buyerStatus$/, { timeout: 4000 });
@@ -126,14 +108,13 @@ test("Hebrew flow: RTL, Hebrew copy, Hebrew tracks, replacing home bridge cautio
   await page.getByRole("button", { name: "לא", exact: true }).nth(2).click();
   await page.getByRole("button", { name: "המשך" }).click();
 
-  // Personalized from the name entered on identityVerification ("בודק בדיקה" -> "בודק").
-  await expect(page.locator("#root").getByText("דוח המוכנות למשכנתא של בודק")).toBeVisible({
+  await expect(page.locator("#root").getByText("דוח המוכנות למשכנתא שלכם.")).toBeVisible({
     timeout: 8000,
   });
   await expect(page.getByRole("button", { name: /הורדת PDF · עברית/ })).toBeVisible();
 });
 
-test("branch guards, deep link refresh, and removed inflation step redirect", async ({ page }) => {
+test("branch guards, deep link refresh, and removed steps redirect", async ({ page }) => {
   // Non replacingHome direct hit on existingHomeStatus redirects past it.
   await page.goto(`${BASE_URL}/simulator/existingHomeStatus`, { waitUntil: "networkidle" });
   await expect(page).toHaveURL(/\/simulator\/(existingHomeStatus|incomeDebt)$/);
@@ -145,6 +126,10 @@ test("branch guards, deep link refresh, and removed inflation step redirect", as
   // The retired inflation route forwards into the flow.
   await page.goto(`${BASE_URL}/simulator/inflationScenario`, { waitUntil: "networkidle" });
   await expect(page).toHaveURL(/\/simulator\/costs$/);
+
+  // The retired identity verification route forwards into the flow too.
+  await page.goto(`${BASE_URL}/simulator/identityVerification`, { waitUntil: "networkidle" });
+  await expect(page).toHaveURL(/\/simulator\/welcome$/);
 });
 
 test("capture endpoint accepts a simulation payload", async ({ request }) => {

@@ -9,7 +9,6 @@ import type { BuyerStatus, Residency } from "../lib/mortgageMath";
 
 export const ALL_STEPS = [
   "welcome",
-  "identityVerification",
   "residency",
   "aliyahDetails",
   "buyerStatus",

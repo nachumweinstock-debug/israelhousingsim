@@ -49,7 +49,7 @@ function ReportPage({
   const dir = lang === "he" ? "rtl" : "ltr";
   const date = new Date().toLocaleDateString(lang === "he" ? "he-IL" : "en-GB");
 
-  const model = buildReportModel(answers, s, lang);
+  const model = buildReportModel(answers, s);
   const {
     loanAmount,
     plan,
@@ -62,7 +62,6 @@ function ReportPage({
     paymentAtHorizon,
     dti,
     showsBridgeCaution,
-    verifiedDate,
     checks,
     hasFailure,
     stillNeedsLines,
@@ -74,8 +73,6 @@ function ReportPage({
     selfEmployed: s.incomeDebt.selfEmployed,
     mixed: s.incomeDebt.mixed,
   }[answers.income.employmentType];
-
-  const firstName = answers.identity.fullName.trim().split(/\s+/)[0] || "";
 
   return (
     <article className={`bg-white p-8 text-black ${pageBreak ? "break-before-page" : ""}`} dir={dir}>
@@ -97,16 +94,9 @@ function ReportPage({
             aria-hidden="true"
           />
         </div>
-        <h1 className="mt-6 text-3xl font-bold text-black">
-          {firstName ? fmt(s.report.personalizedTitle, { name: firstName }) : p.title}
-        </h1>
+        <h1 className="mt-6 text-3xl font-bold text-black">{p.title}</h1>
         <p className="mt-1 text-lg font-semibold text-gray-700">{p.subtitle}</p>
         <p className="mt-2 text-xs text-gray-500">{fmt(p.generated, { date })}</p>
-        {answers.identity.verified && verifiedDate ? (
-          <p className="mt-2 text-sm font-semibold" style={{ color: ACCENT }}>
-            {fmt(s.report.identityLine, { date: verifiedDate })}
-          </p>
-        ) : null}
       </header>
 
       <section className="mt-6 grid grid-cols-3 gap-3 text-center">

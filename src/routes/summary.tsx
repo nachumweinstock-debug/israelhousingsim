@@ -248,27 +248,10 @@ export function Summary() {
   function downloadPdf(mode: PrintMode) {
     track("pdf_download_started", { mode });
     setPrintMode(mode);
-    // Chrome and Safari suggest document.title as the save-as filename in
-    // the print to PDF dialog, there is no direct API for it. Swap the
-    // title just for the print, then restore it once the dialog closes
-    // so the browser tab itself doesn't keep showing someone's name.
-    const originalTitle = document.title;
-    const trimmedName = state.identity.fullName.trim();
-    document.title = trimmedName
-      ? `VryfID Mortgage Readiness Report for ${trimmedName}`
-      : "VryfID Mortgage Readiness Report";
-    const restoreTitle = () => {
-      document.title = originalTitle;
-      window.removeEventListener("afterprint", restoreTitle);
-    };
-    window.addEventListener("afterprint", restoreTitle);
     window.setTimeout(() => window.print(), 60);
   }
 
-  const firstName = state.identity.fullName.trim().split(/\s+/)[0] || "";
-  const reportTitle = firstName ? fmt(s.report.personalizedTitle, { name: firstName }) : s.summary.title;
-
-  const model = buildReportModel(state, s, lang);
+  const model = buildReportModel(state, s);
   const {
     loanAmount,
     plan,
@@ -280,7 +263,6 @@ export function Summary() {
     paymentAtHorizon,
     dti,
     showsBridgeCaution,
-    verifiedDate,
     checks,
     hasFailure,
     failingChecks,
@@ -289,9 +271,8 @@ export function Summary() {
   } = model;
 
   // One anonymous capture per summary visit, the inputs and computed
-  // results are the product signal this demo exists to collect. The
-  // applicant's legal name and teudat zehut number are deliberately left
-  // out of the payload, only whether identity verification passed.
+  // results are the product signal this demo exists to collect. No name
+  // or identifying number is ever collected anywhere in this flow.
   const capturedRef = useRef(false);
   useEffect(() => {
     if (capturedRef.current) return;
@@ -306,7 +287,6 @@ export function Summary() {
     const payload = {
       lang,
       answers: {
-        identityVerified: state.identity.verified,
         residency: state.residency,
         aliyahYears: state.residency === "oleh" ? state.aliyahYears : null,
         ownedPropertyBefore: state.residency === "oleh" ? state.ownedPropertyBefore : null,
@@ -380,22 +360,8 @@ export function Summary() {
               variants={cardReveal}
               className="text-center text-[28px] font-semibold leading-[1.25] tracking-tight text-ink sm:text-[32px]"
             >
-              {reportTitle}
+              {s.summary.title}
             </motion.h1>
-
-            {state.identity.verified && verifiedDate ? (
-              <motion.div
-                variants={cardReveal}
-                className="mx-auto mt-4 flex w-fit items-center gap-2 rounded-pill border border-accent bg-accentSoft/25 px-4 py-2"
-              >
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-pill bg-accent text-[11px] font-bold text-white">
-                  ✓
-                </span>
-                <p className="text-[13px] font-semibold text-ink">
-                  {fmt(s.report.identityLine, { date: verifiedDate })}
-                </p>
-              </motion.div>
-            ) : null}
 
             <motion.div
               variants={heroReveal}
