@@ -2,16 +2,9 @@ import { createPortal } from "react-dom";
 import { fmt } from "../i18n";
 import type { Lang } from "../i18n";
 import { SIM_TEXTS } from "../state/texts";
-import {
-  TRACK_INFO,
-  computeCosts,
-  computePlan,
-  formatPct,
-  formatShekels,
-  stressedMonthlyPayment,
-} from "../lib/mortgageMath";
+import { TRACK_INFO, formatPct, formatShekels } from "../lib/mortgageMath";
 import type { TrackKey } from "../lib/mortgageMath";
-import { loanAmountOf } from "../state/simulatorStore";
+import { buildReportModel } from "../lib/reportModel";
 import type { SimulatorAnswers } from "../state/simulatorStore";
 
 export type PrintMode = Lang | "both";
@@ -39,10 +32,10 @@ function SectionTitle({ children }: { children: string }) {
 }
 
 /**
- * One branded page of the plan in a single language. Two of these stack
- * for the bilingual download, with a page break between them.
+ * One branded page of the report in a single language. Two of these
+ * stack for the bilingual download, with a page break between them.
  */
-function PlanPage({
+function ReportPage({
   lang,
   answers,
   pageBreak,
@@ -56,24 +49,30 @@ function PlanPage({
   const dir = lang === "he" ? "rtl" : "ltr";
   const date = new Date().toLocaleDateString(lang === "he" ? "he-IL" : "en-GB");
 
-  const loanAmount = loanAmountOf(answers);
-  const planInputs = {
+  const model = buildReportModel(answers, s, lang);
+  const {
     loanAmount,
-    termYears: answers.termYears,
-    mix: answers.mix,
-    inflation: answers.inflation,
-  };
-  const plan = computePlan(planInputs);
-  const stress1 = stressedMonthlyPayment(planInputs, 1);
-  const stress2 = stressedMonthlyPayment(planInputs, 2);
-  const breakdown = computeCosts(
-    answers.propertyPrice,
-    answers.residency,
-    answers.buyerStatus,
-    answers.costs
-  );
-  const cashToClose = answers.downPayment + breakdown.total;
-  const ltv = answers.propertyPrice > 0 ? loanAmount / answers.propertyPrice : 0;
+    plan,
+    stress1,
+    stress2,
+    breakdown,
+    ltv,
+    cashToClose,
+    horizonYear,
+    paymentAtHorizon,
+    dti,
+    showsBridgeCaution,
+    verifiedDate,
+    confirmLines,
+    stillNeedsLines,
+    cautionLines,
+  } = model;
+
+  const employmentLabel = {
+    salaried: s.incomeDebt.salaried,
+    selfEmployed: s.incomeDebt.selfEmployed,
+    mixed: s.incomeDebt.mixed,
+  }[answers.income.employmentType];
 
   return (
     <article className={`bg-white p-8 text-black ${pageBreak ? "break-before-page" : ""}`} dir={dir}>
@@ -98,6 +97,11 @@ function PlanPage({
         <h1 className="mt-6 text-3xl font-bold text-black">{p.title}</h1>
         <p className="mt-1 text-lg font-semibold text-gray-700">{p.subtitle}</p>
         <p className="mt-2 text-xs text-gray-500">{fmt(p.generated, { date })}</p>
+        {answers.identity.verified && verifiedDate ? (
+          <p className="mt-2 text-sm font-semibold" style={{ color: ACCENT }}>
+            {fmt(s.report.identityLine, { date: verifiedDate })}
+          </p>
+        ) : null}
       </header>
 
       <section className="mt-6 grid grid-cols-3 gap-3 text-center">
@@ -117,10 +121,10 @@ function PlanPage({
         </div>
         <div className="rounded-lg border border-gray-200 p-3" style={{ background: "#F4F9FE" }}>
           <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
-            {p.labels.term}
+            {p.labels.dti}
           </p>
           <p className="mt-1 text-2xl font-bold" style={{ color: ACCENT }} dir="ltr">
-            {answers.termYears} {p.yearsUnit}
+            {formatPct(dti)}
           </p>
         </div>
       </section>
@@ -136,14 +140,34 @@ function PlanPage({
             label={p.labels.buyerStatus}
             value={answers.buyerStatus ? p.buyerValues[answers.buyerStatus] : "-"}
           />
+          {answers.buyerStatus === "replacingHome" && answers.existingHomeStatus ? (
+            <Row
+              label={p.labels.existingHomeStatus}
+              value={s.existingHome[answers.existingHomeStatus].title}
+            />
+          ) : null}
           <Row label={p.labels.propertyPrice} value={formatShekels(answers.propertyPrice)} />
           <Row label={p.labels.downPayment} value={formatShekels(answers.downPayment)} />
+          {answers.downPaymentSource.source ? (
+            <Row
+              label={p.labels.downPaymentSource}
+              value={s.downPaymentSource[answers.downPaymentSource.source].title}
+            />
+          ) : null}
           <Row
             label={p.labels.loanAmount}
             value={`${formatShekels(loanAmount)} (${formatPct(ltv)} LTV)`}
           />
           <Row label={p.labels.term} value={`${answers.termYears} ${p.yearsUnit}`} />
           <Row label={p.labels.inflation} value={p.inflationValues[answers.inflation]} />
+          <Row label={p.labels.income} value={formatShekels(answers.income.applicantIncome)} />
+          <Row label={p.labels.employment} value={employmentLabel} />
+          <Row
+            label={p.labels.tenure}
+            value={`${answers.income.employerTenureYears} ${p.yearsUnit}`}
+          />
+          <Row label={p.labels.debt} value={formatShekels(answers.income.existingMonthlyDebt)} />
+          <Row label={p.labels.dti} value={formatPct(dti)} />
         </tbody>
       </table>
 
@@ -189,6 +213,10 @@ function PlanPage({
             label={p.labelsResults.monthlyPayment}
             value={`${formatShekels(plan.monthlyPayment)}${s.summary.perMonth}`}
           />
+          <Row
+            label={fmt(p.labelsResults.paymentYear, { year: horizonYear })}
+            value={`${formatShekels(paymentAtHorizon)}${s.summary.perMonth}`}
+          />
           <Row label={p.labelsResults.totalInterest} value={formatShekels(plan.totalInterest)} />
           <Row label={p.labelsResults.totalRepayment} value={formatShekels(plan.totalRepayment)} />
           <Row
@@ -201,6 +229,7 @@ function PlanPage({
           />
         </tbody>
       </table>
+      <p className="mt-2 text-xs leading-relaxed text-gray-500">{s.report.rateNoteUnderTable}</p>
 
       <SectionTitle>{p.costsTitle}</SectionTitle>
       <table className="mt-2 w-full">
@@ -213,6 +242,47 @@ function PlanPage({
           <Row label={p.labelsCosts.cashToClose} value={formatShekels(cashToClose)} />
         </tbody>
       </table>
+
+      {showsBridgeCaution ? (
+        <p className="mt-4 rounded-lg border border-gray-200 p-3 text-xs leading-relaxed text-gray-700">
+          {s.report.bridgeCaution}
+        </p>
+      ) : null}
+
+      {cautionLines.length > 0 ? (
+        <div className="mt-4 space-y-1 rounded-lg border border-amber-300 bg-amber-50 p-3">
+          {cautionLines.map((line) => (
+            <p key={line} className="text-xs leading-relaxed text-amber-800">
+              {line}
+            </p>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="mt-6 grid grid-cols-2 gap-6 break-inside-avoid">
+        <div>
+          <h2 className="text-base font-bold" style={{ color: ACCENT }}>
+            {s.report.confirmsTitle}
+          </h2>
+          <ul className="mt-2 space-y-1.5">
+            {confirmLines.map((line) => (
+              <li key={line} className="text-xs leading-relaxed text-gray-700">
+                ✓ {line}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h2 className="text-base font-bold text-gray-700">{s.report.stillNeedsTitle}</h2>
+          <ul className="mt-2 space-y-1.5">
+            {stillNeedsLines.map((line) => (
+              <li key={line} className="text-xs leading-relaxed text-gray-600">
+                • {line}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
 
       <footer className="mt-8 border-t border-gray-200 pt-4">
         <div className="flex items-center justify-between gap-4">
@@ -236,7 +306,7 @@ export function PrintPlan({ answers, mode }: { answers: SimulatorAnswers; mode: 
   return createPortal(
     <div className="hidden bg-white print:block">
       {languages.map((lang, index) => (
-        <PlanPage key={lang} lang={lang} answers={answers} pageBreak={index > 0} />
+        <ReportPage key={lang} lang={lang} answers={answers} pageBreak={index > 0} />
       ))}
     </div>,
     document.body

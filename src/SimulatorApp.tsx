@@ -15,14 +15,19 @@ import { useSimulatorStore } from "./state/simulatorStore";
 import { useSimLang } from "./state/useSimLang";
 import type { Lang } from "./i18n";
 import { Welcome } from "./routes/welcome";
+import { IdentityVerification } from "./routes/identityVerification";
 import { Residency } from "./routes/residency";
 import { AliyahDetails } from "./routes/aliyahDetails";
 import { BuyerStatus } from "./routes/buyerStatus";
+import { ExistingHomeStatus } from "./routes/existingHomeStatus";
+import { IncomeDebt } from "./routes/incomeDebt";
 import { PropertyPrice } from "./routes/propertyPrice";
 import { DownPayment } from "./routes/downPayment";
+import { DownPaymentSource } from "./routes/downPaymentSource";
 import { Term } from "./routes/term";
 import { TrackMixStep } from "./routes/trackMix";
 import { Costs } from "./routes/costs";
+import { CreditStanding } from "./routes/creditStanding";
 import { Summary } from "./routes/summary";
 
 export default function SimulatorApp() {
@@ -48,6 +53,8 @@ function FlowChrome() {
   const location = useLocation();
   const navigate = useNavigate();
   const residency = useSimulatorStore((state) => state.residency);
+  const buyerStatus = useSimulatorStore((state) => state.buyerStatus);
+  const flowCtx = { residency, buyerStatus };
   const { lang, setLang, s, isHe } = useSimLang();
 
   const step = stepFromPath(location.pathname);
@@ -60,8 +67,8 @@ function FlowChrome() {
     prevIndexRef.current = orderIndex;
   });
 
-  const progress = step ? stepProgress(step, residency) : 0;
-  const backTarget = step ? prevStep(step, residency) : null;
+  const progress = step ? stepProgress(step, flowCtx) : 0;
+  const backTarget = step ? prevStep(step, flowCtx) : null;
 
   return (
     <div className="flex min-h-screen flex-col bg-cream font-sans text-ink print:hidden">
@@ -164,11 +171,15 @@ function FlowChrome() {
           <AnimatePresence mode="wait" custom={direction} initial={false}>
             <Routes location={location} key={location.pathname}>
               <Route path="/simulator/welcome" element={<Welcome />} />
+              <Route path="/simulator/identityVerification" element={<IdentityVerification />} />
               <Route path="/simulator/residency" element={<Residency />} />
               <Route path="/simulator/aliyahDetails" element={<AliyahDetails />} />
               <Route path="/simulator/buyerStatus" element={<BuyerStatus />} />
+              <Route path="/simulator/existingHomeStatus" element={<ExistingHomeStatus />} />
+              <Route path="/simulator/incomeDebt" element={<IncomeDebt />} />
               <Route path="/simulator/propertyPrice" element={<PropertyPrice />} />
               <Route path="/simulator/downPayment" element={<DownPayment />} />
+              <Route path="/simulator/downPaymentSource" element={<DownPaymentSource />} />
               <Route path="/simulator/term" element={<Term />} />
               <Route path="/simulator/trackMix" element={<TrackMixStep />} />
               <Route
@@ -176,6 +187,7 @@ function FlowChrome() {
                 element={<Navigate to="/simulator/costs" replace />}
               />
               <Route path="/simulator/costs" element={<Costs />} />
+              <Route path="/simulator/creditStanding" element={<CreditStanding />} />
               <Route path="/simulator/summary" element={<Summary />} />
               <Route path="*" element={<Navigate to="/simulator/welcome" replace />} />
             </Routes>
@@ -197,7 +209,7 @@ function scrollToFooter() {
 /**
  * Header badge, mirrors the language toggle on the header's other side.
  * A direct port of the "Powered by VryfID" pill from vryfidvibes.com
- * (client/src/App.jsx + index.css .powered-by-badge / badgeShimmer) —
+ * (client/src/App.jsx + index.css .powered-by-badge / badgeShimmer),
  * same deep teal gradient, amber glow border, amber dot, mint "Powered
  * by" label, and the warm-to-teal shimmering "VryfID" wordmark. Clicking
  * scrolls down to the VryfID footer; the footer logo scrolls back up.

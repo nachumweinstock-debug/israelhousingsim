@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 export const FlowDirectionContext = createContext<1 | -1>(1);
 
 // A single smooth deceleration curve used everywhere so nothing in the
-// flow overshoots or bounces — tween-based, not spring-based, on purpose.
+// flow overshoots or bounces, tween based, not spring based, on purpose.
 const EASE_OUT = [0.16, 1, 0.3, 1] as const;
 
 export const shellVariants = {

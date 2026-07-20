@@ -4,19 +4,14 @@ import { AnimatePresence, animate, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { track } from "@vercel/analytics";
 import { palette } from "../theme/palette.js";
-import { FlowDirectionContext, shellVariants } from "../components/QuestionShell";
+import { FlowDirectionContext, InfoNote, shellVariants } from "../components/QuestionShell";
 import { PrintPlan } from "../components/PrintPlan";
 import type { PrintMode } from "../components/PrintPlan";
-import {
-  computeCosts,
-  computePlan,
-  formatPct,
-  formatShekels,
-  stressedMonthlyPayment,
-} from "../lib/mortgageMath";
+import { formatPct, formatShekels } from "../lib/mortgageMath";
 import type { TrackKey } from "../lib/mortgageMath";
+import { buildReportModel } from "../lib/reportModel";
 import { fmt } from "../i18n";
-import { loanAmountOf, useSimulatorStore } from "../state/simulatorStore";
+import { useSimulatorStore } from "../state/simulatorStore";
 import { useSimLang } from "../state/useSimLang";
 
 const TRACK_BAR_CLASS: Record<TrackKey, string> = {
@@ -26,7 +21,7 @@ const TRACK_BAR_CLASS: Record<TrackKey, string> = {
 };
 
 /**
- * Bank sites block embedding, so the hand off is: download your plan,
+ * Bank sites block embedding, so the hand off is: download your report,
  * then open the bank's own pre approval flow in a new tab or call their
  * mortgage line. Plain outbound links, no affiliation.
  */
@@ -256,27 +251,28 @@ export function Summary() {
     window.setTimeout(() => window.print(), 60);
   }
 
-  const loanAmount = loanAmountOf(state);
-  const planInputs = {
+  const model = buildReportModel(state, s, lang);
+  const {
     loanAmount,
-    termYears: state.termYears,
-    mix: state.mix,
-    inflation: state.inflation,
-  };
-  const plan = computePlan(planInputs);
-  const stress1 = stressedMonthlyPayment(planInputs, 1);
-  const stress2 = stressedMonthlyPayment(planInputs, 2);
-  const breakdown = computeCosts(
-    state.propertyPrice,
-    state.residency,
-    state.buyerStatus,
-    state.costs
-  );
-  const ltv = state.propertyPrice > 0 ? loanAmount / state.propertyPrice : 0;
-  const cashToClose = state.downPayment + breakdown.total;
+    plan,
+    stress1,
+    stress2,
+    ltv,
+    cashToClose,
+    horizonYear,
+    paymentAtHorizon,
+    dti,
+    showsBridgeCaution,
+    verifiedDate,
+    confirmLines,
+    stillNeedsLines,
+    cautionLines,
+  } = model;
 
-  // One anonymous capture per summary visit — the inputs and results are
-  // the product signal this demo exists to collect.
+  // One anonymous capture per summary visit, the inputs and computed
+  // results are the product signal this demo exists to collect. The
+  // applicant's legal name and teudat zehut number are deliberately left
+  // out of the payload, only whether identity verification passed.
   const capturedRef = useRef(false);
   useEffect(() => {
     if (capturedRef.current) return;
@@ -285,28 +281,44 @@ export function Summary() {
       price: state.propertyPrice,
       loan: loanAmount,
       payment: Math.round(plan.monthlyPayment),
+      dti: Math.round(dti * 1000) / 1000,
       lang,
     });
     const payload = {
       lang,
       answers: {
+        identityVerified: state.identity.verified,
         residency: state.residency,
         aliyahYears: state.residency === "oleh" ? state.aliyahYears : null,
         ownedPropertyBefore: state.residency === "oleh" ? state.ownedPropertyBefore : null,
         buyerStatus: state.buyerStatus,
+        existingHomeStatus: state.existingHomeStatus,
+        income: {
+          applicantIncome: state.income.applicantIncome,
+          hasCoApplicant: state.income.hasCoApplicant,
+          coApplicantIncome: state.income.coApplicantIncome,
+          employmentType: state.income.employmentType,
+          employerTenureYears: state.income.employerTenureYears,
+          existingMonthlyDebt: state.income.existingMonthlyDebt,
+        },
         propertyPrice: state.propertyPrice,
         downPayment: state.downPayment,
+        downPaymentSource: state.downPaymentSource,
         termYears: state.termYears,
         mix: state.mix,
         inflation: state.inflation,
         costs: state.costs,
+        creditStanding: state.creditStanding,
       },
       results: {
         loanAmount,
         monthlyPayment: Math.round(plan.monthlyPayment),
+        paymentAtHorizon: Math.round(paymentAtHorizon),
+        horizonYear,
         totalInterest: Math.round(plan.totalInterest),
         totalRepayment: Math.round(plan.totalRepayment),
         ltv: Math.round(ltv * 1000) / 1000,
+        dti: Math.round(dti * 1000) / 1000,
         cashToClose: Math.round(cashToClose),
         stressPlus1: Math.round(stress1),
         stressPlus2: Math.round(stress2),
@@ -352,6 +364,20 @@ export function Summary() {
               {s.summary.title}
             </motion.h1>
 
+            {state.identity.verified && verifiedDate ? (
+              <motion.div
+                variants={cardReveal}
+                className="mx-auto mt-4 flex w-fit items-center gap-2 rounded-pill border border-accent bg-accentSoft/25 px-4 py-2"
+              >
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-pill bg-accent text-[11px] font-bold text-white">
+                  ✓
+                </span>
+                <p className="text-[13px] font-semibold text-ink">
+                  {fmt(s.report.identityLine, { date: verifiedDate })}
+                </p>
+              </motion.div>
+            ) : null}
+
             <motion.div
               variants={heroReveal}
               className="relative mt-7 overflow-hidden rounded-3xl border border-accentSoft bg-accentSoft/35 p-7 text-center shadow-lift"
@@ -369,13 +395,25 @@ export function Summary() {
                 transition={{ duration: 1.6, delay: 0.7, ease: "easeInOut" }}
               />
               <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-inkMuted">
-                {s.summary.heroLabel}
+                {s.report.paymentTodayLabel}
               </p>
               <p className="mt-2 text-5xl font-bold text-ink sm:text-6xl">
                 <CountUp value={plan.monthlyPayment} format={formatShekels} delay={0.15} />
               </p>
               <p className="mt-2 text-[14px] text-inkMuted">
                 {fmt(s.summary.heroSub, { years: state.termYears })}
+              </p>
+
+              <div className="mt-5 flex items-center justify-center gap-2 border-t border-accentSoft/60 pt-4">
+                <p className="text-[13px] font-semibold text-inkMuted">
+                  {fmt(s.report.paymentYearLabel, { year: horizonYear })}
+                </p>
+                <p className="text-[15px] font-bold text-ink" dir="ltr">
+                  {formatShekels(paymentAtHorizon)}
+                </p>
+              </div>
+              <p className="mt-2 text-[12px] leading-relaxed text-inkMuted">
+                {s.report.paymentGrowNote}
               </p>
             </motion.div>
 
@@ -411,7 +449,7 @@ export function Summary() {
                     className={TRACK_BAR_CLASS[key]}
                     initial={{ width: 0 }}
                     animate={{ width: `${state.mix[key]}%` }}
-                    transition={{ delay: 0.5, type: "spring", stiffness: 120, damping: 24 }}
+                    transition={{ delay: 0.5, duration: 0.5, ease: EASE_OUT }}
                   />
                 ))}
               </div>
@@ -460,7 +498,69 @@ export function Summary() {
                   (+{formatShekels(stress2 - plan.monthlyPayment)})
                 </span>
               </p>
+              <p className="mt-3 border-t border-hairline pt-3 text-[12px] leading-relaxed text-inkMuted">
+                {s.report.rateNoteUnderTable}
+              </p>
             </motion.div>
+
+            {showsBridgeCaution ? (
+              <motion.div variants={cardReveal} className="mt-5">
+                <InfoNote>{s.report.bridgeCaution}</InfoNote>
+              </motion.div>
+            ) : null}
+
+            {cautionLines.length > 0 ? (
+              <motion.div
+                variants={cardReveal}
+                className="mt-5 space-y-2 rounded-3xl border border-warn/25 bg-warn/5 p-6"
+              >
+                {cautionLines.map((line) => (
+                  <p key={line} className="text-[14px] leading-relaxed text-warn">
+                    {line}
+                  </p>
+                ))}
+              </motion.div>
+            ) : null}
+
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              <motion.div
+                variants={cardReveal}
+                className="rounded-3xl border border-accent bg-accentSoft/20 p-6"
+              >
+                <p className="mb-3 text-[13px] font-bold uppercase tracking-wide text-ink">
+                  {s.report.confirmsTitle}
+                </p>
+                <ul className="space-y-2.5">
+                  {confirmLines.map((line) => (
+                    <li key={line} className="flex gap-2 text-[13px] leading-relaxed text-ink/85">
+                      <span aria-hidden="true" className="shrink-0 font-bold text-accent">
+                        ✓
+                      </span>
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+
+              <motion.div
+                variants={cardReveal}
+                className="rounded-3xl border border-hairline bg-card p-6"
+              >
+                <p className="mb-3 text-[13px] font-bold uppercase tracking-wide text-inkMuted">
+                  {s.report.stillNeedsTitle}
+                </p>
+                <ul className="space-y-2.5">
+                  {stillNeedsLines.map((line) => (
+                    <li key={line} className="flex gap-2 text-[13px] leading-relaxed text-inkMuted">
+                      <span aria-hidden="true" className="shrink-0">
+                        •
+                      </span>
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            </div>
 
             <motion.div
               variants={cardReveal}

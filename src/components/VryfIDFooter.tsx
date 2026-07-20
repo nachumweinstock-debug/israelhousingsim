@@ -1,6 +1,6 @@
 /**
  * Ported verbatim (structure, copy, links, assets) from vryfid-demo's
- * VryfIDFooter — this product is part of the VryfID family.
+ * VryfIDFooter, this product is part of the VryfID family.
  */
 
 const FOUNDERS = [
@@ -169,7 +169,7 @@ export function VryfIDFooter() {
           <p className="text-xs text-[#6B7F7C]">© 2026 VryfID LLC. All rights reserved.</p>
           <div className="flex items-center gap-4">
             <span className="text-xs text-[#6B7F7C]">
-              Educational mortgage simulator — not a bank quote.
+              Educational mortgage simulator, not a bank quote.
             </span>
             <a
               href="https://VryfIDVibes.com"

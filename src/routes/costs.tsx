@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
-import { ContinueButton, QuestionShell, Reveal } from "../components/QuestionShell";
+import { ContinueButton, InfoNote, QuestionShell, Reveal } from "../components/QuestionShell";
 import { computeCosts, estimatePurchaseTax, formatShekels } from "../lib/mortgageMath";
 import { fmt } from "../i18n";
 import { useSimulatorStore } from "../state/simulatorStore";
@@ -67,13 +67,14 @@ export function Costs() {
   const downPayment = useSimulatorStore((state) => state.downPayment);
   const residency = useSimulatorStore((state) => state.residency);
   const buyerStatus = useSimulatorStore((state) => state.buyerStatus);
+  const existingHomeStatus = useSimulatorStore((state) => state.existingHomeStatus);
   const costs = useSimulatorStore((state) => state.costs);
   const setCosts = useSimulatorStore((state) => state.setCosts);
   const { goNext } = useFlowNav();
   const { s } = useSimLang();
 
-  const breakdown = computeCosts(propertyPrice, residency, buyerStatus, costs);
-  const estimatedTax = estimatePurchaseTax(propertyPrice, residency, buyerStatus);
+  const breakdown = computeCosts(propertyPrice, residency, buyerStatus, costs, existingHomeStatus);
+  const estimatedTax = estimatePurchaseTax(propertyPrice, residency, buyerStatus, existingHomeStatus);
   const cashToClose = downPayment + breakdown.total;
 
   return (
@@ -83,6 +84,12 @@ export function Costs() {
       helper={s.costs.helper}
       footer={<ContinueButton label={s.costs.continueLabel} onClick={goNext} />}
     >
+      {buyerStatus === "replacingHome" && existingHomeStatus === "notListed" ? (
+        <Reveal>
+          <InfoNote>{s.existingHome.bridgeNote}</InfoNote>
+        </Reveal>
+      ) : null}
+
       <Reveal>
         <CostField
           label={s.costs.purchaseTaxLabel}

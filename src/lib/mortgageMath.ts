@@ -7,7 +7,9 @@
  *
  * Every figure produced here is an estimate for planning purposes.
  * Purchase tax brackets are simplified approximations of the real mas
- * rechisha tables and must be confirmed by a licensed advisor.
+ * rechisha tables and must be confirmed by a licensed advisor. Nothing
+ * in this module represents an approval, qualification, or credit
+ * decision, see the readiness report framing in the summary route.
  */
 import { computeTrackResult } from "../engine/calc";
 import { getTrack } from "../engine/tracks";
@@ -17,6 +19,10 @@ export type Residency = "israeli" | "oleh" | "foreign";
 export type BuyerStatus = "firstHome" | "replacingHome" | "investment";
 export type InflationScenario = "low" | "medium" | "high";
 export type TrackKey = "prime" | "kalatz" | "katz";
+export type EmploymentType = "salaried" | "selfEmployed" | "mixed";
+export type DownPaymentSourceType = "savings" | "homeSale" | "gift" | "other";
+export type HomeSaleFundsStatus = "inHand" | "pending";
+export type ExistingHomeStatusType = "sold" | "underContract" | "notListed";
 
 export interface TrackMix {
   prime: number;
@@ -70,6 +76,14 @@ export const INFLATION_CPI: Record<InflationScenario, number> = {
 };
 
 export const VAT_RATE = 0.18;
+
+/**
+ * Bank of Israel Directive 329 caps total mortgage payment at 50% of net
+ * household income (hard ceiling); banks generally want it comfortably
+ * under 40% to approve without extra friction (see spec section 2).
+ */
+export const DTI_HARD_CEILING = 0.5;
+export const DTI_FRICTION_FLOOR = 0.4;
 
 /** Loan-to-value ceiling for the user's situation, as a decimal. */
 export function ltvCeiling(residency: Residency | null, buyerStatus: BuyerStatus | null): number {
@@ -175,6 +189,55 @@ export function stressedMonthlyPayment(inputs: PlanInputs, shockPoints: number):
   return base.monthlyPayment - (basePrime?.monthlyPayment ?? 0) + shocked.paymentStressed;
 }
 
+/**
+ * Estimated blended payment at a future year of the loan, holding rates
+ * flat (no stress shock) but letting the CPI-linked share compound the
+ * way it actually will, so the headline payment doesn't quietly assume
+ * a flat line the linked portion will never hold. Kalatz and Prime are
+ * held at today's payment under this baseline; only Katz grows.
+ */
+export function estimatedPaymentAtYear(inputs: PlanInputs, atYear: number): number {
+  const plan = computePlan(inputs);
+  const cpi = INFLATION_CPI[inputs.inflation];
+  const horizon = Math.max(0, Math.min(atYear, inputs.termYears));
+  return plan.perTrack.reduce((sum, t) => {
+    if (t.track === "katz") {
+      return sum + t.monthlyPayment * Math.pow(1 + cpi, horizon);
+    }
+    return sum + t.monthlyPayment;
+  }, 0);
+}
+
+/** Bank of Israel Directive 329 caps the variable/reset-eligible share at two thirds. */
+export function isWithinVariableExposureLimit(mix: TrackMix): boolean {
+  return mix.prime <= 66;
+}
+
+/** Payment-to-income against the 50% hard ceiling; existing debt counts too. */
+export function computeDti(monthlyPayment: number, existingMonthlyDebt: number, netIncome: number): number {
+  if (netIncome <= 0) return 0;
+  return (monthlyPayment + existingMonthlyDebt) / netIncome;
+}
+
+/**
+ * Standard Israeli Teudat Zehut check-digit validator (public algorithm
+ * used by the Ministry of Interior). This is a format and self
+ * consistency check only, it confirms the number is well formed, not
+ * that it belongs to a real registered person. Never described as a
+ * government registry lookup anywhere in the UI or report.
+ */
+export function isValidIsraeliId(rawId: string): boolean {
+  const clean = rawId.trim();
+  if (!/^\d{5,9}$/.test(clean)) return false;
+  const padded = clean.padStart(9, "0");
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    const weighted = Number(padded[i]) * ((i % 2) + 1);
+    sum += weighted > 9 ? weighted - 9 : weighted;
+  }
+  return sum % 10 === 0;
+}
+
 interface TaxBracket {
   upTo: number;
   rate: number;
@@ -214,15 +277,22 @@ function applyBrackets(price: number, brackets: TaxBracket[]): number {
 
 /**
  * Approximate purchase tax (mas rechisha). An oleh gets the better of the
- * aliyah benefit brackets and the regular single-home brackets.
+ * aliyah benefit brackets and the regular single-home brackets. A buyer
+ * replacing a home whose existing property has not yet sold is shown the
+ * temporary "additional dwelling" brackets instead, since that is the
+ * bracket that actually applies until the sale completes.
  */
 export function estimatePurchaseTax(
   price: number,
   residency: Residency | null,
-  buyerStatus: BuyerStatus | null
+  buyerStatus: BuyerStatus | null,
+  existingHomeStatus?: ExistingHomeStatusType | null
 ): number {
   if (price <= 0) return 0;
   if (buyerStatus === "investment" || residency === "foreign") {
+    return applyBrackets(price, INVESTMENT_BRACKETS);
+  }
+  if (buyerStatus === "replacingHome" && existingHomeStatus === "notListed") {
     return applyBrackets(price, INVESTMENT_BRACKETS);
   }
   const regular = applyBrackets(price, SINGLE_HOME_BRACKETS);
@@ -244,10 +314,12 @@ export function computeCosts(
   price: number,
   residency: Residency | null,
   buyerStatus: BuyerStatus | null,
-  costs: CostInputs
+  costs: CostInputs,
+  existingHomeStatus?: ExistingHomeStatusType | null
 ): CostBreakdown {
   const purchaseTax =
-    costs.purchaseTaxOverride ?? estimatePurchaseTax(price, residency, buyerStatus);
+    costs.purchaseTaxOverride ??
+    estimatePurchaseTax(price, residency, buyerStatus, existingHomeStatus);
   const legalFee = price * (costs.legalPct / 100) * (1 + VAT_RATE);
   const agentFee = price * (costs.agentPct / 100) * (1 + VAT_RATE);
   return {

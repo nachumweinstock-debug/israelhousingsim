@@ -1,9 +1,9 @@
 /**
  * Anonymous simulation capture endpoint.
  *
- * POST /api/capture  — called fire-and-forget when a user reaches the
+ * POST /api/capture, called fire-and-forget when a user reaches the
  * summary screen; stores the full answer set and computed results.
- * GET  /api/capture?key=ADMIN_KEY — returns the latest captures.
+ * GET  /api/capture?key=ADMIN_KEY, returns the latest captures.
  *
  * Primary store: the Railway Redis instance in the simcapture project,
  * reached over its public TCP proxy via REDIS_URL. Falls back to the
