@@ -29,9 +29,9 @@ export function TrackMixStep() {
         <TrackMixBuilder mix={mix} onChange={setMix} loanAmount={loanAmount} />
       </Reveal>
 
-      <Reveal className="flex items-center justify-between gap-4 rounded-2xl border border-accentSoft bg-accentSoft/25 px-5 py-4">
+      <Reveal className="flex items-center justify-between gap-4 rounded-3xl border border-accentSoft bg-accentSoft/25 px-6 py-5">
         <p className="text-[14px] font-semibold text-inkMuted">{s.mix.paymentPreview}</p>
-        <p className="text-2xl font-bold tabular-nums text-ink" dir="ltr">
+        <p className="text-[26px] font-bold tabular-nums text-ink" dir="ltr">
           {formatShekels(plan.monthlyPayment)}
         </p>
       </Reveal>

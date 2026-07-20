@@ -32,7 +32,7 @@ export function AliyahDetails() {
 
   return (
     <QuestionShell title={s.aliyah.title} helper={s.aliyah.helper}>
-      <Reveal className="rounded-2xl border border-hairline bg-card p-5 shadow-lift">
+      <Reveal className="rounded-3xl border border-hairline bg-card p-6 shadow-lift">
         <p className="mb-4 text-[15px] font-semibold text-ink">{s.aliyah.yearsQuestion}</p>
         <AmountSlider
           ariaLabel={s.aliyah.yearsQuestion}

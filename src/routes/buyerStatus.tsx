@@ -78,7 +78,7 @@ export function BuyerStatus() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="rounded-2xl border border-accentSoft bg-accentSoft/25 px-4 py-3 text-center text-[14px] leading-relaxed text-ink/85"
+            className="rounded-3xl border border-accentSoft bg-accentSoft/25 px-5 py-4 text-center text-[14px] leading-relaxed text-ink/85"
           >
             {contextNote(s, residency, selected)}
           </motion.div>

@@ -99,18 +99,20 @@ const gridReveal = {
   show: { transition: { staggerChildren: 0.09, delayChildren: 0.1 } },
 };
 
+const EASE_OUT = [0.16, 1, 0.3, 1] as const;
+
 const cardReveal = {
   hidden: { opacity: 0, y: 22 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.48, ease: EASE_OUT } },
 };
 
 const heroReveal = {
-  hidden: { opacity: 0, y: 30, scale: 0.92 },
+  hidden: { opacity: 0, y: 26, scale: 0.96 },
   show: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { type: "spring" as const, stiffness: 240, damping: 20 },
+    transition: { duration: 0.55, ease: EASE_OUT },
   },
 };
 
@@ -172,10 +174,10 @@ function MetricCard({
   return (
     <motion.div
       variants={cardReveal}
-      className="rounded-2xl border border-accentSoft bg-accentSoft/25 p-5"
+      className="rounded-3xl border border-accentSoft bg-accentSoft/25 p-6"
     >
       <p className="text-[13px] font-semibold uppercase tracking-wide text-inkMuted">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-ink">{children}</p>
+      <p className="mt-1.5 text-[26px] font-bold text-ink">{children}</p>
       {sub ? <p className="mt-1 text-[12px] leading-snug text-inkMuted">{sub}</p> : null}
     </motion.div>
   );
@@ -397,7 +399,7 @@ export function Summary() {
 
             <motion.div
               variants={cardReveal}
-              className="mt-4 rounded-2xl border border-hairline bg-card p-5 shadow-lift"
+              className="mt-5 rounded-3xl border border-hairline bg-card p-6 shadow-lift"
             >
               <p className="mb-3 text-[13px] font-semibold uppercase tracking-wide text-inkMuted">
                 {s.summary.mixTitle}
@@ -434,7 +436,7 @@ export function Summary() {
 
             <motion.div
               variants={cardReveal}
-              className="mt-4 rounded-2xl border border-hairline bg-card p-5 shadow-lift"
+              className="mt-5 rounded-3xl border border-hairline bg-card p-6 shadow-lift"
             >
               <p className="text-[13px] font-semibold uppercase tracking-wide text-inkMuted">
                 {s.summary.stressTitle}
@@ -462,7 +464,7 @@ export function Summary() {
 
             <motion.div
               variants={cardReveal}
-              className="mt-4 rounded-2xl border border-hairline bg-card p-5 shadow-lift"
+              className="mt-5 rounded-3xl border border-hairline bg-card p-6 shadow-lift"
             >
               <p className="text-[15px] font-bold text-ink">{s.exportPanel.title}</p>
               <p className="mt-1 text-[13px] text-inkMuted">{s.exportPanel.sub}</p>
@@ -535,7 +537,7 @@ export function Summary() {
 
             <motion.div
               variants={cardReveal}
-              className="mt-4 rounded-2xl border border-hairline bg-card p-5 shadow-lift"
+              className="mt-5 rounded-3xl border border-hairline bg-card p-6 shadow-lift"
             >
               <p className="text-[15px] font-bold text-ink">{s.nextSteps.title}</p>
               <ol className="mt-4 space-y-4">

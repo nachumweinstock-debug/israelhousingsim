@@ -30,7 +30,7 @@ function CostField({ label, note, value, onCommit, suffix, computed, extra }: Fi
   }
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-2xl border border-hairline bg-card p-5 shadow-lift">
+    <div className="flex items-center justify-between gap-4 rounded-3xl border border-hairline bg-card p-6 shadow-lift">
       <div className="min-w-0">
         <p className="text-[15px] font-semibold text-ink">{label}</p>
         {note ? <p className="mt-0.5 text-[13px] leading-snug text-inkMuted">{note}</p> : null}
@@ -134,14 +134,14 @@ export function Costs() {
         />
       </Reveal>
 
-      <Reveal className="rounded-2xl border border-accentSoft bg-accentSoft/25 px-5 py-4">
+      <Reveal className="rounded-3xl border border-accentSoft bg-accentSoft/25 px-6 py-5">
         <div className="flex items-center justify-between gap-4">
           <p className="text-[14px] font-semibold text-inkMuted">{s.costs.costsTotal}</p>
-          <p className="text-xl font-bold tabular-nums text-ink">{formatShekels(breakdown.total)}</p>
+          <p className="text-[22px] font-bold tabular-nums text-ink">{formatShekels(breakdown.total)}</p>
         </div>
-        <div className="mt-2 flex items-center justify-between gap-4 border-t border-accentSoft/70 pt-2">
+        <div className="mt-3 flex items-center justify-between gap-4 border-t border-accentSoft/70 pt-3">
           <p className="text-[14px] font-semibold text-inkMuted">{s.costs.cashTotal}</p>
-          <p className="text-xl font-bold tabular-nums text-ink">{formatShekels(cashToClose)}</p>
+          <p className="text-[22px] font-bold tabular-nums text-ink">{formatShekels(cashToClose)}</p>
         </div>
       </Reveal>
     </QuestionShell>

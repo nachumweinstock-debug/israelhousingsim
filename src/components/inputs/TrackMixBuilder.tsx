@@ -52,7 +52,7 @@ export function TrackMixBuilder({ mix, onChange, loanAmount }: TrackMixBuilderPr
   if (mix.kalatz + mix.katz < 33) warnings.push(s.mix.fixedFloorWarning);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div className="flex flex-wrap justify-center gap-2">
         {MIX_PRESETS.map((preset) => {
           const active = TRACK_KEYS.every((k) => mix[k] === preset.mix[k]);
@@ -83,29 +83,29 @@ export function TrackMixBuilder({ mix, onChange, loanAmount }: TrackMixBuilderPr
             key={key}
             className={TRACK_BAR_CLASS[key]}
             animate={{ width: `${mix[key]}%` }}
-            transition={{ type: "spring", stiffness: 260, damping: 30 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           />
         ))}
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {TRACK_KEYS.map((key) => (
-          <div key={key} className="rounded-2xl border border-hairline bg-card p-5 shadow-lift">
-            <div className="mb-3 flex items-start justify-between gap-3">
+          <div key={key} className="rounded-3xl border border-hairline bg-card p-6 shadow-lift">
+            <div className="mb-4 flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span
                     className={`inline-block h-2.5 w-2.5 rounded-pill ${TRACK_BAR_CLASS[key]}`}
                     aria-hidden="true"
                   />
-                  <span className="text-[16px] font-semibold text-ink">{s.tracks[key].name}</span>
+                  <span className="text-[17px] font-semibold text-ink">{s.tracks[key].name}</span>
                 </div>
-                <p className="mt-0.5 text-[13px] leading-snug text-inkMuted">
+                <p className="mt-0.5 text-[14px] leading-snug text-inkMuted">
                   {s.tracks[key].tagline}
                 </p>
               </div>
               <div className="shrink-0 text-end">
-                <div className="text-2xl font-bold tabular-nums text-ink">{mix[key]}%</div>
+                <div className="text-[26px] font-bold tabular-nums text-ink">{mix[key]}%</div>
                 <div className="text-[12px] tabular-nums text-inkMuted" dir="ltr">
                   {formatPct(TRACK_INFO[key].annualRate, 1)} ·{" "}
                   {formatShekels(loanAmount * (mix[key] / 100))}
@@ -127,7 +127,7 @@ export function TrackMixBuilder({ mix, onChange, loanAmount }: TrackMixBuilderPr
           key={warning}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-warn/25 bg-warn/5 px-4 py-3 text-[14px] leading-relaxed text-warn"
+          className="rounded-3xl border border-warn/25 bg-warn/5 px-5 py-4 text-[14px] leading-relaxed text-warn"
         >
           {warning}
         </motion.div>

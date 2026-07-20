@@ -17,7 +17,7 @@ export function PropertyPrice() {
       helper={s.price.helper}
       footer={<ContinueButton label={s.common.continueLabel} onClick={goNext} />}
     >
-      <Reveal className="rounded-2xl border border-hairline bg-card p-6 shadow-lift">
+      <Reveal className="rounded-3xl border border-hairline bg-card p-7 shadow-lift">
         <AmountSlider
           ariaLabel={s.price.aria}
           value={propertyPrice}

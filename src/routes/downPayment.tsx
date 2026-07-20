@@ -31,7 +31,7 @@ export function DownPayment() {
       helper={s.down.helper}
       footer={<ContinueButton label={s.common.continueLabel} onClick={goNext} />}
     >
-      <Reveal className="rounded-2xl border border-hairline bg-card p-6 shadow-lift">
+      <Reveal className="rounded-3xl border border-hairline bg-card p-7 shadow-lift">
         <div className="mb-5 flex justify-center gap-2">
           {(
             [
@@ -86,26 +86,26 @@ export function DownPayment() {
       <Reveal>
         <motion.div
           layout
-          className="flex items-center justify-between rounded-2xl border border-accentSoft bg-accentSoft/25 px-5 py-4"
+          className="flex items-center justify-between rounded-3xl border border-accentSoft bg-accentSoft/25 px-6 py-5"
         >
           <div>
             <p className="text-[13px] font-semibold uppercase tracking-wide text-inkMuted">
               {s.down.loanAmount}
             </p>
-            <p className="text-2xl font-bold tabular-nums text-ink">{formatShekels(loanAmount)}</p>
+            <p className="text-[26px] font-bold tabular-nums text-ink">{formatShekels(loanAmount)}</p>
           </div>
           <div className="text-end">
             <p className="text-[13px] font-semibold uppercase tracking-wide text-inkMuted">
               {s.down.ltv}
             </p>
-            <p className="text-2xl font-bold tabular-nums text-ink">{formatPct(ltv)}</p>
+            <p className="text-[26px] font-bold tabular-nums text-ink">{formatPct(ltv)}</p>
           </div>
         </motion.div>
         {ltv > ceiling ? (
           <motion.p
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-3 rounded-2xl border border-warn/25 bg-warn/5 px-4 py-3 text-[14px] leading-relaxed text-warn"
+            className="mt-3 rounded-3xl border border-warn/25 bg-warn/5 px-5 py-4 text-[14px] leading-relaxed text-warn"
           >
             {fmt(s.down.warning, { ceiling: formatPct(ceiling) })}
           </motion.p>
