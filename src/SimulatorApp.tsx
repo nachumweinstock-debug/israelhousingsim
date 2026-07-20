@@ -98,7 +98,7 @@ function FlowChrome() {
           </motion.div>
         </div>
         <div className="mx-auto flex h-[72px] w-full max-w-2xl items-center justify-between gap-3 px-4">
-          <div className="flex w-24 justify-start">
+          <div className="flex items-center gap-2">
             <AnimatePresence>
               {backTarget ? (
                 <motion.button
@@ -109,12 +109,13 @@ function FlowChrome() {
                   exit={{ opacity: 0 }}
                   whileTap={{ scale: 0.92 }}
                   onClick={() => navigate(stepPath(backTarget))}
-                  className="flex h-10 w-10 items-center justify-center rounded-pill border border-hairline bg-card text-lg text-ink shadow-lift hover:border-accent/50"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-pill border border-hairline bg-card text-lg text-ink shadow-lift hover:border-accent/50"
                 >
                   {isHe ? "→" : "←"}
                 </motion.button>
               ) : null}
             </AnimatePresence>
+            <NeonPoweredByBadge />
           </div>
           <div className="flex flex-1 justify-center">
             <motion.img
@@ -125,7 +126,7 @@ function FlowChrome() {
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             />
           </div>
-          <div className="flex w-24 justify-end">
+          <div className="flex shrink-0 justify-end">
             <div className="flex items-center gap-0.5 rounded-pill border border-hairline bg-card p-1 shadow-lift">
               {LANG_CHOICES.map((choice) => (
                 <button
@@ -182,34 +183,63 @@ function FlowChrome() {
         </FlowDirectionContext.Provider>
       </main>
 
-      <motion.a
-        href="https://www.vryfid.com/"
-        target="_blank"
-        rel="noreferrer"
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        whileHover={{ y: -2, scale: 1.04 }}
-        whileTap={{ scale: 0.97 }}
-        className="fixed bottom-4 end-4 z-40 flex items-center gap-2 rounded-pill border border-hairline bg-card/95 py-2 pe-4 ps-2 shadow-liftHover backdrop-blur-sm print:hidden"
-      >
-        <img
-          src="/vryfid-logo.jpeg"
-          alt=""
-          aria-hidden="true"
-          className="h-6 w-6 rounded-pill object-cover"
-        />
-        <span className="text-[12px] font-semibold text-ink">
-          Powered by <span className="text-accent">VryfID</span>
-        </span>
-        <span aria-hidden="true" className="text-[11px] text-inkMuted">
-          ↗
-        </span>
-      </motion.a>
-
-      <div className="mt-16 print:hidden" dir="ltr">
+      <div id="site-footer" className="mt-16 print:hidden" dir="ltr">
         <VryfIDFooter />
       </div>
     </div>
+  );
+}
+
+function scrollToFooter() {
+  document.getElementById("site-footer")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+const NEON = "#39FF9B";
+
+/**
+ * Header badge, mirrors the language toggle on the header's other side.
+ * Deep green neon glow (a deliberate one-off exception to the cream/light
+ * blue palette, per Nachum's explicit request) that pulses continuously.
+ * Clicking scrolls down to the VryfID footer; the footer logo scrolls
+ * back up (see VryfIDFooter.tsx).
+ */
+function NeonPoweredByBadge() {
+  return (
+    <motion.button
+      type="button"
+      onClick={scrollToFooter}
+      aria-label="Powered by VryfID — jump to footer"
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.94 }}
+      animate={{
+        boxShadow: [
+          `0 0 3px ${NEON}88, 0 0 8px ${NEON}44`,
+          `0 0 8px ${NEON}dd, 0 0 20px ${NEON}88, 0 0 32px ${NEON}33`,
+          `0 0 3px ${NEON}88, 0 0 8px ${NEON}44`,
+        ],
+      }}
+      transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+      className="flex shrink-0 items-center gap-1.5 rounded-pill px-3 py-2"
+      style={{
+        background: "#0A1F16",
+        border: `1px solid ${NEON}66`,
+      }}
+    >
+      <span
+        className="text-[11px] font-bold uppercase tracking-wide"
+        style={{ color: NEON, textShadow: `0 0 6px ${NEON}aa, 0 0 14px ${NEON}55` }}
+      >
+        VryfID
+      </span>
+      <motion.span
+        aria-hidden="true"
+        animate={{ y: [0, 3, 0] }}
+        transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+        style={{ color: NEON }}
+        className="text-[10px]"
+      >
+        ▼
+      </motion.span>
+    </motion.button>
   );
 }
