@@ -264,9 +264,11 @@ export function Summary() {
     dti,
     showsBridgeCaution,
     verifiedDate,
-    confirmLines,
+    checks,
+    hasFailure,
+    failingChecks,
     stillNeedsLines,
-    cautionLines,
+    creditNotes,
   } = model;
 
   // One anonymous capture per summary visit, the inputs and computed
@@ -435,6 +437,41 @@ export function Summary() {
               </MetricCard>
             </div>
 
+            {hasFailure ? (
+              <motion.div
+                variants={cardReveal}
+                animate={{
+                  boxShadow: [
+                    "0 0 0 0 rgba(197, 48, 48, 0.35)",
+                    "0 0 0 10px rgba(197, 48, 48, 0)",
+                  ],
+                }}
+                transition={{ boxShadow: { duration: 1.8, repeat: Infinity, ease: "easeOut" } }}
+                className="relative mt-5 overflow-hidden rounded-3xl border-2 border-bad bg-bad/10 p-6"
+              >
+                <div className="flex items-start gap-3">
+                  <motion.span
+                    animate={{ scale: [1, 1.12, 1] }}
+                    transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-bad text-lg font-bold text-white"
+                    aria-hidden="true"
+                  >
+                    !
+                  </motion.span>
+                  <div className="min-w-0">
+                    <p className="text-[16px] font-bold text-bad">{s.report.bannerHeading}</p>
+                    <ul className="mt-2 space-y-1.5">
+                      {failingChecks.map((c) => (
+                        <li key={c.id} className="text-[14px] leading-relaxed text-ink/85">
+                          {c.text}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </motion.div>
+            ) : null}
+
             <motion.div
               variants={cardReveal}
               className="mt-5 rounded-3xl border border-hairline bg-card p-6 shadow-lift"
@@ -509,34 +546,41 @@ export function Summary() {
               </motion.div>
             ) : null}
 
-            {cautionLines.length > 0 ? (
-              <motion.div
-                variants={cardReveal}
-                className="mt-5 space-y-2 rounded-3xl border border-warn/25 bg-warn/5 p-6"
-              >
-                {cautionLines.map((line) => (
-                  <p key={line} className="text-[14px] leading-relaxed text-warn">
-                    {line}
-                  </p>
-                ))}
-              </motion.div>
-            ) : null}
-
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <motion.div
                 variants={cardReveal}
-                className="rounded-3xl border border-accent bg-accentSoft/20 p-6"
+                className={`rounded-3xl border p-6 ${
+                  hasFailure ? "border-hairline bg-card" : "border-accent bg-accentSoft/20"
+                }`}
               >
                 <p className="mb-3 text-[13px] font-bold uppercase tracking-wide text-ink">
                   {s.report.confirmsTitle}
                 </p>
                 <ul className="space-y-2.5">
-                  {confirmLines.map((line) => (
-                    <li key={line} className="flex gap-2 text-[13px] leading-relaxed text-ink/85">
-                      <span aria-hidden="true" className="shrink-0 font-bold text-accent">
-                        ✓
+                  {checks.map((c) => (
+                    <li
+                      key={c.id}
+                      className={`flex gap-2 text-[13px] leading-relaxed ${
+                        c.status === "fail"
+                          ? "font-semibold text-bad"
+                          : c.status === "warn"
+                            ? "font-semibold text-warn"
+                            : "text-ink/85"
+                      }`}
+                    >
+                      <span
+                        aria-hidden="true"
+                        className={`shrink-0 font-bold ${
+                          c.status === "fail"
+                            ? "text-bad"
+                            : c.status === "warn"
+                              ? "text-warn"
+                              : "text-accent"
+                        }`}
+                      >
+                        {c.status === "fail" ? "✕" : c.status === "warn" ? "!" : "✓"}
                       </span>
-                      {line}
+                      {c.text}
                     </li>
                   ))}
                 </ul>
@@ -561,6 +605,27 @@ export function Summary() {
                 </ul>
               </motion.div>
             </div>
+
+            {creditNotes.length > 0 ? (
+              <motion.div
+                variants={cardReveal}
+                className="mt-5 rounded-3xl border border-hairline bg-cream p-6"
+              >
+                <p className="mb-2 text-[13px] font-bold uppercase tracking-wide text-inkMuted">
+                  {s.report.creditNotesTitle}
+                </p>
+                <ul className="space-y-1.5">
+                  {creditNotes.map((line) => (
+                    <li key={line} className="flex gap-2 text-[13px] leading-relaxed text-inkMuted">
+                      <span aria-hidden="true" className="shrink-0">
+                        •
+                      </span>
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ) : null}
 
             <motion.div
               variants={cardReveal}

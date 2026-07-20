@@ -1,9 +1,14 @@
 /**
  * Single source of truth for the readiness report's derived figures and
- * confirms/still-needed copy. Both the on screen summary and the printed
- * PDF call buildReportModel so the two surfaces can never show different
- * numbers or claims for the same session, matching the spec's emphasis on
- * a report a banker can trust.
+ * the checklist copy. Both the on screen summary and the printed PDF
+ * call buildReportModel so the two surfaces can never show different
+ * numbers or claims for the same session, matching the spec's emphasis
+ * on a report a banker can trust.
+ *
+ * Every threshold item (DTI, LTV, variable rate exposure) lives in one
+ * unified checks array with a pass, warn, or fail status that is always
+ * rendered, never omitted. A failure must be exactly as visible as a
+ * pass, not buried in a paragraph above the list that states it.
  */
 import { fmt } from "../i18n";
 import type { Lang } from "../i18n";
@@ -16,12 +21,21 @@ import {
   computeCosts,
   computeDti,
   computePlan,
+  effectiveLtvCeiling,
   estimatedPaymentAtYear,
   formatPct,
   isWithinVariableExposureLimit,
   stressedMonthlyPayment,
 } from "./mortgageMath";
 import type { PlanResult } from "./mortgageMath";
+
+export type CheckStatus = "pass" | "warn" | "fail";
+
+export interface CheckItem {
+  id: string;
+  status: CheckStatus;
+  text: string;
+}
 
 export interface ReportModel {
   loanAmount: number;
@@ -30,17 +44,19 @@ export interface ReportModel {
   stress2: number;
   breakdown: ReturnType<typeof computeCosts>;
   ltv: number;
+  ltvCeilingUsed: number;
   cashToClose: number;
   horizonYear: number;
   paymentAtHorizon: number;
   dti: number;
-  withinVariableLimit: boolean;
   showsBridgeCaution: boolean;
   verifiedDate: string | null;
   downPaymentSourceLabel: string | null;
-  confirmLines: string[];
+  checks: CheckItem[];
+  hasFailure: boolean;
+  failingChecks: CheckItem[];
   stillNeedsLines: string[];
-  cautionLines: string[];
+  creditNotes: string[];
 }
 
 export function buildReportModel(answers: SimulatorAnswers, s: SimStrings, lang: Lang): ReportModel {
@@ -62,6 +78,7 @@ export function buildReportModel(answers: SimulatorAnswers, s: SimStrings, lang:
     answers.existingHomeStatus
   );
   const ltv = answers.propertyPrice > 0 ? loanAmount / answers.propertyPrice : 0;
+  const ltvCeilingUsed = effectiveLtvCeiling(answers.residency, answers.buyerStatus, answers.existingHomeStatus);
   const cashToClose = answers.downPayment + breakdown.total;
   const horizonYear = Math.min(10, answers.termYears);
   const paymentAtHorizon = estimatedPaymentAtYear(planInputs, horizonYear);
@@ -79,16 +96,55 @@ export function buildReportModel(answers: SimulatorAnswers, s: SimStrings, lang:
     ? s.downPaymentSource[answers.downPaymentSource.source].title
     : null;
 
-  const confirmLines: string[] = [];
+  // Every entry below is always rendered, whichever status it lands on.
+  // A failure must be exactly as visible as a pass, never demoted to a
+  // paragraph elsewhere on the page.
+  const checks: CheckItem[] = [];
+
   if (answers.identity.verified && verifiedDate) {
-    confirmLines.push(fmt(s.report.identityLine, { date: verifiedDate }));
+    checks.push({ id: "identity", status: "pass", text: fmt(s.report.identityLine, { date: verifiedDate }) });
   }
-  confirmLines.push(fmt(s.report.dtiConfirmLine, { dti: formatPct(dti) }));
+
+  if (dti > DTI_HARD_CEILING) {
+    checks.push({ id: "dti", status: "fail", text: fmt(s.report.dtiWarningHard, { dti: formatPct(dti) }) });
+  } else if (dti > DTI_FRICTION_FLOOR) {
+    checks.push({ id: "dti", status: "warn", text: fmt(s.report.dtiWarningFriction, { dti: formatPct(dti) }) });
+  } else {
+    checks.push({ id: "dti", status: "pass", text: fmt(s.report.dtiPassLine, { dti: formatPct(dti) }) });
+  }
+
   if (downPaymentSourceLabel) {
-    confirmLines.push(fmt(s.report.downPaymentSourceConfirmLine, { source: downPaymentSourceLabel }));
+    checks.push({
+      id: "downPaymentSource",
+      status: "pass",
+      text: fmt(s.report.downPaymentSourceConfirmLine, { source: downPaymentSourceLabel }),
+    });
   }
-  if (withinVariableLimit) confirmLines.push(s.report.variableWithinLimitLine);
-  confirmLines.push(s.report.consistencyConfirmLine);
+
+  if (ltv > ltvCeilingUsed) {
+    checks.push({
+      id: "ltv",
+      status: "fail",
+      text: fmt(s.report.ltvFailLine, { ltv: formatPct(ltv), ceiling: formatPct(ltvCeilingUsed) }),
+    });
+  } else {
+    checks.push({
+      id: "ltv",
+      status: "pass",
+      text: fmt(s.report.ltvPassLine, { ltv: formatPct(ltv), ceiling: formatPct(ltvCeilingUsed) }),
+    });
+  }
+
+  checks.push(
+    withinVariableLimit
+      ? { id: "variableExposure", status: "pass", text: s.report.variableWithinLimitLine }
+      : { id: "variableExposure", status: "fail", text: s.report.variableOverLimitWarning }
+  );
+
+  checks.push({ id: "consistency", status: "pass", text: s.report.consistencyConfirmLine });
+
+  const failingChecks = checks.filter((c) => c.status === "fail");
+  const hasFailure = failingChecks.length > 0;
 
   const stillNeedsLines: string[] = [];
   if (!answers.identity.verified) stillNeedsLines.push(s.report.stillNeeds.identityPending);
@@ -103,12 +159,13 @@ export function buildReportModel(answers: SimulatorAnswers, s: SimStrings, lang:
   stillNeedsLines.push(s.report.stillNeeds.appraisal);
   stillNeedsLines.push(s.report.stillNeeds.finalRate);
 
-  const cautionLines: string[] = [];
-  if (dti > DTI_HARD_CEILING) cautionLines.push(fmt(s.report.dtiWarningHard, { dti: formatPct(dti) }));
-  else if (dti > DTI_FRICTION_FLOOR) {
-    cautionLines.push(fmt(s.report.dtiWarningFriction, { dti: formatPct(dti) }));
-  }
-  if (!withinVariableLimit) cautionLines.push(s.report.variableOverLimitWarning);
+  // Self declared credit answers are surfaced for the bank's context, not
+  // scored and never turned into a check failure, the tool has no
+  // authority to make that call.
+  const creditNotes: string[] = [];
+  if (answers.creditStanding.missedPayments) creditNotes.push(s.report.creditNotes.missedPayments);
+  if (answers.creditStanding.collections) creditNotes.push(s.report.creditNotes.collections);
+  if (answers.creditStanding.bankruptcy) creditNotes.push(s.report.creditNotes.bankruptcy);
 
   return {
     loanAmount,
@@ -117,16 +174,18 @@ export function buildReportModel(answers: SimulatorAnswers, s: SimStrings, lang:
     stress2,
     breakdown,
     ltv,
+    ltvCeilingUsed,
     cashToClose,
     horizonYear,
     paymentAtHorizon,
     dti,
-    withinVariableLimit,
     showsBridgeCaution,
     verifiedDate,
     downPaymentSourceLabel,
-    confirmLines,
+    checks,
+    hasFailure,
+    failingChecks,
     stillNeedsLines,
-    cautionLines,
+    creditNotes,
   };
 }

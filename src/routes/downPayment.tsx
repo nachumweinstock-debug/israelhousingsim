@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ContinueButton, QuestionShell, Reveal } from "../components/QuestionShell";
 import { AmountSlider } from "../components/inputs/AmountSlider";
-import { formatPct, formatShekels, ltvCeiling } from "../lib/mortgageMath";
+import { effectiveLtvCeiling, formatPct, formatShekels } from "../lib/mortgageMath";
 import { fmt } from "../i18n";
 import { loanAmountOf, useSimulatorStore } from "../state/simulatorStore";
 import { useFlowNav } from "../state/useFlowNav";
@@ -16,13 +16,14 @@ export function DownPayment() {
   const setDownPayment = useSimulatorStore((state) => state.setDownPayment);
   const residency = useSimulatorStore((state) => state.residency);
   const buyerStatus = useSimulatorStore((state) => state.buyerStatus);
+  const existingHomeStatus = useSimulatorStore((state) => state.existingHomeStatus);
   const { goNext } = useFlowNav();
   const { s } = useSimLang();
   const [mode, setMode] = useState<EntryMode>("shekels");
 
   const loanAmount = loanAmountOf({ propertyPrice, downPayment });
   const ltv = propertyPrice > 0 ? loanAmount / propertyPrice : 0;
-  const ceiling = ltvCeiling(residency, buyerStatus);
+  const ceiling = effectiveLtvCeiling(residency, buyerStatus, existingHomeStatus);
   const downPct = propertyPrice > 0 ? (downPayment / propertyPrice) * 100 : 0;
 
   return (

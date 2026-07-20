@@ -63,9 +63,10 @@ function ReportPage({
     dti,
     showsBridgeCaution,
     verifiedDate,
-    confirmLines,
+    checks,
+    hasFailure,
     stillNeedsLines,
-    cautionLines,
+    creditNotes,
   } = model;
 
   const employmentLabel = {
@@ -128,6 +129,23 @@ function ReportPage({
           </p>
         </div>
       </section>
+
+      {hasFailure ? (
+        <div className="mt-4 rounded-lg border-2 p-4" style={{ borderColor: "#C53030", background: "#FFF5F5" }}>
+          <p className="text-sm font-bold" style={{ color: "#C53030" }}>
+            {s.report.bannerHeading}
+          </p>
+          <ul className="mt-1.5 space-y-1">
+            {checks
+              .filter((c) => c.status === "fail")
+              .map((c) => (
+                <li key={c.id} className="text-xs leading-relaxed text-gray-700">
+                  {c.text}
+                </li>
+              ))}
+          </ul>
+        </div>
+      ) : null}
 
       <SectionTitle>{p.inputsTitle}</SectionTitle>
       <table className="mt-2 w-full">
@@ -249,25 +267,19 @@ function ReportPage({
         </p>
       ) : null}
 
-      {cautionLines.length > 0 ? (
-        <div className="mt-4 space-y-1 rounded-lg border border-amber-300 bg-amber-50 p-3">
-          {cautionLines.map((line) => (
-            <p key={line} className="text-xs leading-relaxed text-amber-800">
-              {line}
-            </p>
-          ))}
-        </div>
-      ) : null}
-
       <div className="mt-6 grid grid-cols-2 gap-6 break-inside-avoid">
         <div>
           <h2 className="text-base font-bold" style={{ color: ACCENT }}>
             {s.report.confirmsTitle}
           </h2>
           <ul className="mt-2 space-y-1.5">
-            {confirmLines.map((line) => (
-              <li key={line} className="text-xs leading-relaxed text-gray-700">
-                ✓ {line}
+            {checks.map((c) => (
+              <li
+                key={c.id}
+                className="text-xs leading-relaxed"
+                style={{ color: c.status === "fail" ? "#C53030" : c.status === "warn" ? "#B7791F" : "#374151" }}
+              >
+                {c.status === "fail" ? "✕" : c.status === "warn" ? "!" : "✓"} {c.text}
               </li>
             ))}
           </ul>
@@ -283,6 +295,19 @@ function ReportPage({
           </ul>
         </div>
       </div>
+
+      {creditNotes.length > 0 ? (
+        <div className="mt-4">
+          <h2 className="text-sm font-bold text-gray-700">{s.report.creditNotesTitle}</h2>
+          <ul className="mt-1.5 space-y-1">
+            {creditNotes.map((line) => (
+              <li key={line} className="text-xs leading-relaxed text-gray-600">
+                • {line}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       <footer className="mt-8 border-t border-gray-200 pt-4">
         <div className="flex items-center justify-between gap-4">

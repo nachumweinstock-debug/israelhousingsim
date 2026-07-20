@@ -99,6 +99,26 @@ export function ltvCeiling(residency: Residency | null, buyerStatus: BuyerStatus
   }
 }
 
+/**
+ * The realistic loan to value ceiling for the scenario actually selected,
+ * not just the buyer category. A buyer replacing a home whose existing
+ * property has not sold yet cannot count on those proceeds, so a bank
+ * treats it the same conservative way it treats an additional dwelling
+ * until the sale closes, the same reasoning already applied to the
+ * purchase tax bracket in estimatePurchaseTax.
+ */
+export function effectiveLtvCeiling(
+  residency: Residency | null,
+  buyerStatus: BuyerStatus | null,
+  existingHomeStatus?: ExistingHomeStatusType | null
+): number {
+  const base = ltvCeiling(residency, buyerStatus);
+  if (buyerStatus === "replacingHome" && existingHomeStatus && existingHomeStatus !== "sold") {
+    return Math.min(base, 0.5);
+  }
+  return base;
+}
+
 export interface PlanInputs {
   loanAmount: number;
   termYears: number;
@@ -261,9 +281,19 @@ const INVESTMENT_BRACKETS: TaxBracket[] = [
   { upTo: Infinity, rate: 0.1 },
 ];
 
-/** Oleh chadash benefit brackets (approximate). */
+/**
+ * Oleh chadash benefit brackets (approximate). Shares the same 0% entry
+ * bracket as a regular resident so the benefit is never worse than the
+ * regular schedule, then a genuinely reduced rate for a wide band, and a
+ * top rate below the regular schedule's 8%. An earlier version of this
+ * approximation used a flat 0.5% from the first shekel with no 0% floor,
+ * which made it quietly worse than the regular resident schedule at
+ * ordinary first time buyer prices, caught by the v3 verification pass,
+ * exactly backwards from the real world purpose of the benefit.
+ */
 const OLEH_BRACKETS: TaxBracket[] = [
-  { upTo: 1_988_090, rate: 0.005 },
+  { upTo: 1_978_745, rate: 0 },
+  { upTo: 6_055_070, rate: 0.005 },
   { upTo: Infinity, rate: 0.05 },
 ];
 

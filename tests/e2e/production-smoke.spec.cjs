@@ -71,6 +71,10 @@ test("full English flow: identity, income, down payment source, credit standing,
   await expect(page.locator('a[href*="leumi.co.il"]')).toBeVisible();
   await expect(page.getByText("VryfID LLC")).toBeVisible();
   await expect(page.getByText(/approved|preapproved|qualified/i)).toHaveCount(0);
+  // Default income/debt lands in the 40 to 50 percent DTI band, a warn,
+  // not a fail, so the prominent failure banner must stay hidden here.
+  await expect(page.locator("#root").getByText("comfort line banks typically use")).toBeVisible();
+  await expect(page.locator("#root").getByText("This doesn't meet every requirement yet.")).toHaveCount(0);
 
   expect(pageErrors).toEqual([]);
 });

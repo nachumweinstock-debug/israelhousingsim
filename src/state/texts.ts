@@ -162,11 +162,14 @@ export interface SimStrings {
   report: {
     confirmsTitle: string;
     stillNeedsTitle: string;
+    bannerHeading: string;
     identityLine: string;
-    dtiConfirmLine: string;
+    dtiPassLine: string;
     dtiWarningFriction: string;
     dtiWarningHard: string;
     downPaymentSourceConfirmLine: string;
+    ltvPassLine: string;
+    ltvFailLine: string;
     variableWithinLimitLine: string;
     variableOverLimitWarning: string;
     consistencyConfirmLine: string;
@@ -175,6 +178,12 @@ export interface SimStrings {
     paymentGrowNote: string;
     rateNoteUnderTable: string;
     bridgeCaution: string;
+    creditNotesTitle: string;
+    creditNotes: {
+      missedPayments: string;
+      collections: string;
+      bankruptcy: string;
+    };
     stillNeeds: {
       identityPending: string;
       credit: string;
@@ -461,13 +470,17 @@ const en: SimStrings = {
   report: {
     confirmsTitle: "What this confirms",
     stillNeedsTitle: "What the bank will still need",
+    bannerHeading: "This doesn't meet every requirement yet.",
     identityLine: "Identity verified via VryfID on {date}.",
-    dtiConfirmLine: "Income and payment to income ratio calculated: {dti}.",
+    dtiPassLine: "Payment to income is {dti}, comfortably within the practical comfort line banks use.",
     dtiWarningFriction:
       "Payment to income is {dti}, above the 40% comfort line banks typically use. Expect closer scrutiny or a smaller loan.",
     dtiWarningHard:
       "Payment to income is {dti}, above the Bank of Israel's 50% legal ceiling. This needs a smaller loan, more income, or less existing debt before it holds up.",
     downPaymentSourceConfirmLine: "Down payment source documented ({source}).",
+    ltvPassLine: "Loan to value is {ltv}, within the {ceiling} realistic for this scenario.",
+    ltvFailLine:
+      "Loan to value is {ltv}, above the {ceiling} realistic for this scenario. A smaller loan or more equity is needed before this holds up.",
     variableWithinLimitLine: "Loan mix within Bank of Israel's variable rate exposure limit.",
     variableOverLimitWarning:
       "This mix exceeds the two thirds Prime cap. Adjust it before treating this report as bank ready.",
@@ -479,6 +492,12 @@ const en: SimStrings = {
     rateNoteUnderTable: "Rates shown are illustrative and move weekly, confirm current rates with the bank.",
     bridgeCaution:
       "The current home hasn't sold yet, so the loan to value and purchase tax figures here assume the sale completes on schedule. Otherwise a bridge structure and the higher additional dwelling tax bracket apply temporarily.",
+    creditNotesTitle: "Self declared, for the bank's context",
+    creditNotes: {
+      missedPayments: "A missed payment in the last two years.",
+      collections: "An active collection.",
+      bankruptcy: "Bankruptcy history.",
+    },
     stillNeeds: {
       identityPending: "Identity verification, not completed in this session.",
       credit: "An independent credit bureau report, self declared answers here don't replace it.",
@@ -769,13 +788,16 @@ const he: SimStrings = {
   report: {
     confirmsTitle: "מה זה מאשר",
     stillNeedsTitle: "מה שהבנק עדיין יצטרך",
+    bannerHeading: "זה עדיין לא עומד בכל הדרישות.",
     identityLine: "הזהות אומתה דרך VryfID בתאריך {date}.",
-    dtiConfirmLine: "הכנסה ויחס החזר מהכנסה חושבו: {dti}.",
+    dtiPassLine: "יחס ההחזר מהכנסה הוא {dti}, בנוחות מתחת לקו הנוחות המקובל בבנקים.",
     dtiWarningFriction:
       "יחס ההחזר מהכנסה הוא {dti}, מעל קו הנוחות של 40% שהבנקים בדרך כלל משתמשים בו. צפו לבדיקה מוקפדת יותר או להלוואה קטנה יותר.",
     dtiWarningHard:
       "יחס ההחזר מהכנסה הוא {dti}, מעל התקרה החוקית של 50% של בנק ישראל. זה דורש הלוואה קטנה יותר, הכנסה גבוהה יותר, או פחות חוב קיים לפני שזה יחזיק מעמד.",
     downPaymentSourceConfirmLine: "מקור ההון העצמי תועד ({source}).",
+    ltvPassLine: "אחוז המימון הוא {ltv}, בתוך {ceiling} הריאליים לתרחיש הזה.",
+    ltvFailLine: "אחוז המימון הוא {ltv}, מעל {ceiling} הריאליים לתרחיש הזה. נדרשים הלוואה קטנה יותר או הון עצמי גדול יותר לפני שזה יחזיק מעמד.",
     variableWithinLimitLine: "התמהיל בתוך מגבלת החשיפה לריבית משתנה של בנק ישראל.",
     variableOverLimitWarning: "התמהיל הזה חורג ממגבלת הפריים של שני שליש. התאימו אותו לפני שמתייחסים לדוח כמוכן לבנק.",
     consistencyConfirmLine: "הנתונים עקביים פנימית בין המחיר, התמהיל, והעלויות.",
@@ -785,6 +807,12 @@ const he: SimStrings = {
     rateNoteUnderTable: "הריביות המוצגות הן להמחשה בלבד ומשתנות מדי שבוע, אמתו את הריבית העדכנית מול הבנק.",
     bridgeCaution:
       "הדירה הנוכחית עדיין לא נמכרה, אז אחוז המימון ומס הרכישה כאן מניחים שהמכירה תושלם בזמן. אחרת תחול זמנית הלוואת גישור ומדרגת המס הגבוהה יותר של דירה נוספת.",
+    creditNotesTitle: "הצהרה עצמית, לידיעת הבנק",
+    creditNotes: {
+      missedPayments: "פיגור בתשלום בשנתיים האחרונות.",
+      collections: "הליך גבייה פעיל.",
+      bankruptcy: "היסטוריה של פשיטת רגל.",
+    },
     stillNeeds: {
       identityPending: "אימות זהות, לא הושלם במהלך השימוש הזה.",
       credit: "דוח אשראי עצמאי, ההצהרה העצמית כאן לא מחליפה אותו.",
