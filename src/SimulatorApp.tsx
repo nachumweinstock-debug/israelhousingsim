@@ -115,7 +115,7 @@ function FlowChrome() {
                 </motion.button>
               ) : null}
             </AnimatePresence>
-            <NeonPoweredByBadge />
+            <PoweredByPill />
           </div>
           <div className="flex flex-1 justify-center">
             <motion.img
@@ -194,52 +194,66 @@ function scrollToFooter() {
   document.getElementById("site-footer")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-const NEON = "#39FF9B";
-
 /**
  * Header badge, mirrors the language toggle on the header's other side.
- * Deep green neon glow (a deliberate one-off exception to the cream/light
- * blue palette, per Nachum's explicit request) that pulses continuously.
- * Clicking scrolls down to the VryfID footer; the footer logo scrolls
- * back up (see VryfIDFooter.tsx).
+ * A direct port of the "Powered by VryfID" pill from vryfidvibes.com
+ * (client/src/App.jsx + index.css .powered-by-badge / badgeShimmer) —
+ * same deep teal gradient, amber glow border, amber dot, mint "Powered
+ * by" label, and the warm-to-teal shimmering "VryfID" wordmark. Clicking
+ * scrolls down to the VryfID footer; the footer logo scrolls back up.
  */
-function NeonPoweredByBadge() {
+function PoweredByPill() {
   return (
     <motion.button
       type="button"
       onClick={scrollToFooter}
-      aria-label="Powered by VryfID — jump to footer"
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.94 }}
-      animate={{
-        boxShadow: [
-          `0 0 3px ${NEON}88, 0 0 8px ${NEON}44`,
-          `0 0 8px ${NEON}dd, 0 0 20px ${NEON}88, 0 0 32px ${NEON}33`,
-          `0 0 3px ${NEON}88, 0 0 8px ${NEON}44`,
-        ],
-      }}
-      transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-      className="flex shrink-0 items-center gap-1.5 rounded-pill px-3 py-2"
+      aria-label="Powered by VryfID, jump to footer"
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.96 }}
+      transition={{ duration: 0.2 }}
+      className="flex shrink-0 items-center gap-[7px] rounded-pill"
       style={{
-        background: "#0A1F16",
-        border: `1px solid ${NEON}66`,
+        background: "linear-gradient(135deg, #0C3C38 0%, #115E59 100%)",
+        border: "1px solid rgba(251, 191, 36, 0.35)",
+        padding: "7px 16px 7px 11px",
+        boxShadow: "0 0 20px rgba(251, 191, 36, 0.18), inset 0 1px 0 rgba(255,255,255,0.08)",
       }}
     >
       <span
-        className="text-[11px] font-bold uppercase tracking-wide"
-        style={{ color: NEON, textShadow: `0 0 6px ${NEON}aa, 0 0 14px ${NEON}55` }}
-      >
-        VryfID
+        aria-hidden="true"
+        style={{
+          width: 7,
+          height: 7,
+          borderRadius: "50%",
+          background: "#FBBF24",
+          boxShadow: "0 0 8px #FBBF24",
+          flexShrink: 0,
+        }}
+      />
+      <span style={{ fontSize: 11, color: "#99F6E4", fontWeight: 500, letterSpacing: "0.3px" }}>
+        Powered by
       </span>
       <motion.span
-        aria-hidden="true"
-        animate={{ y: [0, 3, 0] }}
-        transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
-        style={{ color: NEON }}
-        className="text-[10px]"
+        style={{
+          fontSize: 13,
+          fontWeight: 800,
+          letterSpacing: "-0.2px",
+          backgroundImage:
+            "linear-gradient(110deg, #FEF3E4 20%, #FFB547 40%, #FF6B5B 48%, #FEF3E4 56%, #5EEAD4 65%, #FEF3E4 80%)",
+          backgroundSize: "200% auto",
+          WebkitBackgroundClip: "text",
+          backgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          color: "transparent",
+        }}
+        animate={{ backgroundPosition: ["-200% 50%", "200% 50%"] }}
+        transition={{ duration: 3.5, repeat: Infinity, ease: "linear" }}
       >
-        ▼
+        VryfID
       </motion.span>
+      <span aria-hidden="true" style={{ fontSize: 11, color: "#FBBF24", fontWeight: 700 }}>
+        ↗
+      </span>
     </motion.button>
   );
 }
