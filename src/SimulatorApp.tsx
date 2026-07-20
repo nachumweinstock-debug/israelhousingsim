@@ -182,6 +182,31 @@ function FlowChrome() {
         </FlowDirectionContext.Provider>
       </main>
 
+      <motion.a
+        href="https://www.vryfid.com/"
+        target="_blank"
+        rel="noreferrer"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        whileHover={{ y: -2, scale: 1.04 }}
+        whileTap={{ scale: 0.97 }}
+        className="fixed bottom-4 end-4 z-40 flex items-center gap-2 rounded-pill border border-hairline bg-card/95 py-2 pe-4 ps-2 shadow-liftHover backdrop-blur-sm print:hidden"
+      >
+        <img
+          src="/vryfid-logo.jpeg"
+          alt=""
+          aria-hidden="true"
+          className="h-6 w-6 rounded-pill object-cover"
+        />
+        <span className="text-[12px] font-semibold text-ink">
+          Powered by <span className="text-accent">VryfID</span>
+        </span>
+        <span aria-hidden="true" className="text-[11px] text-inkMuted">
+          ↗
+        </span>
+      </motion.a>
+
       <div className="mt-16 print:hidden" dir="ltr">
         <VryfIDFooter />
       </div>

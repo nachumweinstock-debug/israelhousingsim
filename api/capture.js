@@ -5,24 +5,25 @@
  * summary screen; stores the full answer set and computed results.
  * GET  /api/capture?key=ADMIN_KEY — returns the latest captures.
  *
- * Storage is Upstash Redis via its REST API (zero dependencies). The
- * Vercel marketplace Upstash integration injects KV_REST_API_URL and
- * KV_REST_API_TOKEN automatically; plain Upstash uses the UPSTASH_*
- * names. Without either, captures still land in the function logs so
- * nothing breaks before the store is provisioned.
+ * Primary store: the Railway Redis instance in the simcapture project,
+ * reached over its public TCP proxy via REDIS_URL. Falls back to the
+ * Upstash REST API when only KV_REST_API_URL/KV_REST_API_TOKEN (or
+ * UPSTASH_*) are configured. With no store at all, captures still land
+ * in the function logs so nothing breaks.
  */
+import Redis from "ioredis";
 
 const LIST_KEY = "simulations";
 const MAX_STORED = 5000;
 const MAX_PAYLOAD_BYTES = 10_000;
 
-function kvConfig() {
+function upstashConfig() {
   const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
   return url && token ? { url, token } : null;
 }
 
-async function kvCommand(config, command) {
+async function upstashCommand(config, command) {
   const response = await fetch(config.url, {
     method: "POST",
     headers: {
@@ -37,9 +38,52 @@ async function kvCommand(config, command) {
   return response.json();
 }
 
-export default async function handler(req, res) {
-  const config = kvConfig();
+/** Runs `fn(client)` against the Railway Redis and always disconnects. */
+async function withRedis(fn) {
+  const client = new Redis(process.env.REDIS_URL, {
+    connectTimeout: 5000,
+    maxRetriesPerRequest: 2,
+    lazyConnect: true,
+  });
+  try {
+    await client.connect();
+    return await fn(client);
+  } finally {
+    client.disconnect();
+  }
+}
 
+async function storePush(serialized) {
+  if (process.env.REDIS_URL) {
+    await withRedis(async (client) => {
+      await client.lpush(LIST_KEY, serialized);
+      await client.ltrim(LIST_KEY, 0, MAX_STORED - 1);
+    });
+    return "railway-redis";
+  }
+  const upstash = upstashConfig();
+  if (upstash) {
+    await upstashCommand(upstash, ["LPUSH", LIST_KEY, serialized]);
+    await upstashCommand(upstash, ["LTRIM", LIST_KEY, 0, MAX_STORED - 1]);
+    return "upstash";
+  }
+  return null;
+}
+
+async function storeRange(limit) {
+  if (process.env.REDIS_URL) {
+    const entries = await withRedis((client) => client.lrange(LIST_KEY, 0, limit - 1));
+    return { backend: "railway-redis", entries };
+  }
+  const upstash = upstashConfig();
+  if (upstash) {
+    const { result } = await upstashCommand(upstash, ["LRANGE", LIST_KEY, 0, limit - 1]);
+    return { backend: "upstash", entries: result ?? [] };
+  }
+  return { backend: null, entries: [] };
+}
+
+export default async function handler(req, res) {
   if (req.method === "POST") {
     const payload = req.body;
     if (!payload || typeof payload !== "object") {
@@ -59,14 +103,11 @@ export default async function handler(req, res) {
     }
 
     console.log("simulation_capture", serialized);
-    if (config) {
-      try {
-        await kvCommand(config, ["LPUSH", LIST_KEY, serialized]);
-        await kvCommand(config, ["LTRIM", LIST_KEY, 0, MAX_STORED - 1]);
-      } catch (error) {
-        // Log only; the user-facing flow must never notice a storage hiccup.
-        console.error("simulation_capture_store_failed", String(error));
-      }
+    try {
+      await storePush(serialized);
+    } catch (error) {
+      // Log only; the user-facing flow must never notice a storage hiccup.
+      console.error("simulation_capture_store_failed", String(error));
     }
     res.status(204).end();
     return;
@@ -78,24 +119,24 @@ export default async function handler(req, res) {
       res.status(401).json({ error: "unauthorized" });
       return;
     }
-    if (!config) {
+    const limit = Math.min(Number(req.query.limit) || 200, 1000);
+    const { backend, entries } = await storeRange(limit);
+    if (!backend) {
       res.status(200).json({
         configured: false,
-        note: "No Redis store configured yet. Add the Upstash integration in Vercel and captures will persist.",
+        note: "No Redis store configured. Set REDIS_URL (Railway) or the Upstash env vars.",
         entries: [],
       });
       return;
     }
-    const limit = Math.min(Number(req.query.limit) || 200, 1000);
-    const { result } = await kvCommand(config, ["LRANGE", LIST_KEY, 0, limit - 1]);
-    const entries = (result ?? []).map((item) => {
+    const parsed = entries.map((item) => {
       try {
         return JSON.parse(item);
       } catch {
         return { raw: item };
       }
     });
-    res.status(200).json({ configured: true, count: entries.length, entries });
+    res.status(200).json({ configured: true, backend, count: parsed.length, entries: parsed });
     return;
   }
 
