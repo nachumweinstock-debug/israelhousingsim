@@ -15,12 +15,13 @@ import { basketToMix } from "../src/engine/baskets";
 import { effectiveTermYears } from "../src/engine/validation";
 import { RULE_SET } from "../src/engine/rules";
 import type { Allocation, Assumptions, BorrowerProfile } from "../src/types";
-import { estimatePurchaseTax } from "../src/lib/mortgageMath";
+import { computePlan, estimatePurchaseTax } from "../src/lib/mortgageMath";
 import { SINGLE_HOME_BRACKETS, INVESTMENT_BRACKETS, NEW_IMMIGRANT_BRACKETS } from "../src/lib/purchaseTaxRates";
 import {
   computeBreakEvenRent,
   computeCashOnCashReturn,
   computeDscr,
+  computeRateSensitivity,
   computeRentalCashFlow,
 } from "../src/lib/investorMath";
 
@@ -316,6 +317,144 @@ console.log("\n[13] Investor math: rental cash flow, cash on cash return, break 
     "cash on cash return is never NaN/Infinity when no cash was invested",
     Number.isFinite(computeCashOnCashReturn(flow.netMonthlyCashFlow, 0))
   );
+}
+
+console.log("\n[14] Purchase tax exactly AT a bracket boundary falls entirely in the lower bracket, not the next one");
+{
+  // At price === upTo exactly, applyBracketsForTest's own loop condition
+  // (`if (price <= floor) break`) means the boundary shekel is the last
+  // one taxed by the CURRENT bracket; the next bracket never sees it.
+  // This is a distinct case from the ±1 continuity check in [12], which
+  // only proves the two sides are close, not which side the exact
+  // boundary value itself lands on.
+  check(
+    "single-home tax at the exact first boundary (1,978,745) is exactly 0, still fully exempt",
+    applyBracketsForTest(1_978_745, SINGLE_HOME_BRACKETS) === 0
+  );
+  check(
+    "single-home tax at the exact second boundary (2,347,040) is bracket1+bracket2 only, no 5% leaks in",
+    close(applyBracketsForTest(2_347_040, SINGLE_HOME_BRACKETS), (2_347_040 - 1_978_745) * 0.035, 1e-6)
+  );
+  check(
+    "investment-property tax at the exact boundary (6,055,070) is entirely at 8%, no 10% leaks in",
+    close(applyBracketsForTest(6_055_070, INVESTMENT_BRACKETS), 6_055_070 * 0.08, 1e-6)
+  );
+  check(
+    "new-immigrant tax at the exact boundary (1,988,090) is entirely at 0.5%, no 5% leaks in",
+    close(applyBracketsForTest(1_988_090, NEW_IMMIGRANT_BRACKETS), 1_988_090 * 0.005, 1e-6)
+  );
+}
+
+console.log("\n[15] Investor math edge cases: zero rent, 100% vacancy, negative cash flow, vacancy input clamping");
+{
+  const baseCosts = {
+    buildingInsuranceAnnual: 1_200,
+    useManagementCompany: true,
+    managementFeePct: 10,
+    maintenancePct: 5,
+    vacancyMonths: 0,
+  };
+
+  // Zero rent: every rent-derived figure should collapse to 0 (or a clean
+  // negative from costs alone), never NaN, and DSCR must stay 0, not
+  // divide-by-something-weird.
+  const zeroRent = computeRentalCashFlow(0, 6_000, 2_000_000, baseCosts);
+  check("zero rent: effective rent is 0", zeroRent.effectiveMonthlyRent === 0);
+  check("zero rent: management/maintenance fees (% of rent) are 0", zeroRent.managementFeeMonthly === 0 && zeroRent.maintenanceMonthly === 0);
+  check("zero rent: building insurance is unaffected (100)", close(zeroRent.buildingInsuranceMonthly, 100, 1e-9));
+  check("zero rent: net cash flow = -payment - insurance = -6,100", close(zeroRent.netMonthlyCashFlow, -6_100, 1e-9));
+  check("zero rent: gross yield is 0, not NaN", zeroRent.grossAnnualYieldPct === 0);
+  check("zero rent: DSCR is 0, not NaN", computeDscr(0, 6_000) === 0 && Number.isFinite(computeDscr(0, 6_000)));
+  check("zero rent: all outputs finite", Object.values(zeroRent).every((v) => Number.isFinite(v)));
+
+  // 100% vacancy (12 of 12 months): effective rent collapses to 0 just like
+  // zero rent, but gross yield must stay based on the FULL potential rent
+  // (the headline "if fully occupied" figure), not the vacancy-adjusted one.
+  const fullVacancy = computeRentalCashFlow(10_000, 6_000, 2_000_000, { ...baseCosts, vacancyMonths: 12 });
+  check("100% vacancy: effective rent is 0", close(fullVacancy.effectiveMonthlyRent, 0, 1e-9));
+  check("100% vacancy: vacancy loss equals the full monthly rent", close(fullVacancy.vacancyLossMonthly, 10_000, 1e-9));
+  check(
+    "100% vacancy: gross yield still reflects full potential rent (6%), unaffected by vacancy",
+    close(fullVacancy.grossAnnualYieldPct, 0.06, 1e-9)
+  );
+  check(
+    "100% vacancy: net yield is negative (only costs, no income)",
+    fullVacancy.netAnnualYieldPct < 0
+  );
+  check(
+    "100% vacancy: net cash flow is -payment - recurring costs (-7,600)",
+    close(fullVacancy.netMonthlyCashFlow, -7_600, 1e-9)
+  );
+
+  // Vacancy input clamping: values outside 0-12 must clamp, not silently
+  // produce a >100% or negative vacancy fraction.
+  const overVacancy = computeRentalCashFlow(10_000, 6_000, 2_000_000, { ...baseCosts, vacancyMonths: 15 });
+  const negVacancy = computeRentalCashFlow(10_000, 6_000, 2_000_000, { ...baseCosts, vacancyMonths: -3 });
+  check("vacancyMonths=15 clamps to 12 (same result as exactly 12)", close(overVacancy.effectiveMonthlyRent, fullVacancy.effectiveMonthlyRent, 1e-9));
+  check("vacancyMonths=-3 clamps to 0 (no vacancy loss)", negVacancy.vacancyLossMonthly === 0);
+
+  // A dedicated negative-cash-flow scenario distinct from the extremes
+  // above: ordinary rent and costs, but the mortgage payment exceeds them,
+  // so every downstream metric must carry a coherent negative sign, not
+  // just "less positive."
+  const negativeFlow = computeRentalCashFlow(5_000, 8_000, 1_500_000, {
+    buildingInsuranceAnnual: 1_200,
+    useManagementCompany: false,
+    managementFeePct: 0,
+    maintenancePct: 5,
+    vacancyMonths: 0,
+  });
+  check("negative cash flow scenario: net monthly cash flow is -3,350", close(negativeFlow.netMonthlyCashFlow, -3_350, 1e-9));
+  const negativeCashOnCash = computeCashOnCashReturn(negativeFlow.netMonthlyCashFlow, 400_000);
+  check("negative cash flow: cash on cash return is negative (-10.05%)", close(negativeCashOnCash, -0.1005, 1e-4));
+  check(
+    "negative cash flow: break even rent is still a plain positive figure (8,350), independent of actual rent",
+    close(computeBreakEvenRent(8_000, negativeFlow.recurringMonthlyCosts), 8_350, 1e-9)
+  );
+  check(
+    "negative cash flow: DSCR below 1 correctly signals rent doesn't cover the payment alone (0.625)",
+    close(computeDscr(5_000, 8_000), 0.625, 1e-9)
+  );
+}
+
+console.log("\n[16] Rate sensitivity isolates the shock to the Prime leg only, verified independently against spitzerPayment (not just the function's own internals), even with a mixed multi-track mix");
+{
+  const planInputs = {
+    loanAmount: 1_400_000,
+    termYears: 25,
+    mix: { prime: 33, kalatz: 34, katz: 33 },
+    inflation: "medium" as const,
+  };
+  const baseline = computePlan(planInputs);
+  const primeTrack = getTrack("prime");
+  const primeAmount = 1_400_000 * 0.33;
+  const termMonths = 25 * 12;
+
+  const kalatzPayment = baseline.perTrack.find((t) => t.track === "kalatz")!.monthlyPayment;
+  const katzPayment = baseline.perTrack.find((t) => t.track === "katz")!.monthlyPayment;
+  const expectedPrimeUp = spitzerPayment(primeAmount, primeTrack.defaultAnnualRate + 0.01, termMonths);
+  const expectedPrimeDown = spitzerPayment(primeAmount, primeTrack.defaultAnnualRate - 0.01, termMonths);
+  const expectedTotalUp = kalatzPayment + katzPayment + expectedPrimeUp;
+  const expectedTotalDown = kalatzPayment + katzPayment + expectedPrimeDown;
+
+  const sensitivity = computeRateSensitivity(planInputs, 10_000, 1_600);
+  const up = sensitivity.find((p) => p.shockPoints === 1)!;
+  const down = sensitivity.find((p) => p.shockPoints === -1)!;
+  const flat = sensitivity.find((p) => p.shockPoints === 0)!;
+
+  check(
+    "+1 point: total payment matches kalatz+katz (unshocked) + prime shocked up, independently recomputed",
+    close(up.monthlyPayment, expectedTotalUp, 1e-6),
+    `got=${up.monthlyPayment.toFixed(2)} want=${expectedTotalUp.toFixed(2)}`
+  );
+  check(
+    "-1 point: total payment matches kalatz+katz (unshocked) + prime shocked down, independently recomputed",
+    close(down.monthlyPayment, expectedTotalDown, 1e-6),
+    `got=${down.monthlyPayment.toFixed(2)} want=${expectedTotalDown.toFixed(2)}`
+  );
+  check("0 points: matches the plain computePlan baseline", close(flat.monthlyPayment, baseline.monthlyPayment, 1e-9));
+  check("payment strictly increases as the shock increases (-1 < 0 < +1)", down.monthlyPayment < flat.monthlyPayment && flat.monthlyPayment < up.monthlyPayment);
+  check("net cash flow strictly decreases as the shock increases", up.netMonthlyCashFlow < flat.netMonthlyCashFlow && flat.netMonthlyCashFlow < down.netMonthlyCashFlow);
 }
 
 console.log(failures === 0 ? "\nAll engine invariants hold." : `\n${failures} FAILURE(S)`);

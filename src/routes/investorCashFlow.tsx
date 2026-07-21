@@ -88,11 +88,14 @@ export function InvestorCashFlow() {
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               className="overflow-hidden"
             >
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-[14px] font-semibold text-inkMuted">
+              {/* min-w-0 lets the label shrink and wrap on a narrow
+                  viewport instead of the flex item's default min-width:auto
+                  forcing the row to overflow. */}
+              <div className="flex items-start justify-between gap-3">
+                <p className="min-w-0 flex-1 text-[14px] font-semibold text-inkMuted">
                   {s.investor.managementFeeLabel}
                 </p>
-                <p className="text-[15px] font-bold tabular-nums text-ink" dir="ltr">
+                <p className="shrink-0 whitespace-nowrap text-[15px] font-bold tabular-nums text-ink" dir="ltr">
                   {investor.managementFeePct}%
                 </p>
               </div>
@@ -112,9 +115,9 @@ export function InvestorCashFlow() {
       </Reveal>
 
       <Reveal className="rounded-3xl border border-hairline bg-card p-6 shadow-lift">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-[15px] font-semibold text-ink">{s.investor.maintenanceLabel}</p>
-          <p className="text-[15px] font-bold tabular-nums text-ink" dir="ltr">
+        <div className="flex items-start justify-between gap-3">
+          <p className="min-w-0 flex-1 text-[15px] font-semibold text-ink">{s.investor.maintenanceLabel}</p>
+          <p className="shrink-0 whitespace-nowrap text-[15px] font-bold tabular-nums text-ink" dir="ltr">
             {investor.maintenancePct}%
           </p>
         </div>
@@ -137,9 +140,9 @@ export function InvestorCashFlow() {
             setShowVacancy(next);
             if (!next) setInvestor({ vacancyMonths: 0 });
           }}
-          className="flex w-full items-center justify-between text-start"
+          className="flex w-full items-center justify-between gap-3 text-start"
         >
-          <span className="text-[15px] font-semibold text-ink">{s.investor.vacancyToggle}</span>
+          <span className="min-w-0 flex-1 text-[15px] font-semibold text-ink">{s.investor.vacancyToggle}</span>
           <span
             aria-hidden="true"
             className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-pill border border-hairline text-[13px] font-bold text-inkMuted transition-transform ${

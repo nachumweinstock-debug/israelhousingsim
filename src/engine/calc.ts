@@ -119,7 +119,18 @@ function variableResetResult(
     trackId: track.id,
     allocationAmount: amount,
     paymentToday,
-    paymentStressed: Math.max(paymentToday, paymentAtResetStressed),
+    // Before: Math.max(paymentToday, paymentAtResetStressed) floored the
+    // stressed payment at today's payment, a no-op for every existing
+    // caller (stressShockPoints is always >= 0 there, and a rate increase
+    // can only raise the Spitzer payment). It silently broke investor
+    // mode's rate-sensitivity table, which calls this with a genuinely
+    // negative shockPoints for the "1 point lower" scenario: the clamp
+    // pinned that case back to today's payment instead of showing the
+    // real, lower one. It was also already inconsistent with
+    // totalInterestStressed just below, which was never clamped. After:
+    // paymentAtResetStressed directly, consistent with totalInterestStressed
+    // and correct for shocks in either direction.
+    paymentStressed: paymentAtResetStressed,
     totalInterestBaseline: preResetInterest + postResetInterestBaseline,
     totalInterestStressed: preResetInterest + postResetInterestStressed,
   };

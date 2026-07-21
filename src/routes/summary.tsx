@@ -547,7 +547,19 @@ export function Summary() {
                       : "border-warn/30 bg-warn/10"
                   }`}
                 >
-                  <p className="text-[13px] font-semibold uppercase tracking-wide text-inkMuted">
+                  {/* Color alone shouldn't carry the pass/fail signal (fails
+                      for colorblind users): the +/- sign and the differing
+                      note sentence already say it in words, and this icon
+                      adds a third, language-independent cue at a glance,
+                      matching the ✓/✕/! icons the checks list already uses
+                      for the same reason. */}
+                  <p className="flex items-center gap-1.5 text-[13px] font-semibold uppercase tracking-wide text-inkMuted">
+                    <span
+                      aria-hidden="true"
+                      className={`text-[15px] ${investorModel.netMonthlyCashFlow >= 0 ? "text-good" : "text-warn"}`}
+                    >
+                      {investorModel.netMonthlyCashFlow >= 0 ? "▲" : "▼"}
+                    </span>
                     {s.investorReport.cashFlowLabel}
                   </p>
                   <p
@@ -607,11 +619,11 @@ export function Summary() {
                 </div>
 
                 <div className="mt-4 rounded-2xl border border-hairline bg-cream p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-[12px] font-semibold uppercase tracking-wide text-inkMuted">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="min-w-0 flex-1 text-[12px] font-semibold uppercase tracking-wide text-inkMuted">
                       {s.investorReport.dscrLabel}
                     </p>
-                    <p className="text-[18px] font-bold text-ink" dir="ltr">
+                    <p className="shrink-0 whitespace-nowrap text-[18px] font-bold text-ink" dir="ltr">
                       {investorModel.dscr.toFixed(2)}
                     </p>
                   </div>
@@ -621,11 +633,11 @@ export function Summary() {
                 </div>
 
                 <div className="mt-4 rounded-2xl border border-accentSoft bg-accentSoft/25 p-4">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-[12px] font-semibold uppercase tracking-wide text-inkMuted">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="min-w-0 flex-1 text-[12px] font-semibold uppercase tracking-wide text-inkMuted">
                       {s.investorReport.totalCashNeededLabel}
                     </p>
-                    <p className="text-[18px] font-bold text-ink" dir="ltr">
+                    <p className="shrink-0 whitespace-nowrap text-[18px] font-bold text-ink" dir="ltr">
                       {formatShekels(investorModel.totalCashNeeded)}
                     </p>
                   </div>
@@ -638,34 +650,42 @@ export function Summary() {
                   <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-inkMuted">
                     {s.investorReport.recurringCostsTitle}
                   </p>
-                  <ul className="space-y-1 text-[13px] text-inkMuted">
-                    <li className="flex items-center justify-between">
-                      <span>{s.investor.insuranceLabel}</span>
-                      <span dir="ltr">
+                  {/* Before: each <span> label had no min-w-0, so on a
+                      narrow viewport the flex item's implicit min-width:auto
+                      refused to shrink below its own unwrapped text width
+                      (e.g. the maintenance label, long in both languages),
+                      overflowing the row instead of wrapping. After: the
+                      label takes the flexible remaining space and is allowed
+                      to shrink and wrap; the value stays a fixed-width,
+                      non-wrapping sibling since it's always short. */}
+                  <ul className="space-y-1.5 text-[13px] text-inkMuted">
+                    <li className="flex items-start justify-between gap-3">
+                      <span className="min-w-0 flex-1">{s.investor.insuranceLabel}</span>
+                      <span className="shrink-0 whitespace-nowrap" dir="ltr">
                         {formatShekels(investorModel.buildingInsuranceMonthly)}
                         {s.summary.perMonth}
                       </span>
                     </li>
                     {state.investor.useManagementCompany ? (
-                      <li className="flex items-center justify-between">
-                        <span>{s.investor.managementFeeLabel}</span>
-                        <span dir="ltr">
+                      <li className="flex items-start justify-between gap-3">
+                        <span className="min-w-0 flex-1">{s.investor.managementFeeLabel}</span>
+                        <span className="shrink-0 whitespace-nowrap" dir="ltr">
                           {formatShekels(investorModel.managementFeeMonthly)}
                           {s.summary.perMonth}
                         </span>
                       </li>
                     ) : null}
-                    <li className="flex items-center justify-between">
-                      <span>{s.investor.maintenanceLabel}</span>
-                      <span dir="ltr">
+                    <li className="flex items-start justify-between gap-3">
+                      <span className="min-w-0 flex-1">{s.investor.maintenanceLabel}</span>
+                      <span className="shrink-0 whitespace-nowrap" dir="ltr">
                         {formatShekels(investorModel.maintenanceMonthly)}
                         {s.summary.perMonth}
                       </span>
                     </li>
                     {state.investor.vacancyMonths > 0 ? (
-                      <li className="flex items-center justify-between">
-                        <span>{s.investorReport.vacancyLossLabel}</span>
-                        <span dir="ltr">
+                      <li className="flex items-start justify-between gap-3">
+                        <span className="min-w-0 flex-1">{s.investorReport.vacancyLossLabel}</span>
+                        <span className="shrink-0 whitespace-nowrap" dir="ltr">
                           -{formatShekels(investorModel.vacancyLossMonthly)}
                           {s.summary.perMonth}
                         </span>
