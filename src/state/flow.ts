@@ -1,9 +1,11 @@
 /**
- * Ordered definition of the question flow. Two steps are conditional:
- * aliyahDetails only exists when residency is "oleh", and
- * existingHomeStatus only exists when buyerStatus is "replacingHome".
- * Every navigation and progress computation goes through here so both
- * branches are skipped cleanly everywhere at once.
+ * Ordered definition of the question flow. Three steps are conditional:
+ * aliyahDetails only exists when residency is "oleh",
+ * existingHomeStatus only exists when buyerStatus is "replacingHome", and
+ * investorCashFlow (rental cash flow inputs, investor mode) only exists
+ * when buyerStatus is "investment". Every navigation and progress
+ * computation goes through here so all three branches are skipped
+ * cleanly everywhere at once.
  */
 import type { BuyerStatus, Residency } from "../lib/mortgageMath";
 
@@ -20,6 +22,7 @@ export const ALL_STEPS = [
   "term",
   "trackMix",
   "costs",
+  "investorCashFlow",
   "creditStanding",
   "summary",
 ] as const;
@@ -39,6 +42,7 @@ export function visibleSteps(ctx: FlowContext): StepId[] {
   return ALL_STEPS.filter((step) => {
     if (step === "aliyahDetails") return ctx.residency === "oleh";
     if (step === "existingHomeStatus") return ctx.buyerStatus === "replacingHome";
+    if (step === "investorCashFlow") return ctx.buyerStatus === "investment";
     return true;
   });
 }

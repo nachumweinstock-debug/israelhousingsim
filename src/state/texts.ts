@@ -145,6 +145,44 @@ export interface SimStrings {
     no: string;
     disclosureNote: string;
   };
+  investor: {
+    title: string;
+    helper: string;
+    rentLabel: string;
+    rentNote: string;
+    insuranceLabel: string;
+    insuranceNote: string;
+    managementToggle: string;
+    managementFeeLabel: string;
+    maintenanceLabel: string;
+    maintenanceNote: string;
+    vacancyToggle: string;
+    vacancyLabel: string;
+    vacancyUnit: string;
+    vacancyNote: string;
+  };
+  investorReport: {
+    sectionTitle: string;
+    cashFlowLabel: string;
+    cashFlowPositiveNote: string;
+    cashFlowNegativeNote: string;
+    grossYieldLabel: string;
+    netYieldLabel: string;
+    cashOnCashLabel: string;
+    cashOnCashNote: string;
+    breakEvenRentLabel: string;
+    dscrLabel: string;
+    dscrNote: string;
+    totalCashNeededLabel: string;
+    totalCashNeededSub: string;
+    recurringCostsTitle: string;
+    vacancyLossLabel: string;
+    rateSensitivityTitle: string;
+    rateSensitivityNote: string;
+    rateLower: string;
+    rateEntered: string;
+    rateHigher: string;
+  };
   report: {
     confirmsTitle: string;
     stillNeedsTitle: string;
@@ -435,6 +473,47 @@ const en: SimStrings = {
     disclosureNote:
       "These answers aren't scored or verified here. Your bank will pull an independent credit report regardless of what you enter.",
   },
+  investor: {
+    title: "The rental numbers.",
+    helper:
+      "Since you told us this is an investment property, here's the cash flow math a generic mortgage calculator skips entirely.",
+    rentLabel: "Expected monthly rent",
+    rentNote: "Your own estimate, we don't have a neighborhood rent data source to pull from.",
+    insuranceLabel: "Building insurance (annual)",
+    insuranceNote: "An editable estimate, real premiums vary by property value, age, and location.",
+    managementToggle: "Will a property management company handle this?",
+    managementFeeLabel: "Management fee (% of monthly rent)",
+    maintenanceLabel: "Maintenance & repair reserve (% of annual rent)",
+    maintenanceNote: "An editable estimate, this varies widely by property age and condition.",
+    vacancyToggle: "Model vacant months? (advanced)",
+    vacancyLabel: "Vacant months per year",
+    vacancyUnit: "months",
+    vacancyNote: "Optional. Leave at 0 to assume full occupancy year round.",
+  },
+  investorReport: {
+    sectionTitle: "Rental cash flow",
+    cashFlowLabel: "Net monthly cash flow",
+    cashFlowPositiveNote: "Rent covers the mortgage payment and recurring costs, with this much left over.",
+    cashFlowNegativeNote: "Rent falls short of the mortgage payment and recurring costs by this much each month.",
+    grossYieldLabel: "Gross annual rental yield",
+    netYieldLabel: "Net annual rental yield",
+    cashOnCashLabel: "Cash on cash return",
+    cashOnCashNote: "Net annual cash flow over the actual cash you put in, usually more meaningful than yield once leverage is involved.",
+    breakEvenRentLabel: "Break even rent",
+    dscrLabel: "Debt service coverage ratio (DSCR)",
+    dscrNote:
+      "Rent divided by the mortgage payment. Israeli banks often reference something like this when underwriting an investment property loan, and typically require a lower loan to value ratio on a second property than on a primary residence, this varies by bank.",
+    totalCashNeededLabel: "Total cash needed at closing",
+    totalCashNeededSub: "Down payment, purchase tax, legal fees, and agent commission, the liquid cash you'll actually need.",
+    recurringCostsTitle: "Recurring costs beyond the mortgage",
+    vacancyLossLabel: "Vacancy loss",
+    rateSensitivityTitle: "If the rate moves",
+    rateSensitivityNote:
+      "Only the Prime portion of your mix reprices here, the same convention as the stress test above, fixed tracks don't move.",
+    rateLower: "1 point lower",
+    rateEntered: "As entered",
+    rateHigher: "1 point higher",
+  },
   report: {
     confirmsTitle: "What this confirms",
     stillNeedsTitle: "What the bank will still need",
@@ -600,7 +679,12 @@ const he: SimStrings = {
     yearsQuestion: "כמה שנים עברו מאז העלייה?",
     yearUnit: "שנה",
     yearsUnit: "שנים",
-    lateWindowNote: "אחרי {years} שנים, חלק מחלונות ההטבה אולי נסגרים, כדאי לוודא אילו תוכניות עדיין רלוונטיות.",
+    // Before: "חלק מחלונות ההטבה אולי נסגרים" is a literal calque of the
+    // English "benefit windows may be closing" idiom, not how this is
+    // phrased in Hebrew. After: "חלק מההטבות עשויות לפוג" ("some benefits
+    // may expire/lapse") is the natural way an Israeli mortgage advisor
+    // would put it.
+    lateWindowNote: "אחרי {years} שנים, חלק מההטבות עשויות לפוג, כדאי לוודא אילו תוכניות עדיין רלוונטיות עבורכם.",
     ownedQuestion: "האם הייתה בבעלותכם דירה בישראל בעבר?",
     ownedNote: "בעלות על נכס ב־10 השנים האחרונות משפיעה על הזכאות להלוואת זכאות ממשלתית.",
     yes: "כן",
@@ -631,8 +715,15 @@ const he: SimStrings = {
   },
   incomeDebt: {
     title: "הכנסה וחובות קיימים.",
+    // Before: "מההכנסה הפנויה של משק הבית" uses "הכנסה פנויה", which in
+    // Hebrew financial usage means "disposable income" (income after tax
+    // AND after fixed expenses), a different concept from what the DTI
+    // ceiling is actually measured against. After: "מההכנסה נטו" (net
+    // income) matches the real Bank of Israel PTI definition and is now
+    // consistent with incomeLabel below, which already correctly says
+    // "הכנסה נטו".
     helper:
-      "בנק ישראל מגביל את ההחזר הכולל ל־50% מההכנסה הפנויה של משק הבית, והבנקים בדרך כלל רוצים שזה יהיה בנוחות מתחת ל־40% כדי לזוז בלי חיכוך. זו המגבלה האמיתית, יותר ממחיר הנכס.",
+      "בנק ישראל מגביל את ההחזר הכולל ל־50% מההכנסה נטו של משק הבית, והבנקים בדרך כלל רוצים שזה יהיה בנוחות מתחת ל־40% כדי לזוז בלי חיכוך. זו המגבלה האמיתית, יותר ממחיר הנכס.",
     incomeLabel: "הכנסה נטו חודשית של משק הבית (לווה ראשי)",
     coApplicantToggle: "יש לווה נוסף?",
     coApplicantIncomeLabel: "הכנסה נטו חודשית של הלווה הנוסף",
@@ -644,7 +735,13 @@ const he: SimStrings = {
       "עצמאים בדרך כלל צריכים דוחות מס ומכתב רואה חשבון, הבנקים מתמחרים את הסיכון הזה קצת אחרת.",
     tenureLabel: "כמה שנים אצל המעסיק הנוכחי או בעסק",
     tenureNoteShort: "פחות משנה או שנתיים בעבודה יכול להקשות מול חלק מהבנקים, שידרשו וותק ארוך יותר.",
-    debtLabel: "חובות חודשיים קיימים",
+    // Before: "חובות חודשיים קיימים" ("existing monthly debts") is
+    // colloquial. After: "התחייבויות חודשיות קיימות" ("existing monthly
+    // obligations") is the precise term used on an actual Israeli bank
+    // mortgage application (הצהרת התחייבויות), and reads more naturally
+    // alongside debtNote's list of things that aren't strictly "loans"
+    // (alimony, credit lines).
+    debtLabel: "התחייבויות חודשיות קיימות",
     debtNote: "הלוואת רכב, הלוואות אחרות, מסגרות אשראי, מזונות, כל דבר עם החזר חודשי קבוע.",
   },
   price: {
@@ -736,6 +833,45 @@ const he: SimStrings = {
     yes: "כן",
     no: "לא",
     disclosureNote: "התשובות האלה לא מדורגות ולא נבדקות כאן. הבנק שלכם יבצע בדיקת אשראי עצמאית בכל מקרה.",
+  },
+  investor: {
+    title: "המספרים של ההשכרה.",
+    helper: "מאחר שסיפרתם לנו שזו דירה להשקעה, הנה חישוב תזרים המזומנים שמחשבון משכנתא רגיל מדלג עליו לגמרי.",
+    rentLabel: "שכר דירה חודשי צפוי",
+    rentNote: "הערכה שלכם, אין לנו מקור נתונים על שכר דירה באזור לשלוף ממנו.",
+    insuranceLabel: "ביטוח מבנה (שנתי)",
+    insuranceNote: "הערכה הניתנת לעריכה, הפרמיה בפועל משתנה לפי שווי הנכס, גילו ומיקומו.",
+    managementToggle: "חברת ניהול תטפל בנכס?",
+    managementFeeLabel: "דמי ניהול (% משכר הדירה החודשי)",
+    maintenanceLabel: "קרן תחזוקה ותיקונים (% משכר הדירה השנתי)",
+    maintenanceNote: "הערכה הניתנת לעריכה, זה משתנה מאוד לפי גיל הנכס ומצבו.",
+    vacancyToggle: "לשקלל תקופות אי־איכלוס? (מתקדם)",
+    vacancyLabel: "חודשי אי־איכלוס בשנה",
+    vacancyUnit: "חודשים",
+    vacancyNote: "אופציונלי. השאירו על 0 כדי להניח איכלוס מלא לאורך כל השנה.",
+  },
+  investorReport: {
+    sectionTitle: "תזרים מזומנים מהשכרה",
+    cashFlowLabel: "תזרים מזומנים חודשי נטו",
+    cashFlowPositiveNote: "שכר הדירה מכסה את החזר המשכנתא והעלויות השוטפות, וזה מה שנשאר מעבר לכך.",
+    cashFlowNegativeNote: "שכר הדירה לא מספיק לכיסוי החזר המשכנתא והעלויות השוטפות בסכום הזה מדי חודש.",
+    grossYieldLabel: "תשואת שכירות שנתית ברוטו",
+    netYieldLabel: "תשואת שכירות שנתית נטו",
+    cashOnCashLabel: "תשואה על ההון העצמי (Cash on Cash)",
+    cashOnCashNote: "תזרים המזומנים השנתי נטו חלקי המזומן שהושקע בפועל, בדרך כלל אינדיקטור משמעותי יותר מתשואה גולמית ברגע שיש מינוף.",
+    breakEvenRentLabel: "שכר דירה לאיזון",
+    dscrLabel: "יחס כיסוי שירות החוב (DSCR)",
+    dscrNote:
+      "שכר הדירה חלקי החזר המשכנתא. בנקים בישראל לעיתים קרובות מתייחסים למדד דומה לזה בחיתום הלוואה לנכס להשקעה, ובדרך כלל דורשים אחוז מימון נמוך יותר לדירה שנייה לעומת דירת מגורים ראשונה, זה משתנה בין בנקים.",
+    totalCashNeededLabel: "סך המזומן הנדרש בסגירה",
+    totalCashNeededSub: "הון עצמי, מס רכישה, שכר טרחת עורך דין ודמי תיווך, המזומן הנזיל שתצטרכו בפועל.",
+    recurringCostsTitle: "עלויות שוטפות מעבר למשכנתא",
+    vacancyLossLabel: "אובדן הכנסה מאי־איכלוס",
+    rateSensitivityTitle: "אם הריבית זזה",
+    rateSensitivityNote: "רק חלק הפריים בתמהיל שלכם משתנה כאן, אותה קונבנציה כמו במבחן הלחץ למעלה, מסלולים בריבית קבועה לא זזים.",
+    rateLower: "נקודה אחת נמוך יותר",
+    rateEntered: "כפי שהוזן",
+    rateHigher: "נקודה אחת גבוה יותר",
   },
   report: {
     confirmsTitle: "מה זה מאשר",

@@ -10,10 +10,17 @@
     <link rel="alternate" href="https://israelhousingsim.vercel.app/" hreflang="he" />
     <link rel="alternate" href="https://israelhousingsim.vercel.app/" hreflang="x-default" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- This app manages its own EN/HE toggle and RTL direction (see
+         src/i18n.tsx). Chrome's automatic page translator doesn't know
+         that: it can translate the Hebrew UI to English while dir="rtl"
+         stays applied from the app's own language state, producing a
+         mismatched half-translated, wrongly-directioned page. Opting out
+         here avoids that fight entirely. -->
+    <meta name="google" content="notranslate" />
     <meta name="theme-color" content="#5B9BD5" />
     <meta name="application-name" content="VryfID Mortgage Readiness Check" />
     <meta name="apple-mobile-web-app-title" content="VryfID Mortgage" />
-    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="robots" content="index, follow, max-image-preview:large, notranslate" />
     <meta name="googlebot" content="index, follow" />
     <title>VryfID Mortgage Readiness Check | Israel Mortgage Approval Simulator</title>
     <meta name="description" content="Check whether an Israeli mortgage is bank-ready. Model property price, equity, income, debt, borrower age, LTV, PTI, term caps, and required loan mix rules before speaking with a bank." />

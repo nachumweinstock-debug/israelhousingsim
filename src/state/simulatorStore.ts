@@ -16,6 +16,7 @@ import type {
   Residency,
   TrackMix,
 } from "../lib/mortgageMath";
+import type { InvestorRecurringCostInputs } from "../lib/investorMath";
 
 export interface IncomeAnswers {
   applicantIncome: number;
@@ -38,6 +39,11 @@ export interface CreditStandingAnswers {
   bankruptcy: boolean | null;
 }
 
+/** Only collected and only shown when buyerStatus === "investment". */
+export interface InvestorAnswers extends InvestorRecurringCostInputs {
+  monthlyRent: number;
+}
+
 export interface SimulatorAnswers {
   residency: Residency | null;
   aliyahYears: number;
@@ -53,6 +59,7 @@ export interface SimulatorAnswers {
   inflation: InflationScenario;
   costs: CostInputs;
   creditStanding: CreditStandingAnswers;
+  investor: InvestorAnswers;
 }
 
 interface SimulatorStore extends SimulatorAnswers {
@@ -70,6 +77,7 @@ interface SimulatorStore extends SimulatorAnswers {
   setInflation: (value: InflationScenario) => void;
   setCosts: (value: Partial<CostInputs>) => void;
   setCreditStanding: (value: Partial<CreditStandingAnswers>) => void;
+  setInvestor: (value: Partial<InvestorAnswers>) => void;
   reset: () => void;
 }
 
@@ -95,6 +103,14 @@ const initialAnswers: SimulatorAnswers = {
   inflation: "medium",
   costs: { purchaseTaxOverride: null, legalPct: 1.5, agentPct: 2, otherFees: 7_500 },
   creditStanding: { missedPayments: null, collections: null, bankruptcy: null },
+  investor: {
+    monthlyRent: 6_000,
+    buildingInsuranceAnnual: 1_500,
+    useManagementCompany: false,
+    managementFeePct: 8,
+    maintenancePct: 5,
+    vacancyMonths: 0,
+  },
 };
 
 export const useSimulatorStore = create<SimulatorStore>((set) => ({
@@ -120,6 +136,7 @@ export const useSimulatorStore = create<SimulatorStore>((set) => ({
   setCosts: (costs) => set((state) => ({ costs: { ...state.costs, ...costs } })),
   setCreditStanding: (creditStanding) =>
     set((state) => ({ creditStanding: { ...state.creditStanding, ...creditStanding } })),
+  setInvestor: (investor) => set((state) => ({ investor: { ...state.investor, ...investor } })),
   reset: () => set({ ...initialAnswers }),
 }));
 

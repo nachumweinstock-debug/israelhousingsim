@@ -10,6 +10,7 @@ import type { PrintMode } from "../components/PrintPlan";
 import { formatPct, formatShekels } from "../lib/mortgageMath";
 import type { TrackKey } from "../lib/mortgageMath";
 import { buildReportModel } from "../lib/reportModel";
+import { buildInvestorReportModel } from "../lib/investorReportModel";
 import { fmt } from "../i18n";
 import { useSimulatorStore } from "../state/simulatorStore";
 import { useSimLang } from "../state/useSimLang";
@@ -270,6 +271,13 @@ export function Summary() {
     creditNotes,
   } = model;
 
+  const investorModel = buildInvestorReportModel(
+    state,
+    { loanAmount, termYears: state.termYears, mix: state.mix, inflation: state.inflation },
+    plan.monthlyPayment,
+    cashToClose
+  );
+
   // One anonymous capture per summary visit, the inputs and computed
   // results are the product signal this demo exists to collect. No name
   // or identifying number is ever collected anywhere in this flow.
@@ -522,6 +530,192 @@ export function Summary() {
                 {s.report.rateNoteUnderTable}
               </p>
             </motion.div>
+
+            {investorModel ? (
+              <motion.div
+                variants={cardReveal}
+                className="mt-5 rounded-3xl border border-hairline bg-card p-6 shadow-lift"
+              >
+                <p className="text-[13px] font-semibold uppercase tracking-wide text-inkMuted">
+                  {s.investorReport.sectionTitle}
+                </p>
+
+                <div
+                  className={`mt-3 rounded-2xl border p-5 ${
+                    investorModel.netMonthlyCashFlow >= 0
+                      ? "border-good/30 bg-good/10"
+                      : "border-warn/30 bg-warn/10"
+                  }`}
+                >
+                  <p className="text-[13px] font-semibold uppercase tracking-wide text-inkMuted">
+                    {s.investorReport.cashFlowLabel}
+                  </p>
+                  <p
+                    className={`mt-1.5 text-[28px] font-bold tabular-nums ${
+                      investorModel.netMonthlyCashFlow >= 0 ? "text-good" : "text-warn"
+                    }`}
+                    dir="ltr"
+                  >
+                    {investorModel.netMonthlyCashFlow >= 0 ? "+" : ""}
+                    {formatShekels(investorModel.netMonthlyCashFlow)}
+                    {s.summary.perMonth}
+                  </p>
+                  <p className="mt-1 text-[12px] leading-snug text-inkMuted">
+                    {investorModel.netMonthlyCashFlow >= 0
+                      ? s.investorReport.cashFlowPositiveNote
+                      : s.investorReport.cashFlowNegativeNote}
+                  </p>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl border border-hairline bg-cream p-4">
+                    <p className="text-[12px] font-semibold uppercase tracking-wide text-inkMuted">
+                      {s.investorReport.grossYieldLabel}
+                    </p>
+                    <p className="mt-1 text-[20px] font-bold text-ink" dir="ltr">
+                      {formatPct(investorModel.grossAnnualYieldPct, 1)}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-hairline bg-cream p-4">
+                    <p className="text-[12px] font-semibold uppercase tracking-wide text-inkMuted">
+                      {s.investorReport.netYieldLabel}
+                    </p>
+                    <p className="mt-1 text-[20px] font-bold text-ink" dir="ltr">
+                      {formatPct(investorModel.netAnnualYieldPct, 1)}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-hairline bg-cream p-4">
+                    <p className="text-[12px] font-semibold uppercase tracking-wide text-inkMuted">
+                      {s.investorReport.cashOnCashLabel}
+                    </p>
+                    <p className="mt-1 text-[20px] font-bold text-ink" dir="ltr">
+                      {formatPct(investorModel.cashOnCashReturnPct, 1)}
+                    </p>
+                    <p className="mt-1 text-[11px] leading-snug text-inkMuted">
+                      {s.investorReport.cashOnCashNote}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-hairline bg-cream p-4">
+                    <p className="text-[12px] font-semibold uppercase tracking-wide text-inkMuted">
+                      {s.investorReport.breakEvenRentLabel}
+                    </p>
+                    <p className="mt-1 text-[20px] font-bold text-ink" dir="ltr">
+                      {formatShekels(investorModel.breakEvenRent)}
+                      {s.summary.perMonth}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-2xl border border-hairline bg-cream p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[12px] font-semibold uppercase tracking-wide text-inkMuted">
+                      {s.investorReport.dscrLabel}
+                    </p>
+                    <p className="text-[18px] font-bold text-ink" dir="ltr">
+                      {investorModel.dscr.toFixed(2)}
+                    </p>
+                  </div>
+                  <p className="mt-1.5 text-[12px] leading-relaxed text-inkMuted">
+                    {s.investorReport.dscrNote}
+                  </p>
+                </div>
+
+                <div className="mt-4 rounded-2xl border border-accentSoft bg-accentSoft/25 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[12px] font-semibold uppercase tracking-wide text-inkMuted">
+                      {s.investorReport.totalCashNeededLabel}
+                    </p>
+                    <p className="text-[18px] font-bold text-ink" dir="ltr">
+                      {formatShekels(investorModel.totalCashNeeded)}
+                    </p>
+                  </div>
+                  <p className="mt-1.5 text-[12px] leading-relaxed text-inkMuted">
+                    {s.investorReport.totalCashNeededSub}
+                  </p>
+                </div>
+
+                <div className="mt-4 border-t border-hairline pt-4">
+                  <p className="mb-2 text-[12px] font-semibold uppercase tracking-wide text-inkMuted">
+                    {s.investorReport.recurringCostsTitle}
+                  </p>
+                  <ul className="space-y-1 text-[13px] text-inkMuted">
+                    <li className="flex items-center justify-between">
+                      <span>{s.investor.insuranceLabel}</span>
+                      <span dir="ltr">
+                        {formatShekels(investorModel.buildingInsuranceMonthly)}
+                        {s.summary.perMonth}
+                      </span>
+                    </li>
+                    {state.investor.useManagementCompany ? (
+                      <li className="flex items-center justify-between">
+                        <span>{s.investor.managementFeeLabel}</span>
+                        <span dir="ltr">
+                          {formatShekels(investorModel.managementFeeMonthly)}
+                          {s.summary.perMonth}
+                        </span>
+                      </li>
+                    ) : null}
+                    <li className="flex items-center justify-between">
+                      <span>{s.investor.maintenanceLabel}</span>
+                      <span dir="ltr">
+                        {formatShekels(investorModel.maintenanceMonthly)}
+                        {s.summary.perMonth}
+                      </span>
+                    </li>
+                    {state.investor.vacancyMonths > 0 ? (
+                      <li className="flex items-center justify-between">
+                        <span>{s.investorReport.vacancyLossLabel}</span>
+                        <span dir="ltr">
+                          -{formatShekels(investorModel.vacancyLossMonthly)}
+                          {s.summary.perMonth}
+                        </span>
+                      </li>
+                    ) : null}
+                  </ul>
+                </div>
+
+                <div className="mt-4 border-t border-hairline pt-4">
+                  <p className="text-[12px] font-semibold uppercase tracking-wide text-inkMuted">
+                    {s.investorReport.rateSensitivityTitle}
+                  </p>
+                  <div className="mt-3 grid grid-cols-3 gap-2">
+                    {investorModel.rateSensitivity.map((point) => (
+                      <div
+                        key={point.shockPoints}
+                        className={`rounded-xl border p-3 text-center ${
+                          point.shockPoints === 0
+                            ? "border-accent bg-accentSoft/25"
+                            : "border-hairline bg-cream"
+                        }`}
+                      >
+                        <p className="text-[11px] font-semibold text-inkMuted">
+                          {point.shockPoints === -1
+                            ? s.investorReport.rateLower
+                            : point.shockPoints === 1
+                              ? s.investorReport.rateHigher
+                              : s.investorReport.rateEntered}
+                        </p>
+                        <p className="mt-1 text-[15px] font-bold tabular-nums text-ink" dir="ltr">
+                          {formatShekels(point.monthlyPayment)}
+                        </p>
+                        <p
+                          className={`mt-0.5 text-[11px] font-semibold tabular-nums ${
+                            point.netMonthlyCashFlow >= 0 ? "text-good" : "text-warn"
+                          }`}
+                          dir="ltr"
+                        >
+                          {point.netMonthlyCashFlow >= 0 ? "+" : ""}
+                          {formatShekels(point.netMonthlyCashFlow)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-[12px] leading-relaxed text-inkMuted">
+                    {s.investorReport.rateSensitivityNote}
+                  </p>
+                </div>
+              </motion.div>
+            ) : null}
 
             {showsBridgeCaution ? (
               <motion.div variants={cardReveal} className="mt-5">

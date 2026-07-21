@@ -1,4 +1,5 @@
 import { palette } from "../../theme/palette.js";
+import { useSimLang } from "../../state/useSimLang";
 
 interface PercentSliderProps {
   value: number;
@@ -21,6 +22,7 @@ export function PercentSlider({
   ariaLabel,
   compact,
 }: PercentSliderProps) {
+  const { isHe } = useSimLang();
   const fillPct = max > min ? ((value - min) / (max - min)) * 100 : 0;
   return (
     <div>
@@ -34,7 +36,10 @@ export function PercentSlider({
         onChange={(e) => onChange(Number(e.target.value))}
         className="sliderInput w-full"
         style={{
-          background: `linear-gradient(to right, ${palette.accent} ${fillPct}%, ${palette.hairline} ${fillPct}%)`,
+          // Same RTL fill-direction bug and fix as AmountSlider: a raw CSS
+          // gradient doesn't mirror on its own even though the native thumb
+          // position does, see the comment there for the full explanation.
+          background: `linear-gradient(to ${isHe ? "left" : "right"}, ${palette.accent} ${fillPct}%, ${palette.hairline} ${fillPct}%)`,
         }}
       />
       {compact ? null : (

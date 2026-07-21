@@ -14,6 +14,12 @@
 import { computeTrackResult } from "../engine/calc";
 import { getTrack } from "../engine/tracks";
 import type { Allocation, Assumptions } from "../types";
+import {
+  INVESTMENT_BRACKETS,
+  NEW_IMMIGRANT_BRACKETS,
+  SINGLE_HOME_BRACKETS,
+} from "./purchaseTaxRates";
+import type { TaxBracket } from "./purchaseTaxRates";
 
 export type Residency = "israeli" | "oleh" | "foreign";
 export type BuyerStatus = "firstHome" | "replacingHome" | "investment";
@@ -239,41 +245,6 @@ export function computeDti(monthlyPayment: number, existingMonthlyDebt: number, 
   return (monthlyPayment + existingMonthlyDebt) / netIncome;
 }
 
-interface TaxBracket {
-  upTo: number;
-  rate: number;
-}
-
-/** Simplified single-home mas rechisha brackets (approximate 2025 figures). */
-const SINGLE_HOME_BRACKETS: TaxBracket[] = [
-  { upTo: 1_978_745, rate: 0 },
-  { upTo: 2_347_040, rate: 0.035 },
-  { upTo: 6_055_070, rate: 0.05 },
-  { upTo: Infinity, rate: 0.08 },
-];
-
-/** Additional property / foreign resident brackets (approximate). */
-const INVESTMENT_BRACKETS: TaxBracket[] = [
-  { upTo: 6_055_070, rate: 0.08 },
-  { upTo: Infinity, rate: 0.1 },
-];
-
-/**
- * Oleh chadash benefit brackets (approximate). Shares the same 0% entry
- * bracket as a regular resident so the benefit is never worse than the
- * regular schedule, then a genuinely reduced rate for a wide band, and a
- * top rate below the regular schedule's 8%. An earlier version of this
- * approximation used a flat 0.5% from the first shekel with no 0% floor,
- * which made it quietly worse than the regular resident schedule at
- * ordinary first time buyer prices, caught by the v3 verification pass,
- * exactly backwards from the real world purpose of the benefit.
- */
-const OLEH_BRACKETS: TaxBracket[] = [
-  { upTo: 1_978_745, rate: 0 },
-  { upTo: 6_055_070, rate: 0.005 },
-  { upTo: Infinity, rate: 0.05 },
-];
-
 function applyBrackets(price: number, brackets: TaxBracket[]): number {
   let tax = 0;
   let floor = 0;
@@ -287,11 +258,20 @@ function applyBrackets(price: number, brackets: TaxBracket[]): number {
 }
 
 /**
- * Approximate purchase tax (mas rechisha). An oleh gets the better of the
- * aliyah benefit brackets and the regular single-home brackets. A buyer
- * replacing a home whose existing property has not yet sold is shown the
- * temporary "additional dwelling" brackets instead, since that is the
- * bracket that actually applies until the sale completes.
+ * Purchase tax (mas rechisha), marginal brackets from purchaseTaxRates.ts
+ * (verified July 2026, frozen through 2028-01-15, see that file). An oleh
+ * gets the better of the new immigrant brackets and the regular
+ * single-home brackets: NEW_IMMIGRANT_BRACKETS has no 0% floor of its own,
+ * so this Math.min is what actually guarantees the benefit is never worse
+ * than paying as a regular resident, not the shape of the bracket table
+ * itself. An earlier version leaned on a 0% floor baked into the oleh
+ * table instead, which quietly broke at ordinary first time buyer prices
+ * (caught by the v3 verification pass); this Math.min invariant is the
+ * fix and is covered by a regression test in scripts/engine-audit.ts, so
+ * it survives if the bracket numbers themselves are ever swapped again.
+ * A buyer replacing a home whose existing property has not yet sold is
+ * shown the temporary "additional dwelling" brackets instead, since that
+ * is the bracket that actually applies until the sale completes.
  */
 export function estimatePurchaseTax(
   price: number,
@@ -308,7 +288,7 @@ export function estimatePurchaseTax(
   }
   const regular = applyBrackets(price, SINGLE_HOME_BRACKETS);
   if (residency === "oleh") {
-    return Math.min(regular, applyBrackets(price, OLEH_BRACKETS));
+    return Math.min(regular, applyBrackets(price, NEW_IMMIGRANT_BRACKETS));
   }
   return regular;
 }

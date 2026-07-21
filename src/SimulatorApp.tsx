@@ -26,6 +26,7 @@ import { DownPaymentSource } from "./routes/downPaymentSource";
 import { Term } from "./routes/term";
 import { TrackMixStep } from "./routes/trackMix";
 import { Costs } from "./routes/costs";
+import { InvestorCashFlow } from "./routes/investorCashFlow";
 import { CreditStanding } from "./routes/creditStanding";
 import { Summary } from "./routes/summary";
 
@@ -72,16 +73,25 @@ function FlowChrome() {
   return (
     <div className="flex min-h-screen flex-col bg-cream font-sans text-ink print:hidden">
       <header className="fixed inset-x-0 top-0 z-40 bg-cream/90 backdrop-blur-sm">
-        <div className="h-1.5 w-full bg-accentSoft/35">
+        {/* Before: a plain block div with a width-animated child always fills
+            from the physical left, and rounded-r-pill always rounds the
+            physical right corner, regardless of language, on this persistent
+            per-screen chrome. In Hebrew the fill should grow from the right
+            toward the left, matching the reading direction and the direction
+            flip already applied to the slide animations below. After: `flex`
+            makes the child align to the flex main-axis start, which is
+            direction aware, and rounded-e-pill rounds whichever corner is
+            actually the leading edge in the current direction. */}
+        <div className="flex h-1.5 w-full bg-accentSoft/35">
           <motion.div
-            className="relative h-full rounded-r-pill bg-accent"
+            className="relative h-full rounded-e-pill bg-accent"
             initial={false}
             animate={{ width: `${progress * 100}%` }}
             transition={{ type: "spring", stiffness: 170, damping: 26 }}
           >
             <motion.div
               aria-hidden="true"
-              className="h-full w-full overflow-hidden rounded-r-pill"
+              className="h-full w-full overflow-hidden rounded-e-pill"
               style={{
                 background:
                   "linear-gradient(100deg, transparent 32%, rgba(255,255,255,0.55) 50%, transparent 68%)",
@@ -154,15 +164,20 @@ function FlowChrome() {
       </header>
 
       <main className="relative flex-1 overflow-x-clip pt-[78px] sm:pt-[86px]">
+        {/* Before: -left-/-right- pinned these ambient blobs to a physical
+            side, so they sat on the same side of the screen in both
+            languages instead of mirroring like the rest of the layout.
+            After: logical -start-/-end- flip them along with everything
+            else. */}
         <motion.div
           aria-hidden="true"
-          className="pointer-events-none fixed -left-32 top-1/4 -z-0 h-80 w-80 rounded-pill bg-accentSoft/30 blur-3xl"
+          className="pointer-events-none fixed -start-32 top-1/4 -z-0 h-80 w-80 rounded-pill bg-accentSoft/30 blur-3xl"
           animate={{ x: [0, 30, 0], y: [0, 20, 0] }}
           transition={{ duration: 13, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
           aria-hidden="true"
-          className="pointer-events-none fixed -right-28 top-1/2 -z-0 h-72 w-72 rounded-pill bg-accent/10 blur-3xl"
+          className="pointer-events-none fixed -end-28 top-1/2 -z-0 h-72 w-72 rounded-pill bg-accent/10 blur-3xl"
           animate={{ x: [0, -26, 0], y: [0, -18, 0] }}
           transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
         />
@@ -185,6 +200,7 @@ function FlowChrome() {
                 element={<Navigate to="/simulator/costs" replace />}
               />
               <Route path="/simulator/costs" element={<Costs />} />
+              <Route path="/simulator/investorCashFlow" element={<InvestorCashFlow />} />
               <Route path="/simulator/creditStanding" element={<CreditStanding />} />
               <Route path="/simulator/summary" element={<Summary />} />
               <Route path="*" element={<Navigate to="/simulator/welcome" replace />} />

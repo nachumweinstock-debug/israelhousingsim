@@ -5,6 +5,7 @@ import { SIM_TEXTS } from "../state/texts";
 import { TRACK_INFO, formatPct, formatShekels } from "../lib/mortgageMath";
 import type { TrackKey } from "../lib/mortgageMath";
 import { buildReportModel } from "../lib/reportModel";
+import { buildInvestorReportModel } from "../lib/investorReportModel";
 import type { SimulatorAnswers } from "../state/simulatorStore";
 
 export type PrintMode = Lang | "both";
@@ -67,6 +68,13 @@ function ReportPage({
     stillNeedsLines,
     creditNotes,
   } = model;
+
+  const investorModel = buildInvestorReportModel(
+    answers,
+    { loanAmount, termYears: answers.termYears, mix: answers.mix, inflation: answers.inflation },
+    plan.monthlyPayment,
+    cashToClose
+  );
 
   const employmentLabel = {
     salaried: s.incomeDebt.salaried,
@@ -254,6 +262,36 @@ function ReportPage({
           <Row label={p.labelsCosts.cashToClose} value={formatShekels(cashToClose)} />
         </tbody>
       </table>
+
+      {investorModel ? (
+        <>
+          <SectionTitle>{s.investorReport.sectionTitle}</SectionTitle>
+          <table className="mt-2 w-full">
+            <tbody>
+              <Row
+                label={s.investorReport.cashFlowLabel}
+                value={`${investorModel.netMonthlyCashFlow >= 0 ? "+" : ""}${formatShekels(investorModel.netMonthlyCashFlow)}${s.summary.perMonth}`}
+              />
+              <Row label={s.investorReport.grossYieldLabel} value={formatPct(investorModel.grossAnnualYieldPct, 1)} />
+              <Row label={s.investorReport.netYieldLabel} value={formatPct(investorModel.netAnnualYieldPct, 1)} />
+              <Row
+                label={s.investorReport.cashOnCashLabel}
+                value={formatPct(investorModel.cashOnCashReturnPct, 1)}
+              />
+              <Row
+                label={s.investorReport.breakEvenRentLabel}
+                value={`${formatShekels(investorModel.breakEvenRent)}${s.summary.perMonth}`}
+              />
+              <Row label={s.investorReport.dscrLabel} value={investorModel.dscr.toFixed(2)} />
+              <Row
+                label={s.investorReport.totalCashNeededLabel}
+                value={formatShekels(investorModel.totalCashNeeded)}
+              />
+            </tbody>
+          </table>
+          <p className="mt-2 text-xs leading-relaxed text-gray-500">{s.investorReport.dscrNote}</p>
+        </>
+      ) : null}
 
       {showsBridgeCaution ? (
         <p className="mt-4 rounded-lg border border-gray-200 p-3 text-xs leading-relaxed text-gray-700">

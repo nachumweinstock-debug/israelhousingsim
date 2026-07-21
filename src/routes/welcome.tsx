@@ -28,15 +28,19 @@ export function Welcome() {
       exit="exit"
       className="relative mx-auto flex w-full max-w-xl flex-col items-center px-6 pb-24 pt-6 text-center sm:pt-12"
     >
+      {/* Before: -left-/-right- kept these ambient blobs on a fixed physical
+          side in both languages. After: logical -start-/-end- mirror them
+          under RTL, matching the me-[0.28em] treatment already used on the
+          title words below. */}
       <motion.div
         aria-hidden="true"
-        className="pointer-events-none absolute -left-28 -top-12 h-64 w-64 rounded-pill bg-accentSoft/45 blur-3xl"
+        className="pointer-events-none absolute -start-28 -top-12 h-64 w-64 rounded-pill bg-accentSoft/45 blur-3xl"
         animate={{ x: [0, 26, 0], y: [0, 16, 0] }}
         transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-24 top-40 h-72 w-72 rounded-pill bg-accent/15 blur-3xl"
+        className="pointer-events-none absolute -end-24 top-40 h-72 w-72 rounded-pill bg-accent/15 blur-3xl"
         animate={{ x: [0, -22, 0], y: [0, -14, 0] }}
         transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
       />

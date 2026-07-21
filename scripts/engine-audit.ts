@@ -16,6 +16,13 @@ import { effectiveTermYears } from "../src/engine/validation";
 import { RULE_SET } from "../src/engine/rules";
 import type { Allocation, Assumptions, BorrowerProfile } from "../src/types";
 import { estimatePurchaseTax } from "../src/lib/mortgageMath";
+import { SINGLE_HOME_BRACKETS, INVESTMENT_BRACKETS, NEW_IMMIGRANT_BRACKETS } from "../src/lib/purchaseTaxRates";
+import {
+  computeBreakEvenRent,
+  computeCashOnCashReturn,
+  computeDscr,
+  computeRentalCashFlow,
+} from "../src/lib/investorMath";
 
 let failures = 0;
 function check(name: string, ok: boolean, detail = "") {
@@ -180,13 +187,134 @@ console.log("\n[11] Oleh purchase tax benefit is never worse than a regular resi
       oleh <= regular + 1e-6
     );
   }
-  // At a typical first time buyer price, the benefit must actually show up,
-  // not just tie the regular schedule, or the oleh branch is invisible.
-  const regularAt2m = estimatePurchaseTax(2_000_000, "israeli", "firstHome");
-  const olehAt2m = estimatePurchaseTax(2_000_000, "oleh", "firstHome");
+  // With the July 2026 verified NEW_IMMIGRANT_BRACKETS (0.5% from shekel
+  // one, no 0% floor of its own), the oleh schedule is actually worse than
+  // the regular resident schedule at ordinary first-time-buyer prices
+  // like 2,000,000, since a regular resident's 0% exemption band still
+  // beats a flat 0.5% there; the Math.min in estimatePurchaseTax is what
+  // protects the buyer in that range (see [11] above; oleh <= regular
+  // always holds). The real benefit only shows up once regular's climb
+  // through the 3.5%/5%/8% brackets outpaces oleh's flat 0.5%/5%, which
+  // the math below places at roughly 6,554,991. Test above and below
+  // that crossover, not at an arbitrary "common" price, so this doesn't
+  // silently break again if the brackets are ever re-verified and shift.
+  const belowCrossover = estimatePurchaseTax(6_000_000, "israeli", "firstHome");
+  const olehBelowCrossover = estimatePurchaseTax(6_000_000, "oleh", "firstHome");
   check(
-    `oleh benefit is visibly lower than regular at a common 2,000,000 price (${olehAt2m.toFixed(0)} < ${regularAt2m.toFixed(0)})`,
-    olehAt2m < regularAt2m
+    `below the crossover (6,000,000), regular resident schedule still wins (regular=${belowCrossover.toFixed(0)} <= oleh=${olehBelowCrossover.toFixed(0)})`,
+    belowCrossover <= olehBelowCrossover
+  );
+  const regularAbove = estimatePurchaseTax(7_000_000, "israeli", "firstHome");
+  const olehAbove = estimatePurchaseTax(7_000_000, "oleh", "firstHome");
+  check(
+    `above the crossover (7,000,000), oleh benefit is visibly lower than regular (${olehAbove.toFixed(0)} < ${regularAbove.toFixed(0)})`,
+    olehAbove < regularAbove
+  );
+}
+
+/** Mirrors the private applyBrackets in mortgageMath.ts, kept independent here on purpose. */
+function applyBracketsForTest(price: number, brackets: { upTo: number; rate: number }[]): number {
+  let tax = 0;
+  let floor = 0;
+  for (const bracket of brackets) {
+    if (price <= floor) break;
+    const taxable = Math.min(price, bracket.upTo) - floor;
+    tax += taxable * bracket.rate;
+    floor = bracket.upTo;
+  }
+  return tax;
+}
+
+console.log("\n[12] Purchase tax brackets are genuinely marginal (continuous at boundaries), not whole-amount-at-top-rate");
+{
+  const tables: Array<[string, { upTo: number; rate: number }[]]> = [
+    ["SINGLE_HOME_BRACKETS", SINGLE_HOME_BRACKETS],
+    ["INVESTMENT_BRACKETS", INVESTMENT_BRACKETS],
+    ["NEW_IMMIGRANT_BRACKETS", NEW_IMMIGRANT_BRACKETS],
+  ];
+  for (const [name, brackets] of tables) {
+    for (const bracket of brackets) {
+      if (!Number.isFinite(bracket.upTo)) continue;
+      const b = bracket.upTo;
+      const below = applyBracketsForTest(b - 1, brackets);
+      const above = applyBracketsForTest(b + 1, brackets);
+      // A genuinely marginal calculation changes by at most a few NIS per
+      // 2 NIS of price near a boundary; a "whole amount taxed at the new
+      // top rate" bug would jump by tens of thousands of NIS instead.
+      check(
+        `${name} continuous across boundary ${b} (below=${below.toFixed(2)} above=${above.toFixed(2)})`,
+        Math.abs(above - below) < 10
+      );
+    }
+  }
+
+  // Hand-computed spot check: at 7,000,000 (israeli, firstHome), each
+  // portion of the price should be taxed at its own bracket's rate.
+  const expectedAt7m =
+    (2_347_040 - 1_978_745) * 0.035 +
+    (6_055_070 - 2_347_040) * 0.05 +
+    (7_000_000 - 6_055_070) * 0.08;
+  const actualAt7m = estimatePurchaseTax(7_000_000, "israeli", "firstHome");
+  check(
+    `single-home tax at 7,000,000 matches hand-computed marginal total (got=${actualAt7m.toFixed(2)} want=${expectedAt7m.toFixed(2)})`,
+    close(actualAt7m, expectedAt7m, 1e-6)
+  );
+
+  // A flat "whole amount at 8%" bug would give 560,000 here, over double
+  // the real marginal total, this guards against exactly that regression.
+  check(
+    "single-home tax at 7,000,000 is nowhere near a flat top-rate calculation",
+    actualAt7m < 7_000_000 * 0.08 * 0.6
+  );
+}
+
+console.log("\n[13] Investor math: rental cash flow, cash on cash return, break even rent, DSCR");
+{
+  const monthlyRent = 10_000;
+  const monthlyMortgagePayment = 6_000;
+  const propertyPrice = 2_000_000;
+  const costs = {
+    buildingInsuranceAnnual: 1_200,
+    useManagementCompany: true,
+    managementFeePct: 10,
+    maintenancePct: 5,
+    vacancyMonths: 0,
+  };
+
+  const flow = computeRentalCashFlow(monthlyRent, monthlyMortgagePayment, propertyPrice, costs);
+  check("building insurance monthly = annual/12", close(flow.buildingInsuranceMonthly, 100, 1e-9));
+  check("management fee monthly = 10% of rent", close(flow.managementFeeMonthly, 1_000, 1e-9));
+  check("maintenance monthly = 5% of rent", close(flow.maintenanceMonthly, 500, 1e-9));
+  check("recurring monthly costs sum correctly", close(flow.recurringMonthlyCosts, 1_600, 1e-9));
+  check("net monthly cash flow = rent - payment - recurring costs", close(flow.netMonthlyCashFlow, 2_400, 1e-9));
+  check("gross annual yield = 6%", close(flow.grossAnnualYieldPct, 0.06, 1e-9));
+  check("net annual yield = 5.04%", close(flow.netAnnualYieldPct, 0.0504, 1e-9));
+
+  const cashOnCash = computeCashOnCashReturn(flow.netMonthlyCashFlow, 500_000);
+  check("cash on cash return = 5.76%", close(cashOnCash, 0.0576, 1e-9));
+
+  const breakEven = computeBreakEvenRent(monthlyMortgagePayment, flow.recurringMonthlyCosts);
+  check("break even rent = payment + recurring costs", close(breakEven, 7_600, 1e-9));
+
+  const dscr = computeDscr(monthlyRent, monthlyMortgagePayment);
+  check("DSCR = rent / payment", close(dscr, 10_000 / 6_000, 1e-9));
+  check("DSCR = 0 when payment is 0 (never divides by zero)", computeDscr(monthlyRent, 0) === 0);
+
+  const withVacancy = computeRentalCashFlow(monthlyRent, monthlyMortgagePayment, propertyPrice, {
+    ...costs,
+    vacancyMonths: 2,
+  });
+  check(
+    "2 vacant months reduces effective rent by 2/12 of monthly rent",
+    close(withVacancy.vacancyLossMonthly, (monthlyRent * 2) / 12, 1e-9)
+  );
+  check(
+    "net cash flow with vacancy is lower than without",
+    withVacancy.netMonthlyCashFlow < flow.netMonthlyCashFlow
+  );
+  check(
+    "cash on cash return is never NaN/Infinity when no cash was invested",
+    Number.isFinite(computeCashOnCashReturn(flow.netMonthlyCashFlow, 0))
   );
 }
 
