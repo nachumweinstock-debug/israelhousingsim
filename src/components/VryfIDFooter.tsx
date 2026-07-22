@@ -2,6 +2,7 @@
  * Ported verbatim (structure, copy, links, assets) from vryfid-demo's
  * VryfIDFooter, this product is part of the VryfID family.
  */
+import { Link } from "react-router-dom";
 
 const FOUNDERS = [
   {
@@ -38,6 +39,13 @@ const LINK_COLUMNS = [
       ["Verify a Tenant", "https://www.vryfid.com/"],
       ["Verify a Landlord", "https://www.vryfid.com/"],
       ["For Managers", "https://www.vryfid.com/"],
+    ],
+  },
+  {
+    heading: "Mortgage",
+    links: [
+      ["Readiness Calculator", "/simulator/welcome"],
+      ["Blog", "/blog"],
     ],
   },
   {
@@ -103,14 +111,23 @@ export function VryfIDFooter() {
                 <ul className="space-y-2">
                   {links.map(([label, href]) => (
                     <li key={label}>
-                      <a
-                        href={href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-sm text-[#8FA29F] transition-colors hover:text-[#CFFAF4]"
-                      >
-                        {label}
-                      </a>
+                      {href.startsWith("/") ? (
+                        <Link
+                          to={href}
+                          className="text-sm text-[#8FA29F] transition-colors hover:text-[#CFFAF4]"
+                        >
+                          {label}
+                        </Link>
+                      ) : (
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-sm text-[#8FA29F] transition-colors hover:text-[#CFFAF4]"
+                        >
+                          {label}
+                        </a>
+                      )}
                     </li>
                   ))}
                 </ul>
