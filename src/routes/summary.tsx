@@ -30,32 +30,28 @@ const BANKS = [
   {
     nameEn: "Bank Hapoalim",
     nameHe: "בנק הפועלים",
-    mark: "P",
-    color: "#D71920",
+    logo: "/bank-hapoalim.svg",
     url: "https://www.bankhapoalim.co.il",
     phone: "*2408",
   },
   {
     nameEn: "Bank Leumi",
     nameHe: "בנק לאומי",
-    mark: "L",
-    color: "#004B9B",
+    logo: "/bank-leumi.png",
     url: "https://www.leumi.co.il",
     phone: "*3200",
   },
   {
     nameEn: "Mizrahi-Tefahot",
     nameHe: "מזרחי טפחות",
-    mark: "M",
-    color: "#F47B20",
+    logo: "/bank-mizrahi-tefahot.svg",
     url: "https://www.mizrahi-tefahot.co.il",
     phone: "*8860",
   },
   {
     nameEn: "Discount Bank",
     nameHe: "בנק דיסקונט",
-    mark: "D",
-    color: "#009B77",
+    logo: "/bank-discount.svg",
     url: "https://www.discountbank.co.il",
     phone: "*2009",
   },
@@ -829,7 +825,14 @@ export function Summary() {
               className="mt-5 rounded-3xl border border-hairline bg-card p-6 shadow-lift"
             >
               <div className="flex items-center gap-2">
-                <img src="/vryfid-logo.jpeg" alt="" aria-hidden="true" className="h-5 w-5 shrink-0 rounded object-cover" />
+                <img
+                  src="/vryfid-logo.jpeg"
+                  alt=""
+                  aria-hidden="true"
+                  width={200}
+                  height={200}
+                  className="h-5 w-5 shrink-0 rounded object-cover"
+                />
                 <p className="text-[15px] font-bold text-ink">{s.exportPanel.title}</p>
               </div>
               <p className="mt-1 text-[13px] text-inkMuted">{s.exportPanel.sub}</p>
@@ -869,12 +872,12 @@ export function Summary() {
                       className="flex items-center justify-between gap-3 rounded-xl border border-hairline bg-cream px-4 py-3"
                     >
                       <div className="flex items-center gap-3">
-                        <div
-                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-bold text-white"
-                          style={{ backgroundColor: bank.color }}
-                          aria-hidden="true"
-                        >
-                          {bank.mark}
+                        <div className="flex h-10 w-16 shrink-0 items-center justify-center rounded-xl border border-hairline bg-white p-1.5">
+                          <img
+                            src={bank.logo}
+                            alt={bank.nameEn}
+                            className="h-full w-full object-contain"
+                          />
                         </div>
                         <div>
                           <p className="text-sm font-semibold text-ink">

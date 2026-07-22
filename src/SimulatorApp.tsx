@@ -126,6 +126,8 @@ function FlowChrome() {
             <motion.img
               src="/vryfid-full-logo.jpeg"
               alt="VryfID"
+              width={160}
+              height={160}
               className="h-10 w-auto rounded-xl border border-hairline bg-card p-1 shadow-lift sm:h-14"
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}

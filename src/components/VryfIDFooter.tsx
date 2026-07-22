@@ -71,7 +71,13 @@ export function VryfIDFooter() {
               aria-label="Back to top"
               className="mb-4 rounded-lg transition-shadow hover:shadow-[0_0_0_3px_rgba(94,234,212,0.35)]"
             >
-              <img src="/vryfid-logo.jpeg" alt="VryfID" className="h-10 w-auto rounded-lg" />
+              <img
+                src="/vryfid-logo.jpeg"
+                alt="VryfID"
+                width={200}
+                height={200}
+                className="h-10 w-auto rounded-lg"
+              />
             </button>
             <p className="mb-5 text-sm leading-relaxed text-[#8FA29F]">
               Your verified digital profile, simplified. Protecting every party in
@@ -149,6 +155,8 @@ export function VryfIDFooter() {
                   <img
                     src={f.img}
                     alt={f.name}
+                    width={64}
+                    height={64}
                     className="h-12 w-12 flex-shrink-0 rounded-full border-2 border-white/10 object-cover"
                   />
                   <div>

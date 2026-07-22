@@ -87,7 +87,13 @@ function ReportPage({
       <header className="pb-5" style={{ borderBottom: `4px solid ${ACCENT}` }}>
         <div className="flex items-start justify-between gap-6">
           <div>
-            <img src="/vryfid-full-logo.jpeg" alt="VryfID" className="h-12 w-auto rounded-md" />
+            <img
+              src="/vryfid-full-logo.jpeg"
+              alt="VryfID"
+              width={160}
+              height={160}
+              className="h-12 w-auto rounded-md"
+            />
             <p
               className="mt-2 text-xs font-semibold uppercase tracking-[0.22em]"
               style={{ color: ACCENT }}
@@ -98,6 +104,8 @@ function ReportPage({
           <img
             src="/vryfid-logo.jpeg"
             alt=""
+            width={200}
+            height={200}
             className="h-12 w-12 rounded-xl object-cover"
             aria-hidden="true"
           />
@@ -345,7 +353,14 @@ function ReportPage({
         <div className="flex items-center justify-between gap-4">
           <p className="max-w-xl text-xs leading-relaxed text-gray-500">{p.footer}</p>
           <div className="flex shrink-0 items-center gap-2" dir="ltr">
-            <img src="/vryfid-logo.jpeg" alt="" aria-hidden="true" className="h-5 w-5 rounded object-cover" />
+            <img
+              src="/vryfid-logo.jpeg"
+              alt=""
+              aria-hidden="true"
+              width={200}
+              height={200}
+              className="h-5 w-5 rounded object-cover"
+            />
             <p className="text-xs font-semibold" style={{ color: ACCENT }}>
               vryfid.com
             </p>
