@@ -9,7 +9,7 @@ Once you know what prime, kalatz, and katz tracks actually do (if you haven't ye
 
 ## Start with what you're actually trying to protect against
 
-Every mix is really a bet on which risk bothers you more: the risk that rates rise and your variable payment climbs, or the risk that you lock in a fixed rate today and then watch rates fall around you for the next decade. You can't eliminate both risks at once — you can only choose which one you're more willing to live with, and size your exposure accordingly.
+Every mix is really a bet on which risk bothers you more: the risk that rates rise and your variable payment climbs, or the risk that you lock in a fixed rate today and then watch rates fall around you for the next decade. You can't eliminate both risks at once. You can only choose which one you're more willing to live with, and size your exposure accordingly.
 
 ## If payment stability is your top priority
 
@@ -17,11 +17,11 @@ Buyers who most want to know exactly what they'll pay every month, for budgeting
 
 ## If you're comfortable with some rate exposure for a lower start
 
-Buyers who want the lowest possible payment today, and are financially able to absorb some increase later if rates rise, typically lean more into prime. Because prime reprices with the Bank of Israel's rate essentially in real time, it's the most rate-sensitive track — good in a falling-rate environment, uncomfortable in a rising one. Regulation limits how much of your total mix can sit in prime specifically, so you'll never be offered a fully prime loan regardless of preference.
+Buyers who want the lowest possible payment today, and are financially able to absorb some increase later if rates rise, typically lean more into prime. Because prime reprices with the Bank of Israel's rate essentially in real time, it's the most rate-sensitive track, good in a falling-rate environment and uncomfortable in a rising one. Regulation limits how much of your total mix can sit in prime specifically, so you'll never be offered a fully prime loan regardless of preference.
 
 ## Where katz fits
 
-Katz doesn't cleanly fit the "fixed vs. variable" framing, because the rate is fixed but the balance itself grows with inflation. It behaves like a hedge against a specific scenario: rates staying flat or falling while inflation runs. If you expect the Bank of Israel to hold or cut rates but you're not confident inflation is fully tamed, katz can make sense as part of the mix. If you're mainly worried about inflation eroding your own purchasing power generally, note that a katz balance growing with CPI is, in that scenario, growing roughly in step with your other costs and (often) your wages too — which is part of why regulators consider it a reasonable middle-ground track rather than a pure risk.
+Katz doesn't cleanly fit the "fixed vs. variable" framing, because the rate is fixed but the balance itself grows with inflation. It behaves like a hedge against a specific scenario: rates staying flat or falling while inflation runs. If you expect the Bank of Israel to hold or cut rates but you're not confident inflation is fully tamed, katz can make sense as part of the mix. If you're mainly worried about inflation eroding your own purchasing power generally, note that a katz balance growing with CPI is, in that scenario, growing roughly in step with your other costs and (often) your wages too, which is part of why regulators consider it a reasonable middle-ground track rather than a pure risk.
 
 ## A practical way to stress-test a proposed mix
 
@@ -33,4 +33,4 @@ A longer term generally means more total exposure to whatever risk your mix carr
 
 ## There's no substitute for seeing your actual numbers
 
-Generic advice can only get you so far — the right mix depends on your specific loan size, your income cushion, and how long you plan to hold the property. The [VryfID simulator](/simulator/welcome) lets you build a mix, see today's payment and a stressed projection side by side, and compare it directly against the required baskets your bank has to quote you.
+Generic advice can only get you so far. The right mix depends on your specific loan size, your income cushion, and how long you plan to hold the property. The [VryfID simulator](/simulator/welcome) lets you build a mix, see today's payment and a stressed projection side by side, and compare it directly against the required baskets your bank has to quote you.

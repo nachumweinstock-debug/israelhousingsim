@@ -9,23 +9,23 @@ LTV tells a bank how much of the property it's exposed to. Payment-to-income (so
 
 ## What counts as income and what counts as payment
 
-Payment-to-income is your projected monthly mortgage payment divided by your net monthly household income. "Household" matters here — if you have a co-applicant, most banks will combine both incomes for this calculation, which is often the single biggest lever available to buyers trying to qualify for a larger loan.
+Payment-to-income is your projected monthly mortgage payment divided by your net monthly household income. "Household" matters here: if you have a co-applicant, most banks will combine both incomes for this calculation, which is often the single biggest lever available to buyers trying to qualify for a larger loan.
 
-The payment side isn't just your new mortgage payment in isolation. Banks generally also factor in your existing monthly debt obligations — car loans, other loans, sometimes credit card minimums — because what they're really measuring is total monthly debt burden against income, not the mortgage payment alone.
+The payment side isn't just your new mortgage payment in isolation. Banks generally also factor in your existing monthly debt obligations, things like car loans, other loans, and sometimes credit card minimums, because what they're really measuring is total monthly debt burden against income, not the mortgage payment alone.
 
 ## Where the thresholds actually sit
 
 There's no single hard national cutoff written into every contract, but in practice:
 
 - **Under roughly 40%** is generally treated as the comfort zone. Banks are typically comfortable approving here without extra scrutiny, assuming the rest of the file (credit, employment stability, LTV) is solid.
-- **Roughly 40-50%** usually triggers closer scrutiny — a bank might still approve, but expect more questions, possibly a smaller approved amount than requested, or a request for a larger down payment to bring the loan size down and the ratio with it.
+- **Roughly 40-50%** usually triggers closer scrutiny. A bank might still approve, but expect more questions, possibly a smaller approved amount than requested, or a request for a larger down payment to bring the loan size down and the ratio with it.
 - **Above 50%** is a difficult zone. Some banks won't go there at all; others might, but usually only with meaningfully compensating factors elsewhere in the file (very strong credit, very stable long-tenure employment, significant liquid assets).
 
-These bands are practical norms, not statutory limits the way LTV ceilings are — individual banks have some discretion here, which is exactly why the same file can get a different answer at two different banks.
+These bands are practical norms, not statutory limits the way LTV ceilings are, since individual banks have some discretion here, which is exactly why the same file can get a different answer at two different banks.
 
 ## Employment type and tenure change how income is weighted
 
-A salaried employee with several years at the same employer is generally the easiest income profile to underwrite — it's stable, documented, and easy to verify. Self-employed income, newer employment, or short tenure at a current job typically gets weighted more conservatively, sometimes averaged over a longer period or discounted somewhat, because it's inherently less predictable from the bank's point of view. If you're newer to a role or self-employed, it's worth building a buffer into your own affordability math rather than assuming your full stated income will be counted at face value.
+A salaried employee with several years at the same employer is generally the easiest income profile to underwrite: it's stable, documented, and easy to verify. Self-employed income, newer employment, or short tenure at a current job typically gets weighted more conservatively, sometimes averaged over a longer period or discounted somewhat, because it's inherently less predictable from the bank's point of view. If you're newer to a role or self-employed, it's worth building a buffer into your own affordability math rather than assuming your full stated income will be counted at face value.
 
 ## Why this ratio matters even if you qualify
 
