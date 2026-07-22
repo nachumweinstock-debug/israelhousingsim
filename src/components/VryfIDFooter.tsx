@@ -33,17 +33,12 @@ const LINK_COLUMNS = [
     ],
   },
   {
-    // vryfid.com itself is currently a parked/expired domain, not a live
-    // site, verified directly (loads GoDaddy's parking page, not VryfID).
-    // Until a real main site exists, these route to VryfIDVibes.com, the
-    // one live, working, VryfID-branded consumer product, confirmed live
-    // both by fetching it and by its own Vercel project record.
     heading: "VryfID",
     links: [
-      ["Main Site", "https://VryfIDVibes.com"],
-      ["Verify a Tenant", "https://VryfIDVibes.com"],
-      ["Verify a Landlord", "https://VryfIDVibes.com"],
-      ["For Managers", "https://VryfIDVibes.com"],
+      ["Main Site", "https://www.vryfid.com/"],
+      ["Verify a Tenant", "https://www.vryfid.com/"],
+      ["Verify a Landlord", "https://www.vryfid.com/"],
+      ["For Managers", "https://www.vryfid.com/"],
       ["Renter App", "https://vryfid-renter.vercel.app"],
     ],
   },
