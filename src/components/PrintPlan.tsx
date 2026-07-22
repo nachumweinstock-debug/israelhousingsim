@@ -344,9 +344,12 @@ function ReportPage({
       <footer className="mt-8 border-t border-gray-200 pt-4">
         <div className="flex items-center justify-between gap-4">
           <p className="max-w-xl text-xs leading-relaxed text-gray-500">{p.footer}</p>
-          <p className="text-xs font-semibold" style={{ color: ACCENT }} dir="ltr">
-            vryfid.com
-          </p>
+          <div className="flex shrink-0 items-center gap-2" dir="ltr">
+            <img src="/vryfid-logo.jpeg" alt="" aria-hidden="true" className="h-5 w-5 rounded object-cover" />
+            <p className="text-xs font-semibold" style={{ color: ACCENT }}>
+              vryfid.com
+            </p>
+          </div>
         </div>
       </footer>
     </article>

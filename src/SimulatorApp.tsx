@@ -1,13 +1,6 @@
 import { useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  BrowserRouter,
-  Navigate,
-  Route,
-  Routes,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { FlowDirectionContext } from "./components/QuestionShell";
 import { VryfIDFooter } from "./components/VryfIDFooter";
 import { prevStep, stepFromPath, stepOrderIndex, stepPath, stepProgress } from "./state/flow";
@@ -31,11 +24,7 @@ import { CreditStanding } from "./routes/creditStanding";
 import { Summary } from "./routes/summary";
 
 export default function SimulatorApp() {
-  return (
-    <BrowserRouter>
-      <FlowChrome />
-    </BrowserRouter>
-  );
+  return <FlowChrome />;
 }
 
 /**
@@ -228,7 +217,19 @@ function FlowChrome() {
  */
 function PoweredByPill() {
   return (
+    // Before: no dir, so this fixed-order English phrase ("Powered by
+    // VryfID") inherited dir="rtl" on the Hebrew page and flexbox mirrored
+    // its DOM order (dot, "Powered by", "VryfID", arrow) visually, reading
+    // as "↗ VryfID Powered by •" instead of the intended phrase. This is
+    // the same class of bug as the slider fill direction: a piece of
+    // content that is direction-invariant (a fixed English wordmark, not
+    // page content that should flip) needs an explicit dir="ltr" to opt
+    // out of the page's RTL flow, the same pattern costs.tsx's CostField
+    // and AmountSlider's editable input already use for fixed-format
+    // numeric content. After: dir="ltr" pins the internal order regardless
+    // of page language.
     <motion.a
+      dir="ltr"
       href="https://www.vryfid.com/"
       target="_blank"
       rel="noreferrer"

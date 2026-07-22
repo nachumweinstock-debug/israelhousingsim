@@ -828,7 +828,10 @@ export function Summary() {
               variants={cardReveal}
               className="mt-5 rounded-3xl border border-hairline bg-card p-6 shadow-lift"
             >
-              <p className="text-[15px] font-bold text-ink">{s.exportPanel.title}</p>
+              <div className="flex items-center gap-2">
+                <img src="/vryfid-logo.jpeg" alt="" aria-hidden="true" className="h-5 w-5 shrink-0 rounded object-cover" />
+                <p className="text-[15px] font-bold text-ink">{s.exportPanel.title}</p>
+              </div>
               <p className="mt-1 text-[13px] text-inkMuted">{s.exportPanel.sub}</p>
               <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <button

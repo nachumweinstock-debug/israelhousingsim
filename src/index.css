@@ -97,6 +97,20 @@ html[lang="he"] .text-sm {
   margin: 0;
 }
 
+/* Before: no @page rule existed, so Chrome's print/Save-as-PDF pipeline
+   reserved its own default margin and filled it with the browser's own
+   header (date/time + page title) and footer (page URL + page number),
+   e.g. "http://localhost:5183/simulator/summary" bottom-left, on every
+   page. That's what read as stray "local..." text in the corner, it was
+   never app content, it's Chrome's own print chrome. After: margin: 0
+   tells Chrome there's no room for that header/footer, so it omits them
+   entirely; PrintPlan's own <article className="p-8"> already provides
+   real padding around the report content, so the page doesn't end up
+   flush against the edge. */
+@page {
+  margin: 0;
+}
+
 /* When printing, only the PrintPlan portal (a sibling of #root on body)
    should exist. Kill the app root entirely so it leaves no blank space. */
 @media print {
@@ -283,4 +297,74 @@ html[dir="rtl"] .wiz-out-back {
 
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* Blog post body, rendered from markdown via dangerouslySetInnerHTML, so
+   these are plain descendant selectors rather than component classNames. */
+.blogArticle {
+  color: #2a2a28;
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+
+.blogArticle h2 {
+  margin-top: 2.25rem;
+  margin-bottom: 0.75rem;
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 1.5rem;
+  color: #2a2a28;
+}
+
+.blogArticle h3 {
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2a2a28;
+}
+
+.blogArticle p {
+  margin-bottom: 1.1rem;
+}
+
+.blogArticle ul,
+.blogArticle ol {
+  margin-bottom: 1.1rem;
+  padding-inline-start: 1.4rem;
+}
+
+.blogArticle ul {
+  list-style-type: disc;
+}
+
+.blogArticle ol {
+  list-style-type: decimal;
+}
+
+.blogArticle li {
+  margin-bottom: 0.4rem;
+}
+
+.blogArticle a {
+  color: #4a88c2;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.blogArticle a:hover {
+  color: #2a2a28;
+}
+
+.blogArticle strong {
+  font-weight: 700;
+  color: #2a2a28;
+}
+
+.blogArticle blockquote {
+  margin: 1.25rem 0;
+  padding-inline-start: 1rem;
+  border-inline-start: 3px solid #b8d8f0;
+  color: #6b6963;
+  font-style: italic;
 }
