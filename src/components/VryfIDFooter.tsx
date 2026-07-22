@@ -62,7 +62,7 @@ export function VryfIDFooter() {
   return (
     <footer style={{ background: "linear-gradient(180deg, #0C3C38 0%, #0A2E2B 100%)" }}>
       <div className="mx-auto max-w-5xl px-6 pt-14 pb-8">
-        <div className="grid grid-cols-1 gap-10 border-b border-white/10 pb-10 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-10 border-b border-white/10 pb-10 md:grid-cols-6">
           {/* Brand */}
           <div className="md:col-span-1">
             <button
@@ -102,7 +102,7 @@ export function VryfIDFooter() {
           </div>
 
           {/* Links */}
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 md:col-span-2">
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 md:col-span-4">
             {LINK_COLUMNS.map(({ heading, links }) => (
               <div key={heading}>
                 <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-white">

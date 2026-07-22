@@ -15,11 +15,91 @@ export interface BlogFrontmatter {
   tags: string[];
 }
 
+export interface TocEntry {
+  id: string;
+  text: string;
+}
+
+export type BlogLang = "en" | "he";
+
 export interface BlogPost {
   slug: string;
+  lang: BlogLang;
   frontmatter: BlogFrontmatter;
   html: string;
   readMinutes: number;
+  toc: TocEntry[];
+}
+
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: "&",
+  quot: '"',
+  lt: "<",
+  gt: ">",
+  apos: "'",
+};
+
+/**
+ * marked escapes heading text (' becomes &#39; or &#x27; depending on
+ * context, & becomes &amp;, etc.); undo that for plain-text uses (TOC
+ * labels, slugs), covering decimal, hex, and the handful of named
+ * entities marked actually emits, rather than hardcoding one encoding.
+ */
+function decodeEntities(text: string): string {
+  return text.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (match, code: string) => {
+    if (code[0] === "#") {
+      const isHex = code[1] === "x" || code[1] === "X";
+      const codePoint = parseInt(isHex ? code.slice(2) : code.slice(1), isHex ? 16 : 10);
+      return Number.isNaN(codePoint) ? match : String.fromCodePoint(codePoint);
+    }
+    return NAMED_ENTITIES[code] ?? match;
+  });
+}
+
+/**
+ * `\w` in a non-unicode JS regex only matches ASCII, so Hebrew headings
+ * slugify down to an empty string. Rather than reach for a Unicode-aware
+ * transliteration (fragile, and a Hebrew string in a URL fragment just
+ * gets percent-encoded and still works, but looks unreadable in the
+ * address bar), an empty slugify result falls back to a plain positional
+ * id (section-1, section-2, ...) in injectHeadingIds below, which is
+ * stable and readable for either language.
+ */
+function slugify(text: string): string {
+  return decodeEntities(text)
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .trim()
+    .replace(/\s+/g, "-");
+}
+
+/**
+ * Injects id="..." onto every <h2> so the table of contents can link to
+ * it, and collects the same {id, text} pairs for that TOC. Post-processes
+ * marked's HTML output with a regex rather than a custom marked renderer,
+ * since the renderer's token-based API has changed across marked major
+ * versions and every heading here is plain text we control (no inline
+ * markdown/HTML inside a heading), so a regex is the more stable choice.
+ */
+function injectHeadingIds(html: string): { html: string; toc: TocEntry[] } {
+  const toc: TocEntry[] = [];
+  const seen = new Set<string>();
+  let position = 0;
+  const withIds = html.replace(/<h2>(.*?)<\/h2>/g, (_match, inner: string) => {
+    position += 1;
+    const text = decodeEntities(inner.replace(/<[^>]+>/g, ""));
+    const base = slugify(text) || `section-${position}`;
+    let id = base;
+    let suffix = 2;
+    while (seen.has(id)) {
+      id = `${base}-${suffix}`;
+      suffix += 1;
+    }
+    seen.add(id);
+    toc.push({ id, text });
+    return `<h2 id="${id}">${inner}</h2>`;
+  });
+  return { html: withIds, toc };
 }
 
 function parseFrontmatter(raw: string): { data: Record<string, string>; body: string } {
@@ -43,12 +123,23 @@ function parseFrontmatter(raw: string): { data: Record<string, string>; body: st
   return { data, body: body.trim() };
 }
 
-export function buildPostList(entries: Array<{ slug: string; raw: string }>): BlogPost[] {
-  const posts = entries.map(({ slug, raw }) => {
+export function buildPostList(
+  entries: Array<{ slug: string; raw: string; lang: BlogLang }>
+): BlogPost[] {
+  const posts = entries.map(({ slug, raw, lang }) => {
     const { data, body } = parseFrontmatter(raw);
+    // Hebrew word counts run shorter than English for the same reading time
+    // (no articles, denser morphology), but there's no reliable formula
+    // without a real corpus to calibrate against, so both languages use the
+    // same words-per-minute constant. Close enough for a rough estimate,
+    // and it keeps the two versions of a post from showing suspiciously
+    // different reading times for near-identical content.
     const wordCount = body.split(/\s+/).filter(Boolean).length;
+    const rawHtml = marked.parse(body, { async: false }) as string;
+    const { html, toc } = injectHeadingIds(rawHtml);
     return {
       slug,
+      lang,
       frontmatter: {
         title: data.title ?? slug,
         description: data.description ?? "",
@@ -58,9 +149,29 @@ export function buildPostList(entries: Array<{ slug: string; raw: string }>): Bl
           .map((t) => t.trim())
           .filter(Boolean),
       },
-      html: marked.parse(body, { async: false }) as string,
+      html,
       readMinutes: Math.max(1, Math.round(wordCount / 200)),
+      toc,
     };
   });
   return posts.sort((a, b) => (a.frontmatter.date < b.frontmatter.date ? 1 : -1));
+}
+
+/**
+ * 2-3 posts sharing the most tags with `post`, ties broken by newest first.
+ * Falls back to the newest other posts if nothing shares a tag, so the
+ * section is never empty. Only ever matches within the same language, a
+ * Hebrew post should never surface an English "related" link.
+ */
+export function relatedPosts(post: BlogPost, all: BlogPost[], max = 3): BlogPost[] {
+  const others = all.filter((p) => p.slug !== post.slug && p.lang === post.lang);
+  const scored = others.map((p) => {
+    const shared = p.frontmatter.tags.filter((t) => post.frontmatter.tags.includes(t)).length;
+    return { post: p, shared };
+  });
+  scored.sort((a, b) => {
+    if (b.shared !== a.shared) return b.shared - a.shared;
+    return a.post.frontmatter.date < b.post.frontmatter.date ? 1 : -1;
+  });
+  return scored.slice(0, max).map((s) => s.post);
 }

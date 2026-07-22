@@ -305,31 +305,39 @@ html[dir="rtl"] .wiz-out-back {
   color: #2a2a28;
   font-size: 1.0625rem;
   line-height: 1.75;
+  /* Comfortable measure regardless of the surrounding layout's width, a
+     wide viewport otherwise stretches paragraph text past a readable
+     line length. */
+  max-width: 68ch;
 }
 
 .blogArticle h2 {
-  margin-top: 2.25rem;
-  margin-bottom: 0.75rem;
+  margin-top: 2.5rem;
+  margin-bottom: 0.85rem;
   font-family: "DM Serif Display", Georgia, serif;
   font-size: 1.5rem;
   color: #2a2a28;
+  /* So a fixed header (or the anchor jump from the table of contents)
+     never lands a heading flush against the viewport edge. */
+  scroll-margin-top: 1.5rem;
 }
 
 .blogArticle h3 {
-  margin-top: 1.75rem;
-  margin-bottom: 0.5rem;
+  margin-top: 1.85rem;
+  margin-bottom: 0.55rem;
   font-size: 1.15rem;
   font-weight: 700;
   color: #2a2a28;
+  scroll-margin-top: 1.5rem;
 }
 
 .blogArticle p {
-  margin-bottom: 1.1rem;
+  margin-bottom: 1.35rem;
 }
 
 .blogArticle ul,
 .blogArticle ol {
-  margin-bottom: 1.1rem;
+  margin-bottom: 1.35rem;
   padding-inline-start: 1.4rem;
 }
 

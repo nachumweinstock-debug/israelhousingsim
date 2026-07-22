@@ -2,6 +2,8 @@
   "rewrites": [
     { "source": "/blog", "destination": "/blog/index.html" },
     { "source": "/blog/:slug", "destination": "/blog/:slug/index.html" },
+    { "source": "/he/blog", "destination": "/he/blog/index.html" },
+    { "source": "/he/blog/:slug", "destination": "/he/blog/:slug/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

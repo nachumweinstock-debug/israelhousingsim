@@ -1,5 +1,5 @@
 import { Navigate, useParams } from "react-router-dom";
-import { BLOG_POSTS, getPostBySlug } from "./posts";
+import { EN_POSTS, HE_POSTS, getPostBySlug, hasCounterpart } from "./posts";
 import { BlogIndexPage } from "./BlogIndexPage";
 import { BlogPostPage } from "./BlogPostPage";
 
@@ -10,12 +10,23 @@ import { BlogPostPage } from "./BlogPostPage";
  * BlogPostPage safe to also render from the plain-Node prerender script.
  */
 export function BlogIndexRoute() {
-  return <BlogIndexPage posts={BLOG_POSTS} />;
+  return <BlogIndexPage posts={EN_POSTS} lang="en" />;
 }
 
 export function BlogPostRoute() {
   const { slug } = useParams<{ slug: string }>();
-  const post = slug ? getPostBySlug(slug) : undefined;
+  const post = slug ? getPostBySlug("en", slug) : undefined;
   if (!post) return <Navigate to="/blog" replace />;
-  return <BlogPostPage post={post} />;
+  return <BlogPostPage post={post} allPosts={EN_POSTS} hasCounterpart={hasCounterpart("en", post.slug)} />;
+}
+
+export function HeBlogIndexRoute() {
+  return <BlogIndexPage posts={HE_POSTS} lang="he" />;
+}
+
+export function HeBlogPostRoute() {
+  const { slug } = useParams<{ slug: string }>();
+  const post = slug ? getPostBySlug("he", slug) : undefined;
+  if (!post) return <Navigate to="/he/blog" replace />;
+  return <BlogPostPage post={post} allPosts={HE_POSTS} hasCounterpart={hasCounterpart("he", post.slug)} />;
 }
