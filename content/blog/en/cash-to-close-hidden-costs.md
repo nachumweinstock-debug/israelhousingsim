@@ -1,6 +1,6 @@
 ---
 title: "Cash to Close: The Hidden Costs Beyond Your Down Payment"
-description: Your down payment is only part of what you need in cash on closing day. Purchase tax, legal fees, and agent commission add up fast, and none of them can be financed into the loan.
+description: Your down payment is only part of what you need on closing day. Purchase tax, legal fees, and agent commission add up fast, and can't be financed into the loan.
 date: 2026-06-30
 tags: cash to close, purchase tax, mas rechisha, closing costs
 ---
@@ -32,6 +32,20 @@ The bank will require an independent appraisal (shamaut) of the property before 
 ## Adding it up
 
 As a rough planning heuristic, budget an additional 3-6% of the property price on top of your down payment to cover purchase tax, legal fees, agent commission, and the smaller appraisal/registration costs. The exact figure depends heavily on your buyer category (purchase tax brackets swing this the most) and whether an agent was involved. On a ₪2,000,000 property, that's commonly an additional ₪60,000-₪120,000 in cash beyond your down payment, due on closing, none of it financeable through the mortgage itself.
+
+## Frequently asked questions
+
+### How much cash do I need beyond my down payment?
+
+Budget an additional 3-6% of the property price to cover purchase tax, legal fees, agent commission, and appraisal/registration costs. On a ₪2,000,000 property, that's commonly ₪60,000-₪120,000 beyond the down payment itself.
+
+### Can closing costs be rolled into the mortgage?
+
+No. Purchase tax, legal fees, agent commission, and appraisal costs cannot be financed into the loan. They're due directly, in cash, separate from your mortgage.
+
+### Who pays the agent commission, the buyer or the seller?
+
+It varies by deal, commonly paid by the buyer, the seller, or split, depending on how the transaction was structured. Confirm this explicitly before you're deep into a deal, since assuming the seller covers it when the agreement says otherwise is a common and expensive misunderstanding.
 
 ## Don't find out on closing day
 

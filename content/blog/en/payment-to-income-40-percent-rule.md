@@ -1,6 +1,6 @@
 ---
 title: Payment-to-Income and Why Banks Cap It Near 40%
-description: The percentage of your income that goes to your mortgage payment is the other number, besides LTV, that decides how much a bank will lend you. Here's how it's calculated and where the real thresholds sit.
+description: The share of your income going to your mortgage payment decides how much a bank will lend you, alongside LTV. Where the real thresholds actually sit.
 date: 2026-06-23
 tags: payment to income, DTI, income requirements, underwriting
 ---
@@ -30,6 +30,20 @@ A salaried employee with several years at the same employer is generally the eas
 ## Why this ratio matters even if you qualify
 
 A bank approving your file at 46% payment-to-income is telling you the loan is approvable, not that it's comfortable for your actual life. That distinction matters. A mortgage payment that consumes nearly half your household income leaves a thin margin for a lost job, a medical expense, a rate reset on a variable track, or simply the ordinary cost of raising a family. Plenty of buyers deliberately choose a smaller loan than what they technically qualify for, precisely to keep this ratio comfortably under 40%.
+
+## Frequently asked questions
+
+### What is a good payment-to-income ratio for a mortgage in Israel?
+
+Under roughly 40% is generally treated as the comfort zone, where banks are typically comfortable approving without extra scrutiny. Between 40-50% usually triggers closer scrutiny, and above 50% is a difficult zone most banks avoid without strong compensating factors.
+
+### Does a co-applicant's income count toward payment-to-income?
+
+Yes. If you have a co-applicant, most banks combine both incomes for this calculation, which is often the single biggest lever available to buyers trying to qualify for a larger loan.
+
+### Does being self-employed hurt my payment-to-income calculation?
+
+Self-employed income, newer employment, or short tenure typically gets weighted more conservatively than a salaried employee with several years at the same job, since it's inherently less predictable from the bank's point of view.
 
 ## Check your own ratio before the bank does
 

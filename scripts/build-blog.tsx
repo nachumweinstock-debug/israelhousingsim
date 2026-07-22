@@ -214,6 +214,10 @@ function main() {
     he: "הסברים בשפה פשוטה על אחוז מימון, מסלולי הלוואה, יחס החזר, ועלויות סגירת עסקה למשכנתא בישראל.",
   };
   const OG_LOCALE: Record<BlogLang, string> = { en: "en_US", he: "he_IL" };
+  const BREADCRUMB_LABELS: Record<BlogLang, { home: string; blog: string }> = {
+    en: { home: "Home", blog: "Blog" },
+    he: { home: "בית", blog: "בלוג" },
+  };
 
   // Index pages (/blog and /he/blog): each links to the other, and both
   // exist here, so the hreflang set is the same fixed pair on each side.
@@ -304,6 +308,43 @@ function main() {
                 publisher: { "@id": `${SITE_URL}/#organization` },
                 mainEntityOfPage: `${SITE_URL}${urlPath(lang, post.slug)}`,
               },
+              {
+                "@type": "BreadcrumbList",
+                itemListElement: [
+                  { "@type": "ListItem", position: 1, name: BREADCRUMB_LABELS[lang].home, item: `${SITE_URL}/` },
+                  {
+                    "@type": "ListItem",
+                    position: 2,
+                    name: BREADCRUMB_LABELS[lang].blog,
+                    item: `${SITE_URL}${urlPath(lang)}`,
+                  },
+                  {
+                    "@type": "ListItem",
+                    position: 3,
+                    name: post.frontmatter.title,
+                    item: `${SITE_URL}${urlPath(lang, post.slug)}`,
+                  },
+                ],
+              },
+              // FAQPage schema is the single highest-leverage structured-data
+              // type for AI answer engines specifically: it hands them
+              // pre-packaged, directly citable question/answer pairs instead
+              // of requiring them to summarize prose. Built from the same
+              // "Frequently asked questions" section already visible in the
+              // article (extractFaq in markdown.ts), so it's never a
+              // schema-only duplicate of content a reader can't see.
+              ...(post.faq.length > 0
+                ? [
+                    {
+                      "@type": "FAQPage",
+                      mainEntity: post.faq.map((f) => ({
+                        "@type": "Question",
+                        name: f.question,
+                        acceptedAnswer: { "@type": "Answer", text: f.answer },
+                      })),
+                    },
+                  ]
+                : []),
             ],
           },
           bundleStyles,

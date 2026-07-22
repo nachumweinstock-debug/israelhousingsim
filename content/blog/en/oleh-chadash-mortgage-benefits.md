@@ -1,6 +1,6 @@
 ---
 title: Oleh Chadash Mortgage Benefits: What New Immigrants Should Know
-description: Making aliyah changes some of the mortgage math in your favor, for a limited window of time. Here's what actually changes, what doesn't, and how long the benefits last.
+description: Making aliyah changes some of the mortgage math in your favor, for a limited window of time. What changes, what doesn't, and how long the benefits last.
 date: 2026-06-09
 tags: oleh chadash, aliyah, immigration, mortgage benefits
 ---
@@ -38,6 +38,20 @@ Aliyah-linked benefits are generally strongest in the first few years after your
 - Your teudat oleh and aliyah date.
 - Proof of foreign income if it's still your primary income source, translated and certified as your bank requires.
 - Any foreign credit report or bank reference letters, which help substitute for an Israeli credit history the bank can't otherwise see.
+
+## Frequently asked questions
+
+### Does oleh chadash status increase my LTV ceiling?
+
+Generally no. Most olim are eligible for the same first-home financing ceiling as a resident, not a higher one. The real benefits are separate: subsidized-rate assistance programs and, in some cases, more favorable treatment of foreign income or assets during underwriting.
+
+### How long do oleh chadash mortgage benefits last?
+
+They're generally strongest in the first few years after your aliyah date and taper or disappear afterward. Check your specific standing, years since aliyah and whether you've used prior benefits, before assuming a program still applies to you.
+
+### What happens if my income is still paid from abroad?
+
+Expect the bank to ask for more documentation, often notarized or apostilled pay stubs and foreign bank statements, and to weight that income somewhat more conservatively than an equivalent shekel salary from an Israeli employer. This isn't a penalty specific to olim, it's simply harder to verify.
 
 ## Model your numbers first
 

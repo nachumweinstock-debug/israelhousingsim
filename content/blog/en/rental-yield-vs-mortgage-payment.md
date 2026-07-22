@@ -1,6 +1,6 @@
 ---
 title: Rental Yield vs. Mortgage Payment, the Real Cash Flow Math
-description: Gross yield, net yield, and cash on cash return each answer a different question about an investment property. Here's what each one actually measures, worked through with real numbers.
+description: Gross yield, net yield, and cash on cash return each answer a different question about an investment property. What each measures, with real numbers.
 date: 2026-07-15
 tags: rental yield, investment property, cash on cash, investor mode
 ---
@@ -32,6 +32,20 @@ A property can have a respectable gross yield, a decent net yield, and still bar
 ## Debt service coverage: a quick sanity check
 
 One more number worth knowing: debt service coverage ratio, monthly rent divided by monthly mortgage payment. Above 1 means the rent alone covers the payment before any other costs; below 1 means it doesn't, and you'd be covering part of the mortgage from your own pocket every month even before insurance or maintenance. In the example above, ₪5,600 divided by ₪4,606 is about 1.22, rent alone covers the payment with some room to spare, though the recurring costs still eat into the cushion.
+
+## Frequently asked questions
+
+### What's the difference between gross yield and net yield?
+
+Gross annual yield is simply annual rent divided by the property price, nothing else. Net annual yield subtracts your recurring ownership costs, insurance, maintenance, and management fees, from the rent before dividing by the price. Both deliberately exclude the mortgage payment.
+
+### What is cash on cash return for an investment property?
+
+It's your annual net cash flow (rent minus mortgage payment minus recurring costs) divided by the actual cash you invested, the down payment plus purchase tax and closing costs, not the property's full price. It reflects what your leveraged investment is actually earning.
+
+### What does a debt service coverage ratio below 1 mean?
+
+It means monthly rent alone doesn't cover the monthly mortgage payment. You'd be covering part of the mortgage from your own pocket every month, even before insurance or maintenance costs are added in.
 
 ## Run this on your own numbers
 

@@ -1,6 +1,6 @@
 ---
 title: Mortgage Life and Structure Insurance, What Banks Actually Require
-description: Israeli banks won't release a mortgage without two specific insurance policies in place. Here's what each one covers, why the bank requires it, and roughly how the cost is structured.
+description: Israeli banks won't release a mortgage without two specific insurance policies. What each one covers, why the bank requires it, and roughly what it costs.
 date: 2026-07-19
 tags: mortgage insurance, life insurance, structure insurance, closing requirements
 ---
@@ -30,6 +30,20 @@ In most cases you can shop these policies independently rather than accepting wh
 ## Where this fits in your budget
 
 Unlike purchase tax or agent commission, these aren't one-time closing costs, they're ongoing costs that ride alongside your mortgage payment for the life of the loan (life insurance premiums typically decline over time as the balance you're insuring shrinks). Factor them into your monthly affordability picture, not just your cash-to-close figure, alongside the [other closing costs](/blog/cash-to-close-hidden-costs) that hit before the mortgage even starts.
+
+## Frequently asked questions
+
+### Is mortgage life insurance mandatory in Israel?
+
+Yes. Banks require both mortgage life insurance and structure insurance in place before releasing loan funds. Neither is optional, and a bank will typically require itself listed as beneficiary on both for the life of the loan.
+
+### Can I use my own insurance provider instead of the bank's?
+
+In most cases, yes. You can shop these policies independently as long as the policy meets the bank's coverage requirements and correctly names the bank's interest. Confirm this is genuinely optional at your specific bank first, since practices vary.
+
+### How much does mortgage insurance cost in Israel?
+
+There's no single typical percentage. Life insurance premiums depend on age, health, smoking status, and loan amount. Structure insurance cost depends mainly on the property's rebuild value, construction type, and location, get a real quote once you have those details.
 
 ## See the full picture
 

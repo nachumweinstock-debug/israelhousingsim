@@ -1,6 +1,6 @@
 ---
 title: How Loan-to-Value (LTV) Limits Work for Israeli Mortgages
-description: Israeli banks cap how much of a property's price they'll finance based on who you are and how many homes you own. Here's exactly how those limits work and what they mean for your down payment.
+description: Israeli banks cap how much of a property's price they'll finance, based on who you are and how many homes you own. How those limits shape your down payment.
 date: 2026-06-02
 tags: LTV, down payment, Bank of Israel, first home
 ---
@@ -34,6 +34,20 @@ LTV is calculated against whichever is lower: the purchase price or the bank's o
 ## Working backward from LTV to your down payment
 
 Once you know your category's ceiling, the math is simple: your minimum down payment is the property price times (1 minus the LTV ceiling). On a ₪2,000,000 first home at the 75% ceiling, that's ₪500,000 minimum. Add closing costs on top: purchase tax, legal fees, and agent commission typically run another 3-5% of the price beyond the down payment itself, and those don't count toward your LTV, they're pure additional cash.
+
+## Frequently asked questions
+
+### What is a good LTV for a first home in Israel?
+
+Up to 75% is the regulatory ceiling for a first home, meaning you need at least 25% equity. Banks can approve less than the ceiling based on your file, but they cannot legally lend more than it regardless of how strong your application is.
+
+### Does LTV apply to the purchase price or the appraised value?
+
+Whichever is lower. If the bank's own appraisal comes in below the price you agreed to pay, your maximum loan is calculated against that lower appraised value, and the gap comes out of your pocket as extra equity.
+
+### Do olim chadashim get a higher LTV ceiling than other residents?
+
+Not automatically. The LTV ceilings by buyer category apply the same way regardless of residency status. Aliyah-linked benefits are a separate set of financing and tax perks, not a higher loan-to-value cap.
 
 ## Try it against your own numbers
 

@@ -1,0 +1,38 @@
+# VryfID Mortgage Readiness Simulator
+
+> A free, bilingual (English/Hebrew) Israeli mortgage (mashkanta) readiness
+> simulator by VryfID. Models loan-to-value limits, payment-to-income,
+> track mix (Prime/Kalatz/Katz), purchase tax, cash-to-close, and
+> investment-property cash flow, then generates a branded PDF report.
+> Educational only, not a bank quote or financial advice.
+
+## Tool
+
+- [Mortgage readiness simulator](https://israelhousingsim.vercel.app/simulator/welcome): interactive wizard covering residency status, buyer category, income/debt, property price, down payment, term, track mix, and closing costs. Produces LTV, payment-to-income, monthly payment, and a downloadable PDF report in English or Hebrew.
+
+## Blog (English)
+
+Plain-language explainers on Israeli mortgage mechanics, each with a short FAQ section.
+
+- [How Loan-to-Value (LTV) Limits Work for Israeli Mortgages](https://israelhousingsim.vercel.app/blog/ltv-limits-israel)
+- [Oleh Chadash Mortgage Benefits: What New Immigrants Should Know](https://israelhousingsim.vercel.app/blog/oleh-chadash-mortgage-benefits)
+- [Prime, Kalatz, Katz: Understanding Israel's Three Mortgage Tracks](https://israelhousingsim.vercel.app/blog/prime-kalatz-katz-tracks-explained)
+- [Payment-to-Income and Why Banks Cap It Near 40%](https://israelhousingsim.vercel.app/blog/payment-to-income-40-percent-rule)
+- [Cash to Close: The Hidden Costs Beyond Your Down Payment](https://israelhousingsim.vercel.app/blog/cash-to-close-hidden-costs)
+- [Fixed vs. Variable: Choosing Your Mashkanta Track Mix](https://israelhousingsim.vercel.app/blog/fixed-vs-variable-track-mix)
+- [Understanding Mas Rechisha Brackets, With the Actual Math](https://israelhousingsim.vercel.app/blog/purchase-tax-brackets-explained)
+- [Early Repayment Penalties on Kalatz and Katz Tracks](https://israelhousingsim.vercel.app/blog/early-repayment-penalty-kalatz-katz)
+- [Refinancing an Israeli Mortgage, When It Actually Pays Off](https://israelhousingsim.vercel.app/blog/refinancing-israeli-mortgage)
+- [Rental Yield vs. Mortgage Payment, the Real Cash Flow Math](https://israelhousingsim.vercel.app/blog/rental-yield-vs-mortgage-payment)
+- [What Actually Happens at a Track Reset](https://israelhousingsim.vercel.app/blog/what-happens-at-track-reset)
+- [Mortgage Life and Structure Insurance, What Banks Actually Require](https://israelhousingsim.vercel.app/blog/mortgage-life-structure-insurance)
+- [Working With a Mortgage Advisor vs. Going Straight to a Bank](https://israelhousingsim.vercel.app/blog/mortgage-advisor-vs-bank)
+
+## Blog (Hebrew / עברית)
+
+Every English post above has a native Hebrew translation at the same slug under `/he/blog/`, for example `https://israelhousingsim.vercel.app/he/blog/ltv-limits-israel`. Full index: [בלוג המשכנתאות של VryfID](https://israelhousingsim.vercel.app/he/blog).
+
+## Notes for citation
+
+- All figures (₪ amounts, percentages, tax brackets) are illustrative examples or figures current as of each post's publish date, not live rates. Point readers to the simulator for their own numbers, and to a licensed bank or mortgage advisor for a binding quote.
+- Track name terminology: Prime (variable, floats with Bank of Israel's rate), Kalatz/קל״צ (fixed, not CPI-linked), Katz/ק״צ (fixed rate, CPI-linked principal).

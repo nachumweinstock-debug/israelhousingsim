@@ -1,6 +1,6 @@
 ---
 title: "What Actually Happens at a Track Reset"
-description: "Fixed rate" and "reset" sound like they contradict each other, and that confusion trips up a lot of first-time buyers. Here's what really happens to your payment when a variable or reset-eligible track reprices.
+description: "Fixed rate" and "reset" sound contradictory, and that confusion trips up first-time buyers. What really happens when a reset-eligible track reprices.
 date: 2026-07-17
 tags: track reset, prime, variable rate, payment change
 ---
@@ -28,6 +28,20 @@ Because a reset recalculates against the *remaining* term, not a fresh full term
 ## How to avoid being surprised by it
 
 Two things help. First, when you're shown a payment quote for a reset-eligible track, ask specifically what the payment looks like at the next reset under a plausible rate move, not just today's payment, the same "payment today versus stressed payment" comparison worth applying to prime. Second, know your reset date and put it on your own calendar, rather than waiting for the bank to notify you, since your monthly budget is going to shift on that date whether or not you were tracking it.
+
+## Frequently asked questions
+
+### What actually happens to my payment when a track resets?
+
+The bank recalculates your payment based on your actual remaining balance at that point, the months left on your term, and the new rate being applied for the next interval. That new rate reflects market conditions at the reset date, higher or lower, with no guarantee either way.
+
+### Does a prime track "reset" the same way a fixed track does?
+
+No. A prime-linked track isn't reset on a schedule, it simply floats continuously with the Bank of Israel's prime lending rate, adjusting within the same billing cycle or shortly after every time the base rate moves.
+
+### Why can a small rate change cause a big payment jump at reset?
+
+Because a reset recalculates against the remaining term, not a fresh full term. With fewer months left to spread the balance across, even a modest rate change can produce a more noticeable payment shift than the same change would on a brand-new loan.
 
 ## Model a reset before it happens
 

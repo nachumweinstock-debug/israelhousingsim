@@ -1,6 +1,6 @@
 ---
 title: Fixed vs. Variable: Choosing Your Mashkanta Track Mix
-description: Once you understand the three loan tracks, the real decision is how to split your loan across them. Here's a framework for thinking about it, rather than a single "right" answer.
+description: Once you understand the three loan tracks, the real decision is how to split your loan across them. A framework for thinking about it, not one "right" answer.
 date: 2026-07-07
 tags: track mix, fixed rate, variable rate, risk tolerance
 ---
@@ -30,6 +30,20 @@ Don't just look at today's blended payment. Ask your bank, or model it yourself,
 ## Term length interacts with your mix decision
 
 A longer term generally means more total exposure to whatever risk your mix carries, simply because there's more time for rates or inflation to move. If you're taking a 30-year term, the case for leaning more heavily fixed (kalatz) is generally stronger than if you're taking a 15-year term, where a shorter horizon limits how much a variable track can realistically move against you before you've paid it down or refinanced.
+
+## Frequently asked questions
+
+### Should I choose fixed or variable rate for my Israeli mortgage?
+
+There's no universal answer, it depends on your risk tolerance. Buyers who most want payment certainty lean toward kalatz (fixed), buyers comfortable with rate exposure for a lower starting payment lean toward prime (variable), and most mixes blend both plus katz.
+
+### How much of my mortgage can be in the prime track?
+
+Regulation limits how much of your total mix can sit in prime, so you'll never be offered a fully prime loan regardless of preference. A required mix across track types is mandatory for every mortgage.
+
+### Does the loan term affect which mix I should choose?
+
+Yes. A longer term means more total exposure to whatever risk your mix carries, since there's more time for rates or inflation to move. The case for leaning more heavily fixed is generally stronger on a 30-year term than a 15-year term.
 
 ## There's no substitute for seeing your actual numbers
 

@@ -1,6 +1,6 @@
 ---
 title: Early Repayment Penalties on Kalatz and Katz Tracks
-description: Paying off a fixed-rate track early can trigger a real penalty, kenas pira'on mukdam, but not always. Here's how the penalty actually works and when paying it is still worth it.
+description: Paying off a fixed-rate track early can trigger a real penalty, kenas pira'on mukdam, but not always. How it's calculated and when it's still worth paying.
 date: 2026-07-11
 tags: early repayment, kenas piraon mukdam, kalatz, katz, prepayment
 ---
@@ -31,6 +31,20 @@ A penalty being real doesn't automatically mean early repayment is a bad move. T
 - **Refinancing into a materially lower rate.** If the new rate saves you enough per month, the savings can outrun the penalty within a few years. This is the same math covered in our [refinancing guide](/blog/refinancing-israeli-mortgage), and the penalty is exactly the "cost" side of that comparison.
 - **Selling the property.** If you're selling anyway, the penalty is simply a cost of the sale, not something you can avoid by waiting, and it's usually smaller relative to your total proceeds than it feels in isolation.
 - **A windfall you'd otherwise leave sitting in a low-yield account.** If the alternative use of that cash earns less than your locked mortgage rate, paying down the loan even with a penalty can still come out ahead over time, though this is a personal-finance judgment call, not a universal rule.
+
+## Frequently asked questions
+
+### Do I always pay a penalty for paying off my mortgage early?
+
+No. It depends mostly on which direction rates have moved since you took the loan. If your locked rate is higher than current comparable market rates, expect a real penalty. If it's lower, the penalty is often minimal or effectively zero.
+
+### Does the early repayment penalty apply to prime tracks?
+
+No. The penalty is specific to fixed-rate tracks, kalatz and katz. A prime-linked track reprices with the market on its own, so the bank was never locked into an above-market rate on that money to begin with.
+
+### How do I find out my exact early repayment penalty?
+
+Request an official early repayment quote, often called a yitrat siluk, from your bank. Banks are required to provide this on request, showing the exact payoff amount including any penalty as of that specific date.
 
 ## Model the tradeoff before you call the bank
 

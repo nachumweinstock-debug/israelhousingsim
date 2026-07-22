@@ -20,6 +20,11 @@ export interface TocEntry {
   text: string;
 }
 
+export interface FaqEntry {
+  question: string;
+  answer: string;
+}
+
 export type BlogLang = "en" | "he";
 
 export interface BlogPost {
@@ -29,6 +34,7 @@ export interface BlogPost {
   html: string;
   readMinutes: number;
   toc: TocEntry[];
+  faq: FaqEntry[];
 }
 
 const NAMED_ENTITIES: Record<string, string> = {
@@ -102,6 +108,37 @@ function injectHeadingIds(html: string): { html: string; toc: TocEntry[] } {
   return { html: withIds, toc };
 }
 
+const FAQ_HEADING_TEXT = new Set(["frequently asked questions", "שאלות נפוצות"]);
+
+/**
+ * Every post ends its body with a "## Frequently asked questions" /
+ * "## שאלות נפוצות" section, each question an <h3> followed by a short
+ * answer paragraph. Extracted here for FAQPage JSON-LD (see
+ * scripts/build-blog.tsx), reading the same rendered HTML the article
+ * already displays rather than a separate content source, so the visible
+ * FAQ and the structured data can never drift out of sync. The section
+ * stays in the normal article flow, this doesn't remove or hide it.
+ */
+function extractFaq(html: string): FaqEntry[] {
+  const h2s = [...html.matchAll(/<h2[^>]*>(.*?)<\/h2>/g)];
+  const faqIndex = h2s.findIndex((m) =>
+    FAQ_HEADING_TEXT.has(decodeEntities(m[1].replace(/<[^>]+>/g, "")).trim().toLowerCase())
+  );
+  if (faqIndex === -1) return [];
+  const sectionStart = h2s[faqIndex].index! + h2s[faqIndex][0].length;
+  const sectionEnd = h2s[faqIndex + 1]?.index ?? html.length;
+  const section = html.slice(sectionStart, sectionEnd);
+
+  const faqs: FaqEntry[] = [];
+  const h3Matches = [...section.matchAll(/<h3[^>]*>(.*?)<\/h3>([\s\S]*?)(?=<h3|$)/g)];
+  for (const m of h3Matches) {
+    const question = decodeEntities(m[1].replace(/<[^>]+>/g, "")).trim();
+    const answer = decodeEntities(m[2].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ")).trim();
+    if (question && answer) faqs.push({ question, answer });
+  }
+  return faqs;
+}
+
 function parseFrontmatter(raw: string): { data: Record<string, string>; body: string } {
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!match) return { data: {}, body: raw };
@@ -137,6 +174,7 @@ export function buildPostList(
     const wordCount = body.split(/\s+/).filter(Boolean).length;
     const rawHtml = marked.parse(body, { async: false }) as string;
     const { html, toc } = injectHeadingIds(rawHtml);
+    const faq = extractFaq(html);
     return {
       slug,
       lang,
@@ -152,6 +190,7 @@ export function buildPostList(
       html,
       readMinutes: Math.max(1, Math.round(wordCount / 200)),
       toc,
+      faq,
     };
   });
   return posts.sort((a, b) => (a.frontmatter.date < b.frontmatter.date ? 1 : -1));

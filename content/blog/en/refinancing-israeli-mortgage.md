@@ -1,6 +1,6 @@
 ---
 title: Refinancing an Israeli Mortgage, When It Actually Pays Off
-description: Mihzur mashkanta can genuinely lower your payment, but the penalty and fees on the old loan can also erase the savings entirely. Here's how to run the actual comparison before you refinance.
+description: Mihzur mashkanta can lower your payment, but penalties and fees on the old loan can erase the savings entirely. How to run the real comparison first.
 date: 2026-07-13
 tags: refinancing, mihzur mashkanta, breakeven, early repayment
 ---
@@ -32,6 +32,20 @@ A new rate that's lower on paper doesn't always mean a lower total cost, for two
 ## When refinancing usually doesn't make sense
 
 If rates have moved only slightly, if you're already near the end of your term, or if most of your mix sits in prime (which already floats with the market and generally has no comparable early repayment penalty to escape), the breakeven math often doesn't clear a meaningful bar. Run the numbers before assuming a rate headline in the news means you should act.
+
+## Frequently asked questions
+
+### How do I know if refinancing my Israeli mortgage is worth it?
+
+Divide your total refinancing cost, the early repayment penalty plus new loan fees, by your monthly payment savings. That gives you a breakeven in months. If you'll hold the property and loan longer than that, refinancing is likely worth it.
+
+### Does a lower rate always mean refinancing saves money?
+
+Not always. Watch for two traps: a term reset that lowers your monthly payment without real savings by spreading the balance over more months, and CPI-linked balances, where the current balance being refinanced may already be larger than the original loan amount.
+
+### When does refinancing usually not make sense?
+
+When rates have moved only slightly, when you're already near the end of your term, or when most of your mix sits in prime, which already floats with the market and generally has no comparable early repayment penalty to escape.
 
 ## See where your current mix stands
 

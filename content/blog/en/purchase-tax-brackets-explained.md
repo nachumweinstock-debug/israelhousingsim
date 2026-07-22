@@ -1,6 +1,6 @@
 ---
 title: Understanding Mas Rechisha Brackets, With the Actual Math
-description: Purchase tax is bracket based, like income tax, not a flat rate on the whole price. Here is the real marginal math, worked through step by step, for a single home, an additional home, and a new immigrant.
+description: Purchase tax is bracket based, like income tax, not a flat rate on the price. The real marginal math for a single home, an extra home, and an oleh chadash.
 date: 2026-07-09
 tags: mas rechisha, purchase tax, buyer category, worked example
 ---
@@ -36,6 +36,20 @@ This is the part that surprises people. The new immigrant schedule is usually de
 ## Why this matters for your cash-to-close budget
 
 Purchase tax is due directly to the tax authority, typically within a couple of months of the transaction, and it cannot be rolled into the mortgage. Underestimating it because you assumed a flat rate on the full price, rather than working through the actual bands, is one of the more common ways buyers get caught short on closing day.
+
+## Frequently asked questions
+
+### Is purchase tax calculated on the full price at the top bracket rate?
+
+No. Purchase tax is marginal, like income tax. Only the portion of the price that falls inside each bracket is taxed at that bracket's rate, so the effective rate on the full price is usually well below the top marginal bracket you reach.
+
+### Do new immigrants always pay less purchase tax than regular residents?
+
+No. At typical first-home prices, the standard single-home schedule often comes out equal to or better than the new immigrant schedule. The immigrant schedule only pulls ahead at very high prices. Always check both schedules for your specific price.
+
+### When is purchase tax due, and can it be included in the mortgage?
+
+It's due directly to the tax authority, typically within about two months of the transaction, and it cannot be rolled into the mortgage. It's a separate cash obligation from your loan.
 
 ## Run your own numbers
 

@@ -1,6 +1,6 @@
 ---
 title: "Prime, Kalatz, Katz: Understanding Israel's Three Mortgage Tracks"
-description: Every Israeli bank is required to quote you a mix across three official loan track types. Here's what each one actually does to your payment, and why the mix matters more than any single rate.
+description: Every Israeli bank must quote you a mix across three official loan tracks. What each does to your payment, and why the mix matters more than any rate.
 date: 2026-06-16
 tags: mashkanta, loan tracks, prime rate, fixed rate, inflation linked
 ---
@@ -30,6 +30,20 @@ For any track (except unlinked fixed, which never resets), you'll typically see 
 ## How the pieces usually fit together
 
 There's no universally "correct" mix. It depends on your risk tolerance, how long you plan to hold the property, and your view on where rates are headed. As a rough pattern: buyers who want maximum stability lean more heavily into kalatz, buyers comfortable with some rate exposure in exchange for a lower starting payment lean into prime, and katz often ends up as the balancing third leg, since it isn't directly rate-sensitive the way prime is, but does carry its own inflation exposure.
+
+## Frequently asked questions
+
+### Can I put 100% of my mortgage in one track?
+
+No. The Bank of Israel requires every mortgage to mix across track types. Prime specifically is capped at a portion of the total, so you'll never see a compliant bank offer a 100% prime loan, regardless of preference.
+
+### Which mortgage track is the safest?
+
+There's no single safest track, each hedges a different risk. Kalatz gives payment stability with no rate or inflation exposure. Prime gives a lower starting rate but full exposure to rate moves. Katz keeps the rate fixed but ties the balance itself to inflation.
+
+### Why does my katz payment grow even though the interest rate never changes?
+
+Because a katz track's principal balance is linked to the Consumer Price Index. Every time the CPI rises, the outstanding balance is adjusted upward before the fixed rate is applied, so the shekel payment can keep growing purely from inflation, not from any rate change.
 
 ## See your own mix, not a generic example
 

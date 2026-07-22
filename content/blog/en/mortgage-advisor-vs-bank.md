@@ -1,6 +1,6 @@
 ---
 title: Working With a Mortgage Advisor vs. Going Straight to a Bank
-description: A yoetz mashkantaot can shop your loan across multiple banks and negotiate on your behalf, for a fee. Here's what an advisor actually does, roughly what it costs, and when it's worth it.
+description: A yoetz mashkantaot can shop your loan across banks and negotiate for you, for a fee. What an advisor does, roughly what it costs, and when it is worth it.
 date: 2026-07-21
 tags: mortgage advisor, yoetz mashkantaot, bank negotiation
 ---
@@ -33,6 +33,20 @@ An advisor tends to earn their fee back when:
 ## When handling it yourself is probably fine
 
 If your situation is straightforward (stable salaried income, standard first-home purchase, no unusual timing constraints) and you have the time and patience to get quotes from a few banks yourself, the advisor's main value, comparison shopping, is something you can reasonably do on your own. Walking in already knowing your numbers, your target mix, and roughly what a competitive rate looks like closes most of the gap between going in cold and having someone negotiate for you.
+
+## Frequently asked questions
+
+### Is it worth hiring a mortgage advisor in Israel?
+
+It depends on your situation. An advisor tends to earn back their fee when your case is more complex than standard, when you genuinely don't have time to shop multiple banks yourself, or when the loan is large enough that a small rate improvement is worth meaningfully more than the fee.
+
+### How much does a yoetz mashkantaot cost?
+
+Independent advisors are typically compensated through either a flat fee or a percentage of the loan amount, paid by you, not the bank. The exact structure varies by advisor, confirm it directly before engaging one rather than assuming a number.
+
+### What does an independent mortgage advisor do that a bank's own advisor doesn't?
+
+An independent advisor shops your loan across multiple banks simultaneously and negotiates on your behalf. A bank's own in-house advisor only shows you that bank's own products, however good those happen to be.
 
 ## Go in prepared either way
 
